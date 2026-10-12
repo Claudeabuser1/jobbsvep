@@ -4,11 +4,13 @@ from OpenStreetMap (Overpass API) and write web/pois.json for the "Gå dit" view
 
 Data © OpenStreetMap contributors, ODbL. Run now and then: python3 scripts/build_places.py
 """
-import json, os, sys, time, urllib.parse, urllib.request
+import json, os, re, sys, time, urllib.parse, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENDPOINTS = ["https://overpass-api.de/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
              "https://overpass.kumi.systems/api/interpreter"]
+BBOX = (58.75, 17.25, 60.25, 19.35)  # south, west, north, east: Stockholm county, roughly
+GRID = 4  # fetched as GRID x GRID tiles; small boxes answer in seconds where one big area query times out
 # (label shown in the app, Overpass filters)
 TYPES = [
     ("Mataffär", ['"shop"~"^(supermarket|convenience)$"']),
@@ -24,41 +26,57 @@ TYPES = [
 
 def overpass(query):
     last = None
-    for attempt in range(3):
+    for attempt in range(4):
         for url in ENDPOINTS:
             try:
                 req = urllib.request.Request(url, data=urllib.parse.urlencode({"data": query}).encode(),
                                              headers={"user-agent": "jobbsvep-build/1.0 (github.com/Claudeabuser1/jobbsvep)"})
-                with urllib.request.urlopen(req, timeout=180) as r:
+                with urllib.request.urlopen(req, timeout=100) as r:
                     return json.load(r)
-            except Exception as e:  # busy mirror: try the next one
+            except Exception as e:  # busy server: try the next one
                 last = e
-        time.sleep(10 + attempt * 20)
+        time.sleep(8 + attempt * 15)
     raise last
 
 
+def type_of(tags):
+    """Index into TYPES for an element's tags, or None."""
+    for ti, (_, filters) in enumerate(TYPES):
+        for f in filters:
+            key, _, val = f.partition("~") if "~" in f else f.partition("=")
+            key, val = key.strip('"'), val.strip('"')
+            v = tags.get(key)
+            if v and (re.match(val, v) if "~" in f else v == val):
+                return ti
+    return None
+
+
 def main():
-    rows, seen = [], set()
-    for ti, (label, filters) in enumerate(TYPES):
-        parts = "".join('nwr[%s]["name"](area.a);' % f for f in filters)
-        d = overpass('[out:json][timeout:150];area["ISO3166-2"="SE-AB"]->.a;(%s);out center tags;' % parts)
-        n = 0
-        for e in d.get("elements", []):
-            t = e.get("tags", {})
-            lat = e.get("lat") or (e.get("center") or {}).get("lat")
-            lon = e.get("lon") or (e.get("center") or {}).get("lon")
-            name = (t.get("name") or "").strip()
-            if not name or not lat or not lon or t.get("disused") or t.get("access") == "private":
-                continue
-            key = (name.lower(), round(lat, 3), round(lon, 3))
-            if key in seen:
-                continue
-            seen.add(key)
-            street = " ".join(x for x in (t.get("addr:street"), t.get("addr:housenumber")) if x)
-            rows.append([name[:60], ti, round(lat, 5), round(lon, 5), street[:50]])
-            n += 1
-        print("%-18s %5d" % (label, n), file=sys.stderr)
-        time.sleep(3)
+    s, w, n, e = BBOX
+    rows, seen, counts = [], set(), [0] * len(TYPES)
+    parts = "".join('nwr[%s]["name"];' % f for _, fs in TYPES for f in fs)
+    for i in range(GRID):
+        for k in range(GRID):
+            box = "%.4f,%.4f,%.4f,%.4f" % (s + (n - s) * i / GRID, w + (e - w) * k / GRID, s + (n - s) * (i + 1) / GRID, w + (e - w) * (k + 1) / GRID)
+            d = overpass("[out:json][timeout:90][bbox:%s];(%s);out center tags;" % (box, parts))
+            for el in d.get("elements", []):
+                t = el.get("tags", {})
+                lat = el.get("lat") or (el.get("center") or {}).get("lat")
+                lon = el.get("lon") or (el.get("center") or {}).get("lon")
+                name, ti = (t.get("name") or "").strip(), type_of(t)
+                if not name or not lat or not lon or ti is None or t.get("access") == "private":
+                    continue
+                key = (name.lower(), round(lat, 3), round(lon, 3))
+                if key in seen:
+                    continue
+                seen.add(key)
+                street = " ".join(x for x in (t.get("addr:street"), t.get("addr:housenumber")) if x)
+                rows.append([name[:60], ti, round(lat, 5), round(lon, 5), street[:50]])
+                counts[ti] += 1
+            print("tile %d/%d: %d places so far" % (i * GRID + k + 1, GRID * GRID, len(rows)), file=sys.stderr, flush=True)
+            time.sleep(1.5)
+    for (label, _), c in zip(TYPES, counts):
+        print("%-18s %5d" % (label, c), file=sys.stderr)
     out = {"built": time.strftime("%Y-%m-%d"), "source": "© OpenStreetMap contributors (ODbL)", "types": [t[0] for t in TYPES], "places": rows}
     path = os.path.join(ROOT, "web", "pois.json")
     json.dump(out, open(path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
