@@ -1,0 +1,1003 @@
+<title>Jobbsvep</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap">
+<style>
+/* Design 2b "Svep först": 320px sidebar + centred photo-style card on desktop, card + overlapping round buttons + tab bar on mobile. Single light theme by design. */
+:root{
+  --accent:#5b4fd6; --accent-d:#4a3ec2; --ink:#1d1715; --ink2:#4a413c; --muted:#6e6460;
+  --bg:#fbf9f7; --surface:#ffffff; --subtle:#ede8e4; --line:#ebe5e1; --line2:#ddd5d0; --dot:#c4bbb5;
+  --ok:#1f7a55; --err:#b3362f;
+  --font:"Onest","Segoe UI",system-ui,-apple-system,sans-serif;
+  --sh-card:0 18px 44px rgba(29,23,21,.2); --sh-btn:0 6px 18px rgba(29,23,21,.15);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent-d)}
+h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.02em;line-height:1.05;text-wrap:balance}
+.logo-t{font-size:24px;font-weight:800;letter-spacing:-.02em;border:0;background:none;padding:0;color:inherit}
+
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;grid-template-columns:minmax(0,1fr);position:relative}
+.side{display:none}
+.mhead{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 12px;gap:12px}
+.fpill{border:1px solid var(--line2);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;color:var(--ink)}
+main{min-height:0;position:relative;overflow:hidden}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:var(--surface);padding:0 0 env(safe-area-inset-bottom,0px)}
+.tab{border:0;background:none;padding:14px 4px 16px;font-size:12px;font-weight:600;color:var(--muted);position:relative}
+.tab[aria-selected="true"]{color:var(--accent-d)}
+.tab .n{display:inline-block;margin-left:5px;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;padding:0 5px;font-variant-numeric:tabular-nums}
+.view{height:100%;overflow-y:auto;padding-inline:20px;padding-block:8px 32px}
+.col{max-width:640px;margin-inline:auto;display:flex;flex-direction:column;gap:18px}
+.col>*{min-width:0}
+
+/* swipe view */
+#v-swipe{overflow:hidden;display:flex;flex-direction:column;align-items:center;padding-block:0 0}
+.deskpill{display:none}
+.deckwrap{position:relative;width:100%;max-width:440px;flex:1;min-height:0;max-height:600px;margin-bottom:46px}
+.card{position:absolute;inset:0;border-radius:22px;overflow:hidden;box-shadow:0 14px 34px rgba(29,23,21,.18);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;
+  background:linear-gradient(155deg,hsl(var(--h) 46% 84%),hsl(calc(var(--h) + 38) 42% 62%))}
+.card.under{box-shadow:none;cursor:default}
+.info a.map{color:#fff;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px;align-self:flex-start;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stu{align-self:flex-start;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700}
+.card .wm{position:absolute;top:13%;left:0;right:0;text-align:center;font-size:clamp(96px,34vw,150px);font-weight:800;letter-spacing:-.05em;line-height:1;color:rgba(255,255,255,.42)}
+.badge{position:absolute;top:16px;left:16px;background:#fff;font-weight:700;font-size:13px;padding:6px 11px;border-radius:999px;color:var(--accent-d)}
+.readbtn{position:absolute;top:16px;right:16px;background:rgba(29,23,21,.55);color:#fff;border:0;font-weight:600;font-size:13px;padding:6px 12px;border-radius:999px}
+.stamp{position:absolute;top:66px;border:3px solid #fff;color:#fff;font-weight:800;font-size:26px;padding:3px 12px;border-radius:8px;opacity:0;pointer-events:none}
+.stamp.y{left:20px;background:var(--accent);transform:rotate(-12deg)} .stamp.n{right:20px;background:var(--ink);transform:rotate(12deg)}
+.info{position:absolute;left:0;right:0;bottom:0;padding:70px 20px 56px;background:linear-gradient(to top,rgba(29,23,21,.92) 60%,rgba(29,23,21,0));color:#fff;display:flex;flex-direction:column;gap:6px}
+.info>*{min-width:0}
+.info .co{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;min-width:0}
+.info .co span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ini{flex:none;width:28px;height:28px;border-radius:50%;background:#fff;color:var(--ink);display:grid;place-items:center;font-size:11px;font-weight:800}
+.info .ti{font-size:clamp(26px,7.6vw,32px);font-weight:800;line-height:1.02;letter-spacing:-.02em;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.info .sal{font-size:15px;font-weight:600}
+.info .meta{font-size:14px;opacity:.85}
+.info .why{font-size:14px;line-height:1.4;opacity:.95;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px}
+.actions{position:absolute;left:0;right:0;bottom:-30px;display:flex;justify-content:center;align-items:center;gap:18px;z-index:3}
+.rb{border:0;border-radius:50%;background:#fff;box-shadow:0 6px 18px rgba(29,23,21,.18);color:var(--ink);display:grid;place-items:center;transition:transform .12s}
+.rb:active{transform:scale(.93)} .rb:disabled{opacity:.5;cursor:default}
+.rb.no,.rb.yes{width:62px;height:62px;font-size:22px} .rb.yes{background:var(--accent);color:#fff;font-size:24px} .rb.save{width:48px;height:48px;font-size:11px;font-weight:600}
+.sheet{position:absolute;inset:0;z-index:2;background:var(--surface);border-radius:22px;box-shadow:0 14px 34px rgba(29,23,21,.18);display:flex;flex-direction:column;overflow:hidden}
+.sheet-h{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:18px 20px 12px;border-bottom:1px solid var(--line)}
+.sheet-h h2{font-size:24px;overflow-wrap:anywhere} .sheet-h small{display:block;margin-top:4px;color:var(--muted);font-size:14px;font-weight:500;letter-spacing:0}
+.x{flex:none;width:34px;height:34px;border-radius:50%;border:0;background:var(--subtle);font-size:14px}
+.sheet-b{flex:1;overflow-y:auto;padding:14px 20px 60px;display:flex;flex-direction:column;gap:14px}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:5px 16px;font-size:14px;margin:0}
+.facts dt{color:var(--muted)} .facts dd{margin:0;overflow-wrap:anywhere;font-weight:500}
+.desc{margin:0;white-space:pre-line;overflow-wrap:anywhere;font-size:15px;line-height:1.5;color:var(--ink2)}
+.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:28px;border:1.5px dashed var(--line2);border-radius:22px;color:var(--muted)}
+.empty h2{color:var(--ink);font-size:26px}
+.toast{position:absolute;top:6px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 8px 8px 16px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis;z-index:6;display:flex;align-items:center;gap:10px}
+.toast span{overflow:hidden;text-overflow:ellipsis;padding-right:8px}
+.toast button{border:0;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;padding:4px 10px;font-size:12px;font-weight:600}
+.rankpill{position:absolute;top:8px;right:14px;font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px;z-index:1}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite;display:inline-block;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* pills, forms, panels */
+.btn{border:0;border-radius:999px;padding:11px 20px;font-weight:600;font-size:15px;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn.big{padding:18px 34px;font-size:18px;font-weight:700}
+.btn.dark{background:var(--ink)} .btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line2)} .btn.danger{background:var(--surface);color:var(--err);border:1px solid var(--line2)}
+.btn.sm{padding:7px 14px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:default}
+.btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.panel h2{font-size:24px}
+.panel>p{margin:0;color:var(--ink2);max-width:62ch}
+.vh{font-size:32px;padding-top:6px}
+label.f{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px;min-width:0}
+label.f span{color:var(--muted);font-weight:400}
+input[type=text],input[type=email],input[type=tel],textarea,select{width:100%;border:1px solid var(--line2);background:var(--bg);border-radius:14px;padding:11px 14px;font-weight:400;font-size:15px}
+textarea{resize:vertical;min-height:100px;line-height:1.5}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opt{border:1px solid var(--line2);background:var(--surface);border-radius:999px;padding:6px 13px;font-size:14px;font-weight:500}
+.opt[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.grp{display:flex;flex-direction:column;gap:8px} .grp>b{font-size:14px} .grp>b span{font-weight:400;color:var(--muted)}
+.check{display:flex;gap:10px;align-items:flex-start} .check input{margin-top:2px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+.drop{border:1.5px dashed var(--line2);border-radius:18px;padding:18px;text-align:center;color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:10px;align-items:center}
+.drop.over{border-color:var(--accent);background:#f1effc}
+.note{font-size:14px;color:var(--muted);margin:0;display:flex;gap:8px;align-items:center} .note.err{color:var(--err)} .note.ok{color:var(--ok)}
+
+/* applications */
+.av{flex:none;width:44px;height:44px;border-radius:50%;background:var(--subtle);display:grid;place-items:center;font-weight:800;font-size:14px}
+.lst{display:flex;flex-direction:column;min-width:0}
+.item{border-bottom:1px solid var(--line)}
+.item-s{width:100%;border:0;background:none;display:flex;gap:12px;align-items:center;padding:12px 0;text-align:left;flex-wrap:wrap}
+.item-s .t{flex:1;min-width:140px;display:flex;flex-direction:column;gap:2px}
+.item-s .t b{font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-s .t small{font-size:14px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st{flex:none;font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px}
+.st.go{color:var(--accent-d)} .st.ok{color:var(--ok)} .st.bad{color:var(--err)}
+.item-b{padding:4px 0 18px;display:flex;flex-direction:column;gap:12px}
+.item-b textarea{min-height:280px;background:var(--surface)}
+.item-b input{background:var(--surface)}
+.li-sec{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:8px}
+.li-sec h3{font-size:17px;font-weight:700;letter-spacing:0}
+.li-sec pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;color:var(--ink2);user-select:text;-webkit-user-select:text}
+.confirm{background:var(--subtle);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.confirm p{margin:0;overflow-wrap:anywhere}
+.sel{user-select:all;-webkit-user-select:all;font-weight:700}
+
+/* full-screen accent moment (design: match screen) */
+.match{position:absolute;inset:0;z-index:20;background:var(--accent);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:32px;text-align:center}
+.match h2{font-size:clamp(44px,7vw,72px);letter-spacing:-.03em;line-height:1}
+.match .duo{display:flex}
+.match .duo span{width:96px;height:96px;border-radius:50%;border:4px solid var(--accent);display:grid;place-items:center;font-size:28px;font-weight:800;background:#fff;color:var(--ink)}
+.match .duo span+span{background:var(--ink);color:#fff;margin-left:-20px}
+.match p{margin:0;font-size:17px;line-height:1.5;max-width:520px;overflow-wrap:anywhere}
+.match .mb{display:flex;flex-direction:column;gap:12px;width:100%;max-width:340px}
+.match .mb button{height:54px;border-radius:999px;font-size:16px}
+.mb .w{border:0;background:#fff;color:#4338b5;font-weight:700} .mb .o{border:1.5px solid #fff;background:transparent;color:#fff;font-weight:600}
+
+/* landing */
+.land{position:absolute;inset:0;z-index:30;color:#fff;display:flex;flex-direction:column;overflow-y:auto;
+  background:radial-gradient(120% 80% at 80% 10%,rgba(91,79,214,.55),transparent 60%),radial-gradient(90% 70% at 10% 90%,rgba(190,120,90,.28),transparent 60%),#1c1920}
+.land header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px clamp(20px,4.4vw,56px)}
+.land .logo-t{font-size:26px}
+.land .out{border:1.5px solid #fff;border-radius:999px;padding:9px 18px;font-size:15px;font-weight:600;background:none;color:#fff}
+.land .hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:26px;padding:24px 20px}
+.land h1{font-size:clamp(46px,9.4vw,92px);line-height:.98;letter-spacing:-.035em}
+.land .hero p{margin:0;font-size:clamp(17px,2.2vw,20px);line-height:1.5;max-width:580px;text-wrap:pretty}
+.land .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px 40px;padding:0 clamp(20px,9.4vw,120px) 48px;font-size:15px;line-height:1.45}
+.land .steps div{display:flex;flex-direction:column;gap:4px} .land .steps b{font-size:17px;font-weight:700} .land .steps span{opacity:.85}
+.land .src{font-size:13px;opacity:.7}
+
+@media (min-width:768px){
+  .card{border-radius:24px;box-shadow:var(--sh-card)} .sheet{border-radius:24px}
+  .badge{top:18px;left:18px;font-size:14px;padding:7px 12px} .readbtn{top:18px;right:18px}
+  .stamp{top:70px;font-size:30px;padding:4px 14px} .stamp.y{left:24px} .stamp.n{right:24px}
+  .info{padding:80px 26px 26px;gap:8px} .info .co{font-size:15px;gap:10px} .ini{width:32px;height:32px;font-size:12px}
+  .info .ti{font-size:40px;line-height:1} .info .sal{font-size:17px} .info .meta{font-size:15px}
+  .deckwrap{max-height:none;margin-bottom:0;display:flex;flex-direction:column;align-items:stretch}
+  #deck{position:relative;flex:1;min-height:0;max-height:560px}
+  .actions{position:static;gap:20px;padding:20px 0 16px} .rb{box-shadow:var(--sh-btn)}
+  .rb.no,.rb.yes{width:64px;height:64px} .rb.save{width:50px;height:50px;font-size:12px}
+  .sheet-b{padding-bottom:20px}
+  #v-swipe{padding-top:12px}
+  .toast{font-size:14px;padding:10px 10px 10px 18px}
+  .match .duo span{width:120px;height:120px;font-size:34px;border-width:5px} .match .duo span+span{margin-left:-26px}
+  .match p{font-size:20px} .match .mb{flex-direction:row;max-width:none;width:auto} .match .mb button{height:56px;padding:0 32px;font-size:17px}
+}
+@media (min-width:1024px){
+  .app{grid-template-columns:320px minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+  .mhead,.tabs{display:none}
+  .side{display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--surface);min-height:0;overflow-y:auto}
+  .side-top{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--line)}
+  .me{width:34px;height:34px;border-radius:50%;background:var(--subtle);display:grid;place-items:center;font-size:13px;font-weight:700;border:0}
+  .side-sec{padding:20px 24px 8px;display:flex;flex-direction:column;gap:12px}
+  .side-sec>b{font-size:15px;font-weight:700}
+  .rings{display:flex;gap:14px;flex-wrap:wrap}
+  .ring{border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;width:60px}
+  .ring i{width:60px;height:60px;border-radius:50%;border:3px solid var(--accent);display:grid;place-items:center;font-weight:800;font-style:normal;font-size:15px}
+  .ring span{max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .side .hint{font-size:14px;color:var(--muted);margin:0}
+  .srow{width:100%;border:0;background:none;display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);text-align:left}
+  .srow .t{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+  .srow .l1{display:flex;justify-content:space-between;gap:8px} .srow .l1 b{font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .srow .l1 small{font-size:12px;color:var(--muted);white-space:nowrap}
+  .srow .l2{font-size:14px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .side-foot{margin-top:auto;padding:16px 24px 20px;font-size:12px;color:var(--muted)}
+  .deskpill{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 6px 6px 20px;font-size:15px;font-weight:600;margin:8px 0 20px;max-width:calc(100% - 40px)}
+  .deskpill .d{color:var(--dot)} .deskpill span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .deskpill button{background:var(--ink);color:#fff;border:0;border-radius:999px;padding:7px 16px;margin-left:8px;font-weight:600}
+  .toast{top:76px}
+  .view{padding-block:28px 40px}
+  #v-swipe{padding-block:12px 0}
+  .back{display:inline-flex}
+}
+.back{display:none;border:0;background:none;padding:0;font-weight:600;color:var(--accent-d);align-self:flex-start}
+@media (max-width:767px){ #deck{position:absolute;inset:0} .rankpill{top:auto;bottom:8px;left:0;right:0;justify-content:center} }
+@media (prefers-reduced-motion:reduce){ .spin{animation-duration:2.4s} }
+</style>
+
+<div class="app">
+  <aside class="side" aria-label="Ansökningar">
+    <div class="side-top"><button class="logo-t" data-go="swipe">jobbsvep</button><button class="me" id="me" data-go="profile" title="Din profil" aria-label="Din profil">?</button></div>
+    <div class="side-sec"><b>Redo att skicka</b><div id="s-rings"></div></div>
+    <div class="side-sec"><b>Ansökningar</b><div id="s-list"></div><button class="btn ghost sm" data-imp="1" style="align-self:flex-start">Importera en annons</button></div>
+    <div class="side-foot" id="snap"></div>
+  </aside>
+  <header class="mhead"><button class="logo-t" data-go="swipe">jobbsvep</button><button class="fpill" id="m-filter" data-go="profile">Stockholm · Filter</button></header>
+  <main>
+    <section class="view" id="v-swipe">
+      <div class="deskpill" id="deskpill"></div>
+      <div class="rankpill" id="rankpill" hidden></div>
+      <div class="deckwrap">
+        <div id="deck"><div class="empty"><span class="spin"></span><p>Hämtar lediga jobb i Stockholms län…</p></div></div>
+        <div class="actions">
+          <button class="rb no" id="b-no" aria-label="Hoppa över jobbet" title="Hoppa över (vänsterpil)">✕</button>
+          <button class="rb save" id="b-save" aria-label="Spara jobbet till senare" title="Spara (uppåtpil)">Spara</button>
+          <button class="rb yes" id="b-yes" aria-label="Ansök till jobbet" title="Ansök (högerpil)">✓</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="v-profile" hidden>
+      <div class="col">
+        <button class="back" data-go="swipe">← Tillbaka till jobben</button>
+        <h1 class="vh">Din profil</h1>
+        <div class="panel">
+          <h2>Vad söker du?</h2>
+          <label class="f" for="p-specs">Dina önskemål <span>Roller, kunskaper, branscher, vad du vill ha och vad du inte vill ha. Skriv som du skulle säga det till en vän.</span>
+            <textarea id="p-specs" rows="5" placeholder="T.ex. Junior frontendutvecklare eller UX-roll, React och TypeScript, två års erfarenhet. Helst produktbolag, hybrid, centrala Stockholm eller Solna. Inte konsult, inte sälj."></textarea></label>
+          <div class="row">
+            <label class="f" for="p-field">Typ av jobb<select id="p-field"><option value="">Alla områden</option></select></label>
+            <label class="f" for="p-emp">Anställning<select id="p-emp"><option value="">Alla</option><option value="Permanent">Tillsvidare</option><option value="Fixed-term">Visstid</option><option value="Temporary cover">Vikariat</option><option value="Summer job">Sommarjobb</option><option value="On-call">Extra vid behov</option></select></label>
+            <label class="f" for="p-hours">Omfattning<select id="p-hours"><option value="">Heltid och deltid</option><option value="Full-time">Heltid</option><option value="Part-time">Deltid</option></select></label>
+          </div>
+          <div class="row">
+            <label class="f" for="p-home">Var bor du?<input type="text" id="p-home" autocomplete="off" placeholder="T.ex. Sveavägen 20, Solna eller 113 50"></label>
+            <label class="f" for="p-radius">Max avstånd<select id="p-radius"><option value="0">Hela Stockholms län</option><option value="5">5 km</option><option value="10">10 km</option><option value="20">20 km</option><option value="40">40 km</option></select></label>
+          </div>
+          <p class="note" id="home-note">Skriv en adress, ett område eller en ort så visas avståndet till varje jobb.</p>
+          <label class="check" for="p-student"><input type="checkbox" id="p-student"><span>Studentläge: visa främst extrajobb, deltid, sommarjobb, praktik och jobb utan krav på erfarenhet</span></label>
+          <label class="check" for="p-emailonly"><input type="checkbox" id="p-emailonly"><span>Visa bara jobb som tar emot ansökan via mejl, så att jag kan skicka direkt härifrån</span></label>
+        </div>
+        <div class="panel">
+          <h2>Om dig</h2>
+          <div class="row">
+            <label class="f" for="p-name">Namn<input type="text" id="p-name" autocomplete="name"></label>
+            <label class="f" for="p-phone">Telefon<input type="tel" id="p-phone" autocomplete="tel"></label>
+            <label class="f" for="p-email">Mejl i signaturen<input type="email" id="p-email" autocomplete="email"></label>
+          </div>
+          <div class="grp"><b>Ditt CV <span>PDF, Word eller text. Filen stannar i din webbläsare och läses bara när dina ansökningar skrivs.</span></b>
+            <div class="drop" id="cv-drop">
+              <span id="cv-status">Släpp ditt CV här eller välj en fil</span>
+              <div class="btns"><button class="btn ghost sm" id="cv-pick" type="button">Välj fil</button><button class="btn ghost sm" id="cv-clear" type="button" hidden>Ta bort</button></div>
+              <input type="file" id="cv-file" accept=".pdf,.docx,.txt,.md,application/pdf,text/plain" hidden>
+            </div>
+          </div>
+          <label class="f" for="p-cv">CV som text <span>Fylls i från din fil. Ändra fritt, eller klistra in ditt CV här i stället.</span><textarea id="p-cv" rows="6"></textarea></label>
+          <label class="check" for="p-attach"><input type="checkbox" id="p-attach"><span>Bifoga min CV-fil i ansökningarna jag skickar</span></label>
+        </div>
+        <div class="panel">
+          <h2>Din röst</h2>
+          <p>Klistra in ett mejl eller personligt brev som du har skrivit själv. Ansökningarna skrivs så att de låter som du, fast professionellt.</p>
+          <label class="f" for="p-example">Exempelmejl<textarea id="p-example" rows="6" placeholder="Hej Anna, Tack för ett trevligt samtal i tisdags…"></textarea></label>
+          <label class="f" for="p-lang">Språk i ansökningarna
+            <select id="p-lang"><option value="ad">Samma språk som annonsen</option><option value="sv">Alltid svenska</option><option value="en">Alltid engelska</option></select></label>
+        </div>
+        <div class="panel">
+          <h2>LinkedIn</h2>
+          <p>LinkedIn släpper inte in andra appar i din profil, så kopplingen går via dig: ladda upp din profil som PDF (på din profilsida: Resurser, sedan Spara som PDF) eller klistra in texten. Då kan Jobbsvep använda den som CV och föreslå en vassare profil som du klistrar in på LinkedIn.</p>
+          <label class="f" for="p-li">Länk till din profil<input type="text" id="p-li" autocomplete="off" placeholder="https://www.linkedin.com/in/…"></label>
+          <div class="drop" id="li-drop"><span id="li-status">Släpp din LinkedIn-PDF här eller välj en fil</span><div class="btns"><button class="btn ghost sm" id="li-pick" type="button">Välj fil</button></div><input type="file" id="li-file" accept=".pdf,.txt,application/pdf,text/plain" hidden></div>
+          <label class="f" for="p-litext">Din nuvarande LinkedIn-profil som text<textarea id="p-litext" rows="5" placeholder="Rubrik, Om, Erfarenhet, Utbildning, Kompetenser…"></textarea></label>
+          <label class="f" for="p-lilang">Språk på profilen<select id="p-lilang"><option value="sv">Svenska</option><option value="en">Engelska</option></select></label>
+          <div class="btns"><button class="btn" id="li-go" type="button">Förbättra min LinkedIn-profil</button><a class="btn ghost" id="li-open" href="https://www.linkedin.com/in/me/" target="_blank" rel="noopener">Öppna min profil</a></div>
+          <p class="note" id="li-note"></p>
+          <div id="li-out"></div>
+        </div>
+        <div class="panel">
+          <h2>Fyll i formulär automatiskt</h2>
+          <p>Jobbsveps tillägg för Chrome fyller i ansökningsformulär på arbetsgivarnas sajter med ditt namn, dina kontaktuppgifter, ditt CV och brevet du har fått skrivet här. Tillägget hämtar uppgifterna själv när den här sidan är öppen. Fungerar inte det kan du kopiera över dem.</p>
+          <div class="btns"><button class="btn ghost" id="ext-copy" type="button">Kopiera mina uppgifter till tillägget</button></div>
+          <p class="note" id="ext-note"></p>
+        </div>
+        <div class="btns"><button class="btn big" id="b-match" type="button">Hitta mina jobb</button></div>
+        <p class="note" id="match-note"></p>
+        <p class="note" id="sync-note"></p>
+      </div>
+    </section>
+
+    <section class="view" id="v-apps" hidden>
+      <div class="col">
+        <button class="back" data-go="swipe">← Tillbaka till jobben</button>
+        <h1 class="vh">Ansökningar</h1>
+        <div class="btns"><button class="btn ghost" data-imp="1">Importera en annons</button></div>
+        <div class="panel" id="imp" hidden>
+          <h2>Importera en annons</h2>
+          <p>Hittade du ett jobb på Instagram, Facebook eller på en lapp i butiken? Klistra in texten eller lägg till en skärmbild, så skrivs ansökan åt dig. Annonsen sparas också i jobbdatabasen så att andra kan svepa på den.</p>
+          <label class="f" for="imp-text">Annonsens text<textarea id="imp-text" rows="5" placeholder="Klistra in inlägget eller annonsen här…"></textarea></label>
+          <div class="drop" id="imp-drop"><span id="imp-status">Släpp en bild här, klistra in den eller välj en fil</span><div class="btns"><button class="btn ghost sm" id="imp-pick" type="button">Välj bild</button><button class="btn ghost sm" id="imp-clear" type="button" hidden>Ta bort bilder</button></div><input type="file" id="imp-file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden></div>
+          <div class="btns"><button class="btn" id="imp-go" type="button">Skapa ansökan</button><button class="btn ghost" id="imp-cancel" type="button">Avbryt</button></div>
+          <p class="note" id="imp-note"></p>
+        </div>
+        <p class="note" id="gmail-note" hidden></p>
+        <div id="apps-list" class="lst"></div>
+        <h2 id="saved-h" hidden style="font-size:24px;padding-top:10px">Sparade jobb</h2>
+        <div id="saved-list" class="lst"></div>
+      </div>
+    </section>
+
+    <div class="toast" id="toast" hidden><span id="toast-t"></span><button id="toast-undo" hidden>Ångra</button></div>
+    <div class="match" id="match" hidden>
+      <h2>Ansökan skickad!</h2>
+      <div class="duo"><span id="mt-me"></span><span id="mt-co"></span></div>
+      <p id="mt-text"></p>
+      <div class="mb"><button class="w" id="mt-go">Fortsätt svepa</button><button class="o" id="mt-apps">Visa ansökningar</button></div>
+    </div>
+  </main>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-go="swipe" aria-selected="true">Svepa</button>
+    <button class="tab" role="tab" data-go="apps" aria-selected="false">Ansökningar<span class="n" id="apps-count" hidden>0</span></button>
+    <button class="tab" role="tab" data-go="profile" aria-selected="false">Profil</button>
+  </nav>
+
+  <div class="land" id="land" hidden>
+    <header><span class="logo-t">jobbsvep</span><button class="out" id="l-skip">Börja svepa</button></header>
+    <div class="hero">
+      <h1>Svep. Matcha.<br>Börja jobba.</h1>
+      <p>Extrajobb, sommarjobb och första jobbet i Stockholm, utvalda efter din profil. Svep höger på det du gillar så skrivs din ansökan direkt, redo att skicka.</p>
+      <button class="btn big" id="l-start">Skapa din profil</button>
+      <span class="src" id="l-src">Lediga jobb i Stockholms län från Platsbanken</span>
+    </div>
+    <div class="steps">
+      <div><b>1. Skapa din profil</b><span>Vad du pluggar, vad du kan och var du bor, på fem minuter.</span></div>
+      <div><b>2. Svep bland jobben</b><span>Höger för att ansöka, vänster för att gå vidare.</span></div>
+      <div><b>3. Läs och skicka</b><span>Ansökan skrivs i din ton. Du trycker på skicka.</span></div>
+    </div>
+  </div>
+</div>
+<script type="application/json" id="jobbsvep-bridge">{}</script>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const cap=n=>(window.claude&&typeof window.claude.use==="function")?window.claude.use(n).catch(()=>null):Promise.resolve(null);
+const LS="jobbsvep:v1";
+const EMP=["Permanent","Fixed-term","Temporary cover","Summer job","On-call"], HOURS=["Full-time","Part-time"];
+const SV={"Permanent":"Tillsvidare","Fixed-term":"Visstid","Temporary cover":"Vikariat","Summer job":"Sommarjobb","On-call":"Behovsanställning","Full-time":"Heltid","Part-time":"Deltid"};
+const sv=x=>SV[x]||x||"";
+const REDUCED=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- state ---------- */
+const blank=()=>({profile:{name:"",email:"",phone:"",specs:"",emp:[],hours:[],fields:[],munis:[],emailOnly:false,lang:"ad",cvText:"",cvName:"",attach:true,example:"",linkedin:"",liText:"",liLang:"sv",home:"",homeLL:null,homeLabel:"",radius:0,student:true,t:0},swipes:{},apps:{},plan:null,ai:{},li:null,seen:false});
+let S=blank();
+try{const raw=localStorage.getItem(LS); if(raw){const o=JSON.parse(raw); S=Object.assign(blank(),o); S.profile=Object.assign(blank().profile,o.profile||{});}}catch(e){}
+let saveT=0;
+function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{const ids=Object.keys(S.ai);if(ids.length>600)ids.slice(0,ids.length-600).forEach(k=>delete S.ai[k]);localStorage.setItem(LS,JSON.stringify(S));}catch(e){} updateBridge();},250);}
+function bridgeData(){ const p=S.profile; return JSON.stringify({v:1,profile:{name:p.name,email:p.email,phone:p.phone,linkedin:p.linkedin},apps:Object.values(S.apps).filter(a=>a.body&&!["sent","applied"].includes(a.status)).sort((a,b)=>b.t-a.t).slice(0,30).map(a=>({id:a.id,e:a.e,h:a.h,subject:a.subject,body:a.body,url:a.url||""}))}); }
+function updateBridge(){ const el=document.getElementById("jobbsvep-bridge"); if(el) el.textContent=bridgeData(); }
+
+let PLACES=null, SHARED=[], sharedDb=null, META=null, JOBS=[], BYID=new Map(), chunkCache={}, cvFile=null;
+let pool=[], order=[], history=[], ranking=false, sheetOpen=false, sample=null, mcp=null, gmailOK=null, cloud=null;
+let tab="swipe";
+
+/* ---------- helpers ---------- */
+function toast(msg,undoable){const t=$("toast");$("toast-t").textContent=msg;$("toast-undo").hidden=!undoable;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,undoable?3200:2200);}
+function hue(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return h;}
+function initials(s){const w=String(s||"?").replace(/\b(AB|HB|KB|i|och|&)\b/g," ").trim().split(/\s+/).filter(Boolean);return ((w[0]||"?")[0]+(w[1]?w[1][0]:"")).toUpperCase();}
+function fmtDate(d){if(!d)return"";const x=new Date(String(d).length>10?d:d+"T12:00:00");return isNaN(x)?d:x.toLocaleDateString("sv-SE",{day:"numeric",month:"short"});}
+function daysLeft(d){if(!d)return null;return Math.ceil((new Date(d+"T23:59:59")-Date.now())/864e5);}
+const OFF=["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"];
+function sampleCopy(code){return ({not_granted:"Claude är inte tillåtet på den här sidan än, så matchning och utkast är avstängda. Ladda om sidan och tillåt Claude.",rate_limited:"Du har nått en användningsgräns just nu. Försök igen om en stund.",session_expired:"Din Claude-session har gått ut. Logga in igen och försök på nytt.",sampling_disabled:"Claude är inte tillgängligt för det här kontot.",refused:"Claude avböjde att skriva den här. Ändra din profiltext eller skriv för hand.",prompt_too_large:"Ditt CV eller exempelmejl är för långt. Korta ner det och försök igen."})[code]||"Claude kunde inte svara just nu. Försök igen.";}
+function mcpCopy(e){const c=e&&e.code;return ({needs_reauth:"Gmail behöver anslutas igen. Öppna claude.ai Inställningar, Connectors, och anslut Gmail på nytt.",server_not_connected:"Gmail är inte anslutet. Lägg till det i claude.ai Inställningar, Connectors.",selection_required:"Du har flera Gmail-anslutningar. Välj en i rutan som visas och tryck sedan på skicka igen.",not_in_manifest:"Gmail är avstängt för den här sidan. Tillåt det i sidans behörighetsmeny.",not_granted:"Sidan fick inte tillgång till Gmail.",approval_required:"Du behöver godkänna utskicket. Tryck på skicka igen och välj Tillåt.",blocked_by_policy:"Din organisation tillåter inte utskick härifrån.",cancelled:"Utskicket avbröts.",tool_error:"Gmail tog inte emot mejlet: "+(e.message||"okänd orsak"),server_unavailable:"Gmail svarade inte. Titta i Skickat innan du försöker igen, mejlet kan ha gått iväg.",upstream_error:"Något avbröt utskicket. Titta i Skickat innan du försöker igen."})[c]||"Det gick inte att skicka. Titta i Skickat innan du försöker igen.";}
+
+/* ---------- data ---------- */
+async function loadData(){
+  try{
+    META=await (await fetch("data/meta.json")).json();
+    const parts=await Promise.all(META.fields.map((f,i)=>fetch("data/i-"+i+".json").then(r=>r.json())));
+    parts.forEach((rows,fi)=>rows.forEach(r=>{
+      const j={id:r[0],h:r[1],e:r[2]||"Arbetsgivare ej angiven",m:r[3],o:r[4],g:r[5],et:r[6],hr:r[7],pub:r[8],dl:r[9],em:r[10],ci:r[11],sn:r[12],lat:r[13],lon:r[14],street:(r[15]||"").replace(/[,\s]+$/,""),stu:r[16]||0,src:r[17]||"",f:fi};
+      j.h1=(j.h+" "+j.o+" "+j.g).toLowerCase(); j.h2=j.sn.toLowerCase();
+      JOBS.push(j);BYID.set(j.id,j);
+    }));
+    try{ PLACES=await (await fetch("data/places.json")).json(); }catch(_){ PLACES={m:{},s:{},p:{}}; }
+    const txt=JOBS.length.toLocaleString("sv-SE")+" lediga jobb i Stockholms län från Platsbanken"+(META.otherSites?" och "+Object.keys(META.sources||{}).length+" andra jobbsajter":"")+", uppdaterat "+fmtDate(META.built);
+    $("snap").textContent=txt; $("l-src").textContent=txt;
+    mergeShared(); buildOptions(); rebuildPool(); renderDeck();
+    if(S.plan&&sample) maybeRank();
+  }catch(e){
+    $("deck").innerHTML='<div class="empty"><h2>Jobben gick inte att hämta</h2><p>Jobblistan kunde inte läsas. Ladda om sidan för att försöka igen.</p></div>';
+  }
+}
+function mergeShared(){
+  if(!META) return; let n=0;
+  SHARED.forEach(d=>{
+    if(!d||!d.id||!d.h||BYID.has(String(d.id))||Date.now()-(d.t||0)>60*864e5) return;
+    const mail=String(d.to||""), ok=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail);
+    const j={id:String(d.id),h:String(d.h).slice(0,120),e:String(d.e||"Okänd arbetsgivare").slice(0,80),m:String(d.m||"").slice(0,60),o:"Importerad annons",g:"",et:"",hr:"",pub:new Date(d.t||Date.now()).toISOString().slice(0,10),dl:"",em:ok?1:0,ci:-1,sn:String(d.ad||"").replace(/\s+/g," ").slice(0,320),lat:null,lon:null,street:"",stu:2,src:"",f:-1};
+    j._det={d:String(d.ad||"").slice(0,6000),email:ok?mail:"",url:/^https?:\/\//.test(String(d.url||""))?String(d.url):"",ref:String(d.ref||"").slice(0,60),contacts:d.contact?[{name:String(d.contact).slice(0,80)}]:[]};
+    j.h1=(j.h+" "+j.o).toLowerCase(); j.h2=j.sn.toLowerCase(); JOBS.push(j); BYID.set(j.id,j); n++;
+  });
+  if(n&&tab==="swipe"&&!busy&&!sheetOpen){ const top=order[0]; rebuildPool(); if(top&&order.includes(top)&&history.length) order=[top].concat(order.filter(i=>i!==top)); renderDeck(); }
+}
+async function detail(j){
+  if(j._det) return j._det;
+  const fn=META.chunks[j.ci]; if(!fn) return {};
+  if(!chunkCache[fn]) chunkCache[fn]=fetch("data/"+fn).then(r=>r.json()).catch(()=>{delete chunkCache[fn];return {};});
+  return (await chunkCache[fn])[j.id]||{};
+}
+
+/* ---------- places, distance, photos ---------- */
+function jobLL(j){ if(j.lat&&j.lon) return [j.lat,j.lon]; return (PLACES&&PLACES.m[(j.m||"").toLowerCase()])||null; }
+function distKm(j){
+  const h=S.profile.homeLL, ll=h&&jobLL(j); if(!ll) return null;
+  const R=6371, r=Math.PI/180, dLa=(ll[0]-h[0])*r, dLo=(ll[1]-h[1])*r, a=Math.sin(dLa/2)**2+Math.cos(h[0]*r)*Math.cos(ll[0]*r)*Math.sin(dLo/2)**2;
+  return 2*R*Math.asin(Math.sqrt(a));
+}
+function fmtKm(d){ return d<1?"under 1 km":(d<10?d.toFixed(1).replace(".",","):Math.round(d))+" km"; }
+function mapURL(j,d){
+  const st=j.street||(d&&d.street)||"";
+  const q=st?st+", "+((d&&d.city)||j.m||"Stockholm"):(j.lat&&j.lon?j.lat+","+j.lon:j.e+", "+(j.m||"Stockholm"));
+  return "https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(q);
+}
+async function geocode(text){
+  const t=text.toLowerCase().trim(); if(!t||!PLACES) return null;
+  const pc=t.match(/\b(\d{3})\s?(\d{2})\b/);
+  if(pc&&PLACES.p[pc[1]+pc[2]]) return {ll:PLACES.p[pc[1]+pc[2]],label:pc[1]+" "+pc[2]};
+  const parts=t.split(/[,\n]/).map(x=>x.trim()).filter(Boolean);
+  const street=parts[0].replace(/\s*\d.*$/,"").trim();
+  if(street.length>3&&PLACES.s[street]) return {ll:PLACES.s[street],label:street.replace(/^./,c=>c.toUpperCase())};
+  for(const part of parts.concat([t])){ const k=part.replace(/\b\d{3}\s?\d{2}\b/,"").trim(); if(PLACES.m[k]) return {ll:PLACES.m[k],label:k.replace(/^./,c=>c.toUpperCase())}; }
+  if(!sample) return null;
+  try{
+    const r=await sample.json('Give approximate WGS84 coordinates for this address or area in Sweden: "'+text.slice(0,160)+'". Reply with only JSON: {"lat":<number>,"lon":<number>,"label":"<short place name in Swedish>"} or {"lat":null} if you cannot place it.',{modelTier:"quick"});
+    const la=Number(r&&r.lat), lo=Number(r&&r.lon);
+    if(r&&r.lat!==null&&la>55&&la<69.2&&lo>10.5&&lo<24.3) return {ll:[Math.round(la*1e4)/1e4,Math.round(lo*1e4)/1e4],label:String(r.label||text).slice(0,40),approx:true};
+  }catch(e){ if(e&&OFF.includes(e.code)) sample=null; }
+  return null;
+}
+let homeSeq=0;
+async function resolveHome(){
+  const p=S.profile, n=$("home-note"), seq=++homeSeq;
+  if(!p.home.trim()){ p.homeLL=null; p.homeLabel=""; n.className="note"; n.textContent="Skriv en adress, ett område eller en ort så visas avståndet till varje jobb."; save(); renderChrome(); return; }
+  if(!PLACES){ return; }
+  n.className="note"; n.innerHTML='<span class="spin"></span> Letar upp platsen…';
+  const g=await geocode(p.home); if(seq!==homeSeq) return;
+  if(g){ p.homeLL=g.ll; p.homeLabel=g.label; n.className="note ok"; n.textContent="Avstånd räknas från "+g.label+(g.approx?" (ungefärligt läge)":"")+"."; }
+  else { p.homeLL=null; p.homeLabel=""; n.className="note err"; n.textContent="Hittade inte platsen. Prova ett område, en ort eller ett postnummer, t.ex. Solna eller 113 50."; }
+  p.t=Date.now(); save(); pushProfile(); renderChrome();
+}
+
+/* ---------- matching ---------- */
+const STOP=new Set("och eller att som för med inte jobb jobba arbete arbeta söker gärna vill ha the and for with not want would like job work role roles looking some have that this from years year experience erfarenhet inom helst ideally preferably also även samt men but min mitt jag".split(" "));
+function planKey(){const p=S.profile;return [p.specs,p.cvText.slice(0,400)].join("|");}
+function fallbackPlan(){
+  const words=(S.profile.specs||"").toLowerCase().split(/[^a-z0-9åäöé+#.]+/).map(w=>w.replace(/^\.+|\.+$/g,"")).filter(w=>w.length>2&&!STOP.has(w));
+  return {titles:[],keywords:[...new Set(words)].slice(0,30),avoid:[],fields:[],key:planKey()};
+}
+function passes(j){
+  const p=S.profile;
+  if(p.emailOnly&&!j.em) return false;
+  if(p.emp.length&&!p.emp.includes(j.et)) return false;
+  if(p.hours.length&&!p.hours.includes(j.hr)) return false;
+  if(p.fields.length&&!p.fields.includes(j.f)) return false;
+  if(p.student&&j.stu<1) return false;
+  if(p.radius&&p.homeLL){ const km=distKm(j); if(km!==null&&km>p.radius) return false; }
+  const d=daysLeft(j.dl); if(d!==null&&d<0) return false;
+  return true;
+}
+function localScore(j,plan){
+  let s=0;
+  for(const t of plan.titles){ if(j.h1.includes(t)) s+=8; else if(j.h2.includes(t)) s+=2; }
+  for(const t of plan.keywords){ if(j.h1.includes(t)) s+=4; else if(j.h2.includes(t)) s+=1.5; }
+  for(const t of plan.avoid){ if(j.h1.includes(t)) s-=10; else if(j.h2.includes(t)) s-=2; }
+  if(s>0){ if(plan.fields.includes(j.f)) s+=3; const age=(Date.now()-new Date(j.pub))/864e5; if(age<14) s+=2-age/7; if(j.em) s+=1; if(S.profile.student) s+=j.stu*2.5; const km=distKm(j); if(km!==null) s+=km<3?2:km<8?1:0; }
+  return s;
+}
+function rebuildPool(){
+  const plan=S.plan;
+  let list=JOBS.filter(j=>!S.swipes[j.id]&&passes(j));
+  if(plan&&(plan.titles.length||plan.keywords.length)){
+    list.forEach(j=>j._s=localScore(j,plan));
+    list=list.filter(j=>j._s>=3).sort((a,b)=>b._s-a._s).slice(0,400);
+    const max=list.length?list[0]._s:1; list.forEach(j=>j._pct=Math.round(55+40*Math.min(1,j._s/max)));
+  }else{
+    list.forEach(j=>{j._s=0;j._pct=0;});
+    const st=S.profile.student; list.sort((a,b)=>(st?(b.stu-a.stu):0)||(b.em-a.em)||(b.pub<a.pub?-1:b.pub>a.pub?1:0)); list=list.slice(0,300);
+  }
+  pool=list.map(j=>j.id);
+  const ranked=pool.filter(id=>S.ai[id]&&S.ai[id].s>=30).sort((a,b)=>S.ai[b].s-S.ai[a].s);
+  const rest=pool.filter(id=>!S.ai[id]);
+  order=plan?ranked.concat(rest):pool.slice();
+}
+async function makePlan(){
+  const p=S.profile;
+  if(!sample) return fallbackPlan();
+  const fields=META.fields.map((f,i)=>i+": "+f.name).join("\n");
+  const prompt="You turn a job seeker's wishes into search terms for a Swedish job-ad database (Platsbanken, Stockholm). Most ads are written in Swedish, some in English.\n\n"
+   +"JOB SEEKER'S SPECIFICATIONS:\n"+(p.specs||"(none given, infer from CV)")+"\n\nCV EXCERPT:\n"+(p.cvText.slice(0,3500)||"(none)")+"\n\nOCCUPATION FIELDS:\n"+fields
+   +"\n\nReply with only a JSON object: {\"titles\":[up to 14 job titles this person should apply for, lowercase, in Swedish AND English variants, short stems that match inside compound words, e.g. \"utvecklare\",\"developer\",\"frontend\"],\"keywords\":[up to 22 lowercase skills, tools and domain words likely to appear in fitting ads, Swedish and English],\"avoid\":[up to 8 lowercase words for job types the person said they do NOT want, empty if none],\"fields\":[indices of the 1-4 most relevant occupation fields]}";
+  const r=await sample.json(prompt,{modelTier:"quick"});
+  const arr=x=>Array.isArray(x)?x.map(v=>String(v).toLowerCase().trim()).filter(v=>v.length>1&&v.length<40):[];
+  const plan={titles:arr(r.titles).slice(0,14),keywords:arr(r.keywords).slice(0,22),avoid:arr(r.avoid).slice(0,8),fields:(Array.isArray(r.fields)?r.fields:[]).map(Number).filter(n=>n>=0&&n<META.fields.length),key:planKey()};
+  if(!plan.titles.length&&!plan.keywords.length) return fallbackPlan();
+  return plan;
+}
+async function rankBatch(){
+  if(ranking||!sample||!S.plan) return;
+  const ids=order.filter(id=>!S.ai[id]).slice(0,40); if(!ids.length) return;
+  ranking=true; renderChrome();
+  const p=S.profile;
+  const lines=ids.map(id=>{const j=BYID.get(id);const km=distKm(j);return id+" | "+j.h+" | "+j.e+" | "+j.o+" | "+j.m+(km!==null?" ("+Math.round(km)+" km from home)":"")+" | "+sv(j.et)+", "+sv(j.hr)+" | "+j.sn.slice(0,230);}).join("\n");
+  const prompt="You are a recruiter matching one candidate to open jobs in Stockholm. Judge fit honestly: seniority, skills, what they asked for and what they said they don't want.\n\n"
+   +"WHAT THE CANDIDATE WANTS:\n"+(p.specs||"(not stated)")+(p.student?"\nThe candidate is a student: favour part-time, extra, summer, internship and entry-level jobs that fit beside studies, and mark down jobs that need years of experience or full-time daytime presence unless they asked for that.":"")+"\n\nCANDIDATE CV:\n"+(p.cvText.slice(0,6000)||"(no CV given)")
+   +"\n\nJOBS (id | title | employer | occupation | place | terms | ad excerpt):\n"+lines
+   +"\n\nReply with only a JSON array, one object per job, every id included: [{\"id\":\"<id>\",\"s\":<fit 0-100>,\"why\":\"<one short sentence in Swedish, max 18 words, addressed to the candidate as 'du', saying why it fits or what the catch is>\"}]. Be strict: under 40 means not worth their time.";
+  try{
+    const r=await sample.json(prompt,{modelTier:"default"});
+    (Array.isArray(r)?r:[]).forEach(x=>{const id=String(x.id);if(BYID.has(id))S.ai[id]={s:Math.max(0,Math.min(100,Math.round(Number(x.s)||0))),why:String(x.why||"").slice(0,200)};});
+    ids.forEach(id=>{if(!S.ai[id])S.ai[id]={s:45,why:""};});
+    const top=order[0]; const keepTop=history.length>0||sheetOpen;
+    const ranked=order.filter(id=>S.ai[id]&&S.ai[id].s>=30&&!(keepTop&&id===top)).sort((a,b)=>S.ai[b].s-S.ai[a].s);
+    const rest=order.filter(id=>!S.ai[id]&&!(keepTop&&id===top));
+    order=(keepTop&&top&&(!S.ai[top]||S.ai[top].s>=30)?[top]:[]).concat(ranked,rest);
+    save();
+  }catch(e){ if(e&&e.code!=="cancelled") toast(sampleCopy(e&&e.code)); if(e&&OFF.includes(e.code)) sample=null; }
+  ranking=false; if(sheetOpen||busy) renderChrome(); else renderDeck();
+}
+function maybeRank(){ if(!sample||!S.plan||ranking) return; const ahead=order.slice(0,8).filter(id=>S.ai[id]).length; if(ahead<6&&order.some(id=>!S.ai[id])) rankBatch(); }
+
+async function findMatches(){
+  const b=$("b-match"), n=$("match-note"); readProfile();
+  if(!S.profile.specs.trim()&&!S.profile.cvText.trim()){n.className="note err";n.textContent="Skriv vad du söker, eller lägg till ditt CV, så finns det något att matcha mot.";return;}
+  if(!META){n.className="note err";n.textContent="Jobblistan laddas fortfarande. Försök igen om en stund.";return;}
+  b.disabled=true; n.className="note"; n.innerHTML='<span class="spin"></span> Läser din profil…';
+  let extra="";
+  try{ S.plan=await makePlan(); }
+  catch(e){ S.plan=fallbackPlan(); if(e&&OFF.includes(e.code)) sample=null; extra=" "+sampleCopy(e&&e.code)+" Sökordsmatchning används i stället."; }
+  S.ai={}; history=[]; closeSheet(true); rebuildPool(); save(); pushProfile();
+  b.disabled=false;
+  if(!order.length){n.className="note err";n.textContent="Inga lediga jobb matchar just nu. Lätta på filtren eller beskriv rollen bredare.";renderDeck();return;}
+  n.className="note ok"; n.textContent=order.length+" jobb hittade."+extra;
+  go("swipe",true); maybeRank();
+}
+
+/* ---------- chrome: filter pill, sidebar, tabs ---------- */
+function filterParts(){
+  const p=S.profile, a=[];
+  a.push(p.fields.length===1&&META?META.fields[p.fields[0]].name:(p.fields.length>1?p.fields.length+" områden":(S.plan?"Mina matchningar":"Alla jobb")));
+  a.push(p.homeLL?(p.homeLabel+(p.radius?" · "+p.radius+" km":"")):"Stockholm");
+  if(p.student) a.push("Student");
+  if(p.hours.length===1) a.push(sv(p.hours[0]));
+  return a;
+}
+function renderChrome(){
+  const fp=filterParts();
+  $("deskpill").innerHTML=fp.map(x=>'<span>'+esc(x)+'</span>').join('<span class="d">·</span>')+'<button data-go="profile">Filter</button>';
+  $("m-filter").textContent=fp[1]+" · Filter";
+  const rp=$("rankpill");
+  if(ranking){rp.hidden=false;rp.innerHTML='<span class="spin"></span>Claude rangordnar';}
+  else if(S.plan&&!sample&&META){rp.hidden=false;rp.textContent="Sökordsmatchning";}
+  else rp.hidden=true;
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t.dataset.go===tab));
+  const apps=Object.values(S.apps).sort((a,b)=>b.t-a.t);
+  const ready=apps.filter(a=>a.status==="ready"||a.status==="error");
+  const c=$("apps-count"); c.hidden=!ready.length; c.textContent=ready.length;
+  $("me").textContent=S.profile.name?initials(S.profile.name):"?";
+  const rings=apps.filter(a=>["ready","queued","drafting","error"].includes(a.status)).slice(0,4);
+  $("s-rings").innerHTML=rings.length?'<div class="rings">'+rings.map(a=>'<button class="ring" data-app="'+a.id+'" title="'+esc(a.h)+'"><i>'+esc(initials(a.e))+'</i><span>'+esc(a.e.split(/\s+/)[0])+'</span></button>').join("")+'</div>'
+    :'<p class="hint">Svep höger på ett jobb så dyker utkastet upp här.</p>';
+  $("s-list").innerHTML=apps.length?apps.slice(0,30).map(a=>{const st=STATUS[a.status]||STATUS.ready;return '<button class="srow" data-app="'+a.id+'"><span class="av">'+esc(initials(a.e))+'</span><span class="t"><span class="l1"><b>'+esc(a.e)+'</b><small>'+(a.status==="sent"?fmtDate(new Date(a.sentAt||a.t).toISOString()):st[0])+'</small></span><span class="l2">'+esc(a.status==="ready"&&a.body?a.body.replace(/\s+/g," ").slice(0,70):a.h)+'</span></span></button>';}).join("")
+    :'<p class="hint">Inga ansökningar än.</p>';
+}
+
+/* ---------- deck ---------- */
+function cardHTML(j,under){
+  const ai=S.ai[j.id], d=daysLeft(j.dl), pct=ai?ai.s:(S.plan?j._pct:0);
+  const km=distKm(j);
+  const meta=[j.m||"Stockholms län", km!==null?fmtKm(km)+" bort":"", j.em?"Ansök via mejl":(j.src?"Ansök på "+j.src:"Ansök på deras sajt"), d!==null?(d<=0?"Sista dag i dag":d<=14?d+" dagar kvar":"Sista dag "+fmtDate(j.dl)):""].filter(Boolean).join(" · ");
+  return '<article class="card'+(under?" under":"")+'" data-id="'+j.id+'" style="--h:'+hue(j.e)+'"'+(under?' aria-hidden="true"':' tabindex="0" aria-label="'+esc(j.h+", "+j.e)+'"')+'>'
+   +'<span class="wm" aria-hidden="true">'+esc(initials(j.e))+'</span>'
+   +(pct?'<span class="badge">'+pct+' % matchning</span>':'<span class="badge">'+(j.src?"Från "+esc(j.src):"Nytt "+esc(fmtDate(j.pub)))+'</span>')
+   +(under?'':'<button class="readbtn" data-act="read">Läs annonsen</button>')
+   +'<div class="stamp y">JA</div><div class="stamp n">NEJ</div>'
+   +'<div class="info"><div class="co"><span class="ini">'+esc(initials(j.e))+'</span><span>'+esc(j.e)+'</span></div>'
+   +(j.stu>=2?'<span class="stu">Passar studenter</span>':'')
+   +'<span class="ti">'+esc(j.h)+'</span><span class="sal">'+esc([sv(j.et),sv(j.hr)].filter(Boolean).join(" · ")||j.o)+'</span><span class="meta">'+esc(meta)+'</span>'
+   +(under?'':'<a class="map" href="'+esc(mapURL(j))+'" target="_blank" rel="noopener">'+esc(j.street?j.street+" · visa på karta":"Visa på karta")+'</a>')
+   +(ai&&ai.why?'<span class="why">'+esc(ai.why)+'</span>':'')+'</div></article>';
+}
+function renderDeck(){
+  renderChrome();
+  const deck=$("deck"); if(!META) return;
+  order=order.filter(id=>!S.swipes[id]);
+  const top=order.slice(0,2).map(id=>BYID.get(id));
+  const dis=!top.length; $("b-no").disabled=$("b-yes").disabled=$("b-save").disabled=dis;
+  sheetOpen=false;
+  if(dis){
+    deck.innerHTML='<div class="empty"><h2>'+(S.plan?"Du har svept klart":"Inget att visa")+'</h2><p>'+(S.plan?"Inga fler matchningar just nu. Bredda dina filter, eller titta in igen när jobblistan har uppdaterats.":"Lätta på filtren för att se jobb.")+'</p><button class="btn" data-go="profile">Ändra profil</button></div>';
+    return;
+  }
+  deck.innerHTML=top.map((j,i)=>cardHTML(j,i>0)).reverse().join("");
+  bindCard(deck.querySelector(".card:not(.under)")); detail(top[0]);
+}
+async function openSheet(){
+  const j=BYID.get(order[0]); if(!j||sheetOpen) return; sheetOpen=true;
+  const el=document.createElement("div"); el.className="sheet"; el.id="sheet";
+  el.innerHTML='<div class="sheet-h"><h2>'+esc(j.h)+'<small>'+esc(j.e)+' · '+esc(j.o)+'</small></h2><button class="x" data-act="close" aria-label="Stäng annonsen">✕</button></div><div class="sheet-b" id="sheet-b"><p class="note"><span class="spin"></span> Hämtar annonsen…</p></div>';
+  $("deck").appendChild(el); el.querySelector(".x").focus();
+  const d=await detail(j); if(!el.isConnected) return;
+  const ai=S.ai[j.id];
+  const facts=[["Sista dag",j.dl?fmtDate(j.dl):""],["Publicerad",fmtDate(j.pub)],["Plats",[j.street,[d.pc,d.city||j.m].filter(Boolean).join(" ")].filter(Boolean).join(", ")],["Avstånd",distKm(j)!==null?fmtKm(distKm(j))+" från "+S.profile.homeLabel:""],["Källa",j.src],["Arbetsplats",d.model],["Anställning",[sv(j.et),sv(j.hr)].filter(Boolean).join(", ")],["Varaktighet",d.duration],["Lön",d.salary||d.salaryType],["Antal platser",d.vac>1?d.vac:""],["Krav",(d.must||[]).join(", ")],["Meriterande",(d.nice||[]).join(", ")],["Erfarenhet",d.exp?"Krävs":""],["Körkort",d.lic?"Krävs":""],["Referens",d.ref],["Ansökan",d.email?d.email:(d.url?"På arbetsgivarens sajt":"Se annonsen")]].filter(f=>f[1]);
+  $("sheet-b").innerHTML=(ai&&ai.why?'<p class="desc" style="font-weight:600;color:var(--accent-d)">'+ai.s+' % matchning. '+esc(ai.why)+'</p>':'')
+    +'<dl class="facts">'+facts.map(f=>'<dt>'+f[0]+'</dt><dd>'+esc(f[1])+'</dd>').join("")+'</dl>'
+    +'<p style="margin:0"><a href="'+esc(mapURL(j,d))+'" target="_blank" rel="noopener">Visa vägen på karta</a></p>'
+    +'<p class="desc">'+esc(d.d||j.sn)+'</p>'
+    +(d.web?'<p style="margin:0"><a href="'+esc(d.web)+'" target="_blank" rel="noopener">Öppna originalannonsen</a></p>':'');
+}
+function closeSheet(silent){ const s=$("sheet"); if(s) s.remove(); sheetOpen=false; if(!silent){const c=$("deck").querySelector(".card:not(.under)"); if(c) c.focus();} }
+$("deck").addEventListener("click",e=>{ const a=e.target.closest("[data-act]"); if(!a) return; if(a.dataset.act==="read") openSheet(); else if(a.dataset.act==="close") closeSheet(); });
+function bindCard(card){
+  if(!card) return;
+  let sx=0,sy=0,dx=0,dy=0,down=false,moved=false;
+  const yS=card.querySelector(".stamp.y"), nS=card.querySelector(".stamp.n");
+  card.addEventListener("pointerdown",e=>{ if(e.button||e.target.closest("button,a")||busy) return; down=true;moved=false;sx=e.clientX;sy=e.clientY;dx=dy=0;card.style.transition="none";try{card.setPointerCapture(e.pointerId);}catch(_){} });
+  card.addEventListener("pointermove",e=>{ if(!down) return; dx=e.clientX-sx; dy=(e.clientY-sy)*0.4; if(Math.abs(dx)>6||Math.abs(dy)>6) moved=true;
+    card.style.transform="translate("+dx+"px,"+dy+"px) rotate("+dx/18+"deg)"; yS.style.opacity=Math.max(0,Math.min(1,dx/110)); nS.style.opacity=Math.max(0,Math.min(1,-dx/110)); });
+  const up=()=>{ if(!down) return; down=false;
+    if(dx>110) fly("yes"); else if(dx<-110) fly("no");
+    else { card.style.transition="transform .28s ease"; card.style.transform=""; yS.style.opacity=nS.style.opacity=0; if(!moved) openSheet(); } };
+  card.addEventListener("pointerup",up); card.addEventListener("pointercancel",()=>{moved=true;up();});
+  card.addEventListener("keydown",e=>{ if(e.target===card&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openSheet();} });
+}
+let busy=false;
+function fly(dir){
+  if(busy||!order.length) return; const id=order[0], card=$("deck").querySelector('.card[data-id="'+id+'"]'); if(!card) return;
+  busy=true; closeSheet(true);
+  const done=()=>{ busy=false; const j=BYID.get(id); const code=dir==="yes"?"l":dir==="up"?"s":"p";
+    S.swipes[id]=code; history.push({id,dir:code}); if(history.length>30) history.shift();
+    order.shift(); save(); pushSwipes();
+    if(code==="l"){ addApp(id); toast((j.em?"Ansökan skrivs till ":"Brevet skrivs för ")+j.e,true); }
+    else if(code==="s") toast(j.h+" sparad",true);
+    renderDeck(); maybeRank(); };
+  if(REDUCED){ done(); return; }
+  const to=dir==="up"?[0,-900]:[dir==="yes"?900:-900,40];
+  if(dir!=="up") card.querySelector(dir==="yes"?".stamp.y":".stamp.n").style.opacity=1;
+  card.style.transition="transform .28s ease"; card.style.transform="translate("+to[0]+"px,"+to[1]+"px) rotate("+to[0]/18+"deg)";
+  setTimeout(done,280);
+}
+function undo(){
+  const h=history.pop(); if(!h) return; delete S.swipes[h.id]; $("toast").hidden=true;
+  if(h.dir==="l"&&S.apps[h.id]&&!["sent","applied"].includes(S.apps[h.id].status)){ delete S.apps[h.id]; pushApp(h.id,true); }
+  order.unshift(h.id); save(); pushSwipes(); renderDeck(); if(tab==="apps") renderApps();
+}
+
+/* ---------- applications ---------- */
+function addApp(id){
+  const j=BYID.get(id); if(S.apps[id]) return;
+  S.apps[id]={id,h:j.h,e:j.e,m:j.m,dl:j.dl,ci:j.ci,to:"",url:"",web:"",subject:"",body:"",status:"queued",t:Date.now()};
+  save(); pushApp(id); pumpQueue();
+}
+let pumping=false;
+async function pumpQueue(){
+  if(pumping) return; pumping=true;
+  for(;;){ const a=Object.values(S.apps).find(a=>a.status==="queued"); if(!a) break; await draft(a); }
+  pumping=false;
+}
+function jobFor(a){ return BYID.get(a.id)||{id:a.id,h:a.h,e:a.e,m:a.m,ci:a.ci,sn:"",o:""}; }
+async function draft(a,fresh){
+  const p=S.profile, j=jobFor(a);
+  if(a.fresh){ fresh=true; delete a.fresh; }
+  a.status="drafting"; a.err=""; touchApp(a);
+  const d=a.imp?{d:a.ad||"",email:a.to,url:a.url,ref:a.ref||"",contacts:a.contact?[{name:a.contact}]:[]}:(META&&BYID.has(a.id)?await detail(j):{});
+  if(!a.imp){ if(!a.to) a.to=d.email||""; a.url=d.url||""; a.web=d.web||""; }
+  const contact=(d.contacts||[]).map(c=>[c.name,c.description].filter(Boolean).join(", ")).filter(Boolean)[0]||"";
+  if(!sample){
+    a.subject="Ansökan: "+j.h+(d.ref?" (ref. "+d.ref+")":"");
+    a.body="Hej,\n\nJag vill söka tjänsten som "+j.h+" hos "+j.e+".\n\n[Claude är inte tillgängligt på den här sidan just nu, så det här är bara en mall. Skriv några rader om varför du passar för rollen.]\n\nMed vänliga hälsningar,\n"+[p.name,p.phone,p.email].filter(Boolean).join("\n");
+    a.status="ready"; touchApp(a); return;
+  }
+  const lang=p.lang==="sv"?"Write in Swedish.":p.lang==="en"?"Write in English.":"Write in the same language as the job ad (a Swedish ad gets a Swedish application, an English ad an English one).";
+  const prompt="Write a job application email for the candidate below. It will be sent as-is from their own email account, so it must be finished, truthful and ready to send.\n\n"
+   +"RULES\n- "+lang+"\n- Sound like the candidate: copy the rhythm, greeting style, warmth and typical phrasing of their EXAMPLE EMAIL, but keep it professional and free of slang and spelling mistakes. If there is no example, write in a natural, direct, modern tone, not stiff.\n"
+   +"- Use only facts found in the CV and the candidate's own notes. Never invent experience, employers, degrees, numbers or skills. If the CV is thin, write a shorter, honest email that leans on motivation.\n"
+   +"- Open with the specific role and one concrete reason this employer or role appeals. Then 2-3 concrete links between the ad's requirements and what the CV actually shows. End with availability for an interview.\n"
+   +"- 130 to 220 words in the body. Plain text only, short paragraphs separated by blank lines, no bullet lists, no markdown, no placeholders or brackets.\n"
+   +"- Address the contact person by first name if one is given, otherwise use a neutral greeting ('Hej,' in Swedish).\n"
+   +"- If a CV file is attached, mention it in one short clause. Attached: "+(p.attach&&cvFile?"yes":"no")+".\n"
+   +"- Sign off with the candidate's name, then phone and email on their own lines if given.\n"
+   +"- Subject line: short and clear, the role title, plus the reference number if the ad has one.\n\n"
+   +"CANDIDATE\nName: "+(p.name||"(not given, sign off without a name)")+"\nPhone: "+(p.phone||"-")+"\nEmail: "+(p.email||"-")+"\nLinkedIn (add as a last signature line if given): "+(p.linkedin||"-")+"\nWhat they are looking for: "+(p.specs||"-")
+   +(p.student?"\nThe candidate is a student; if the CV shows studies, mention them briefly and how the job fits beside them.":"")+"\n\nCV\n"+((p.cvText||p.liText).slice(0,12000)||"(no CV text provided)")+"\n\nEXAMPLE EMAIL WRITTEN BY THE CANDIDATE (style reference only, do not reuse its content)\n"+(p.example.slice(0,4000)||"(none)")
+   +"\n\nJOB AD\nTitle: "+j.h+"\nEmployer: "+j.e+"\nPlace: "+(j.m||"")+"\nContact person: "+(contact||"(none named)")+"\nReference: "+(d.ref||"(none)")+"\nApplication instructions: "+([d.info,d.other].filter(Boolean).join(" ")||"(none)")+"\nAd text:\n"+((d.d||j.sn||"").slice(0,5000))
+   +"\n\nReply with only a JSON object: {\"subject\":\"...\",\"body\":\"...\"}";
+  try{
+    const r=await sample.json(prompt,{modelTier:"default",cache:fresh?false:true});
+    a.subject=String(r.subject||("Ansökan: "+j.h)).replace(/\s+/g," ").trim(); a.body=String(r.body||"").trim();
+    if(!a.body) throw {code:"empty_completion"};
+    a.status="ready";
+  }catch(e){ a.status="error"; a.err=sampleCopy(e&&e.code); if(e&&OFF.includes(e.code)) sample=null; }
+  touchApp(a);
+}
+function touchApp(a){ a.t=Date.now(); save(); pushApp(a.id); renderChrome(); if(tab==="apps") renderApps(); }
+const STATUS={queued:["I kö",""],drafting:["Skrivs",""],ready:["Redo att skicka","go"],error:["Försök igen","bad"],sending:["Skickar",""],sent:["Skickad","ok"],applied:["Ansökt","ok"],drafted:["I Gmail-utkast","ok"]};
+let openApp=null, confirmApp=null;
+function renderApps(){
+  const list=$("apps-list"), apps=Object.values(S.apps).sort((a,b)=>{const r=x=>["sent","applied"].includes(x.status)?1:0;return r(a)-r(b)||b.t-a.t;});
+  const gn=$("gmail-note"); gn.hidden=gmailOK!==false; gn.textContent="Gmail går inte att nå i den här vyn, så det går inte att skicka härifrån. Du kan fortfarande kopiera varje ansökan och skicka den själv.";
+  const act=document.activeElement&&document.activeElement.id, sel=act&&document.activeElement.selectionStart;
+  if(!apps.length) list.innerHTML='<div class="panel"><p>Här är det tomt än så länge. Svep höger på ett jobb så skrivs ansökan åt dig.</p><div class="btns"><button class="btn" data-go="swipe">Börja svepa</button></div></div>';
+  else list.innerHTML=apps.map(a=>{
+    const st=STATUS[a.status]||STATUS.ready, open=openApp===a.id, done=["sent","applied"].includes(a.status), work=["queued","drafting","sending"].includes(a.status);
+    let body="";
+    if(open){
+      if(work&&a.status!=="sending") body='<p class="note"><span class="spin"></span> Claude skriver den här. Det tar oftast under en minut.</p>';
+      else body=(a.err?'<p class="note err">'+esc(a.err)+'</p>':'')
+         +(done?'<p class="note ok">'+(a.status==="sent"?"Skickad "+fmtDate(new Date(a.sentAt||a.t).toISOString())+" till "+esc(a.to):"Markerad som ansökt")+'</p>':'')
+         +(!a.to&&a.url?'<p class="note">Den här arbetsgivaren tar emot ansökningar på sin egen sajt. Kopiera ditt brev och klistra in det i deras formulär.</p>':'')
+         +'<label class="f" for="to-'+a.id+'">Till<input type="email" id="to-'+a.id+'" data-f="to" value="'+esc(a.to)+'" placeholder="'+(a.url?"Ingen mejladress i annonsen":"mottagare@foretag.se")+'"></label>'
+         +'<label class="f" for="su-'+a.id+'">Ämne<input type="text" id="su-'+a.id+'" data-f="subject" value="'+esc(a.subject)+'"></label>'
+         +'<label class="f" for="bo-'+a.id+'">Ansökan<textarea id="bo-'+a.id+'" data-f="body">'+esc(a.body)+'</textarea></label>'
+         +(S.profile.attach&&cvFile&&a.to?'<p class="note">Bifogar '+esc(cvFile.name)+'</p>':'')
+         +(confirmApp===a.id?'<div class="confirm"><p>Skicka till <span class="sel">'+esc(a.to)+'</span> från din Gmail nu? Mejlet går iväg direkt.</p><div class="btns"><button class="btn" data-act="send-yes">Skicka nu</button><button class="btn ghost" data-act="send-no">Inte än</button></div></div>'
+           :'<div class="btns">'
+            +(a.to&&gmailOK!==false&&!done?'<button class="btn" data-act="send"'+(a.status==="sending"?" disabled":"")+'>'+(a.status==="sending"?'<span class="spin"></span> Skickar':'Skicka ansökan')+'</button>':'')
+            +(a.to&&gmailOK!==false&&!done?'<button class="btn ghost" data-act="gdraft">Spara i Gmail-utkast</button>':'')
+            +(a.url?'<a class="btn'+(a.to?" ghost":"")+'" href="'+esc(a.url)+'" target="_blank" rel="noopener">Öppna ansökningssidan</a>':'')
+            +'<button class="btn ghost" data-act="copy">Kopiera text</button>'
+            +(!done?'<button class="btn ghost" data-act="regen">Skriv om</button>':'')
+            +(!done&&(!a.to||gmailOK===false)?'<button class="btn ghost" data-act="applied">Markera som ansökt</button>':'')
+            +(a.web?'<a class="btn ghost" href="'+esc(a.web)+'" target="_blank" rel="noopener">Visa annonsen</a>':'')
+            +'<button class="btn danger" data-act="remove">Ta bort</button></div>');
+    }
+    return '<div class="item" data-id="'+a.id+'"><button class="item-s" data-act="toggle" aria-expanded="'+open+'"><span class="av">'+esc(initials(a.e))+'</span><span class="t"><b>'+esc(a.h)+'</b><small>'+esc(a.e)+(a.m?" · "+esc(a.m):"")+'</small></span><span class="st '+st[1]+'">'+(work?'<span class="spin"></span>':'')+st[0]+'</span></button>'+(open?'<div class="item-b">'+body+'</div>':'')+'</div>';
+  }).join("");
+  if(act&&$(act)){ $(act).focus(); try{$(act).setSelectionRange(sel,sel);}catch(_){} }
+  const saved=Object.keys(S.swipes).filter(id=>S.swipes[id]==="s"&&BYID.has(id)).map(id=>BYID.get(id));
+  $("saved-h").hidden=!saved.length;
+  $("saved-list").innerHTML=saved.map(j=>'<div class="item" data-id="'+j.id+'"><div class="item-s"><span class="av">'+esc(initials(j.e))+'</span><span class="t"><b>'+esc(j.h)+'</b><small>'+esc(j.e)+(j.m?" · "+esc(j.m):"")+'</small></span><span class="btns" style="flex:none"><button class="btn sm" data-act="s-apply">Ansök</button><button class="btn ghost sm" data-act="s-back">Visa igen</button><button class="btn ghost sm" data-act="s-del" aria-label="Ta bort sparat jobb">✕</button></span></div></div>').join("");
+}
+$("saved-list").addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]"), it=e.target.closest(".item"); if(!b||!it) return; const id=it.dataset.id, act=b.dataset.act;
+  if(act==="s-apply"){ S.swipes[id]="l"; addApp(id); openApp=id; }
+  else if(act==="s-back"){ delete S.swipes[id]; rebuildPool(); order=[id].concat(order.filter(x=>x!==id)); save(); pushSwipes(); go("swipe",true); return; }
+  else if(act==="s-del"){ S.swipes[id]="p"; }
+  save(); pushSwipes(); renderApps(); renderChrome();
+});
+$("apps-list").addEventListener("input",e=>{ const f=e.target.dataset.f, it=e.target.closest(".item"); if(!f||!it) return; const a=S.apps[it.dataset.id]; if(!a) return; a[f]=e.target.value; a.t=Date.now(); save(); pushApp(a.id); });
+$("apps-list").addEventListener("click",async e=>{
+  const b=e.target.closest("[data-act]"), it=e.target.closest(".item"); if(!b||!it) return; const a=S.apps[it.dataset.id]; if(!a) return; const act=b.dataset.act;
+  if(act==="toggle"){ openApp=openApp===a.id?null:a.id; confirmApp=null; renderApps(); }
+  else if(act==="copy"){ const txt=(a.subject?a.subject+"\n\n":"")+a.body; try{ await navigator.clipboard.writeText(txt); toast("Kopierat"); }catch(_){ const ta=$("bo-"+a.id); if(ta){ta.focus();ta.select();} toast("Texten är markerad. Kopiera med tangentbordet."); } }
+  else if(act==="regen"){ a.status="queued"; a.fresh=1; touchApp(a); pumpQueue(); }
+  else if(act==="applied"){ a.status="applied"; touchApp(a); }
+  else if(act==="remove"){ delete S.apps[a.id]; openApp=null; save(); pushApp(a.id,true); renderChrome(); renderApps(); }
+  else if(act==="send"){ if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(a.to.trim())){ a.err="Fyll i en giltig mejladress till mottagaren först."; renderApps(); return; } if(!a.body.trim()){ a.err="Ansökan är tom."; renderApps(); return; } a.err=""; confirmApp=a.id; renderApps(); }
+  else if(act==="send-no"){ confirmApp=null; renderApps(); }
+  else if(act==="send-yes"){ confirmApp=null; sendApp(a,"send_message"); }
+  else if(act==="gdraft"){ sendApp(a,"create_draft"); }
+});
+async function mailInput(a){
+  const input={to:[a.to.trim()],subject:a.subject,body:a.body};
+  if(S.profile.attach&&cvFile){
+    let fileArgs=false; try{ fileArgs=!!(await mcp.listTools()).fileArgs; }catch(_){}
+    const type=cvFile.type||"application/octet-stream";
+    if(fileArgs) input.attachments=[{filename:cvFile.name,mimeType:type,content:{$file:{data:cvFile,name:cvFile.name,type:type}}}];
+    else if(cvFile.size<650000){ const buf=new Uint8Array(await cvFile.arrayBuffer()); let s=""; for(let i=0;i<buf.length;i+=8192) s+=String.fromCharCode.apply(null,buf.subarray(i,i+8192)); input.attachments=[{filename:cvFile.name,mimeType:type,content:btoa(s)}]; }
+    else return {input,skipped:true};
+  }
+  return {input};
+}
+async function sendApp(a,tool){
+  if(!mcp){ a.err="Gmail går inte att nå i den här vyn. Kopiera texten och skicka från din mejlapp."; renderApps(); return; }
+  const prev=a.status; a.status="sending"; a.err=""; renderApps();
+  let sent=false;
+  try{
+    const m=await mailInput(a);
+    await mcp.callTool("Gmail",tool,m.input);
+    if(tool==="send_message"){ a.status="sent"; a.sentAt=Date.now(); sent=true; }
+    else { a.status="drafted"; toast("Sparad i dina Gmail-utkast"); }
+    if(m.skipped) a.err="Din CV-fil var för stor för att bifogas härifrån, så mejlet gick utan den.";
+  }catch(e){ a.status=prev==="sending"?"ready":prev; a.err=mcpCopy(e||{}); if(e&&["not_granted","capability_disabled","capability_removed"].includes(e.code)){ gmailOK=false; } }
+  touchApp(a);
+  if(sent) showSent(a);
+}
+function showSent(a){
+  $("mt-me").textContent=S.profile.name?initials(S.profile.name):"Du"; $("mt-co").textContent=initials(a.e);
+  $("mt-text").textContent="Din ansökan till "+a.e+" för rollen som "+a.h+" är på väg till "+a.to+".";
+  $("match").hidden=false; $("mt-go").focus();
+}
+$("mt-go").onclick=()=>{$("match").hidden=true;go("swipe");};
+$("mt-apps").onclick=()=>{$("match").hidden=true;go("apps");};
+
+/* ---------- LinkedIn profile ---------- */
+$("li-pick").onclick=()=>$("li-file").click();
+async function takeLi(file){
+  if(!file) return; const st=$("li-status"); st.textContent="Läser "+file.name+"…";
+  try{
+    const text=(await readCV(file)).replace(/[ \t]+\n/g,"\n").replace(/\n{3,}/g,"\n\n").trim();
+    if(text.length<40) throw 0;
+    $("p-litext").value=text.slice(0,20000);
+    if(!$("p-cv").value.trim()){ $("p-cv").value=text.slice(0,20000); st.textContent=file.name+" är inläst och används också som CV-text."; }
+    else st.textContent=file.name+" är inläst.";
+    readProfile();
+  }catch(e){ st.textContent="Det gick inte att läsa filen. Klistra in profilens text nedan i stället."; }
+}
+$("li-file").onchange=e=>takeLi(e.target.files[0]);
+const liDrop=$("li-drop");
+["dragenter","dragover"].forEach(t=>liDrop.addEventListener(t,e=>{e.preventDefault();liDrop.classList.add("over");}));
+["dragleave","drop"].forEach(t=>liDrop.addEventListener(t,e=>{e.preventDefault();liDrop.classList.remove("over");}));
+liDrop.addEventListener("drop",e=>takeLi(e.dataTransfer.files[0]));
+function renderLi(){
+  const o=S.li, el=$("li-out"); if(!o){ el.innerHTML=""; return; }
+  const sec=(title,hint,text,i)=>text?'<div class="li-sec"><h3>'+title+'</h3>'+(hint?'<p class="note">'+hint+'</p>':'')+'<pre id="li-t'+i+'">'+esc(text)+'</pre><div class="btns"><button class="btn ghost sm" data-copy="li-t'+i+'">Kopiera</button></div></div>':'';
+  let h=sec("Rubrik","Klistra in under Redigera intro, fältet Rubrik.",o.headline,0)+sec("Om","Klistra in i avsnittet Om.",o.about,1);
+  (o.experience||[]).forEach((x,i)=>{ h+=sec(esc(x.role||"Erfarenhet")+(x.company?" · "+esc(x.company):""),"Beskrivning för den här rollen under Erfarenhet.",x.text,10+i); });
+  h+=sec("Kompetenser","Lägg till under Kompetenser, de viktigaste först.",(o.skills||[]).join(", "),2);
+  if((o.tips||[]).length) h+='<div class="li-sec"><h3>Att göra själv</h3><pre>'+esc(o.tips.map(t=>"• "+t).join("\n"))+'</pre></div>';
+  el.innerHTML=h;
+}
+$("li-out").addEventListener("click",async e=>{ const b=e.target.closest("[data-copy]"); if(!b) return; const t=$(b.dataset.copy).textContent; try{ await navigator.clipboard.writeText(t); toast("Kopierat"); }catch(_){ const r=document.createRange(); r.selectNodeContents($(b.dataset.copy)); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast("Texten är markerad. Kopiera med tangentbordet."); } });
+$("li-go").onclick=async()=>{
+  readProfile(); const p=S.profile, n=$("li-note"), b=$("li-go");
+  if(!p.cvText.trim()&&!p.liText.trim()){ n.className="note err"; n.textContent="Lägg till ditt CV eller din nuvarande LinkedIn-profil först, så finns det något att bygga på."; return; }
+  if(!sample){ n.className="note err"; n.textContent="Claude är inte tillgängligt i den här vyn, så profilen kan inte skrivas just nu."; return; }
+  b.disabled=true; n.className="note"; n.innerHTML='<span class="spin"></span> Claude skriver din profil. Det tar oftast under en minut.';
+  const prompt="You are a LinkedIn profile editor for a job seeker in Sweden"+(p.student?" who is a student looking for part-time work, internships and a first job":"")+". Rewrite and complete their LinkedIn profile so recruiters find them and want to get in touch.\n\n"
+   +"RULES\n- Write in "+(p.liLang==="en"?"English":"Swedish")+".\n- Use only facts from the CV and the current profile. Never invent employers, titles, dates, degrees, numbers or skills. Where an important fact is missing (a result, a date, a grade), do not guess: add a tip telling them what to add.\n- First person, concrete, no buzzwords and no clichés like 'passionate' or 'driven'. If the candidate's own writing sample is given, keep their voice.\n- headline: max 200 characters, says what they do or study and what they are looking for, with the keywords a recruiter would search for.\n- about: 700 to 1300 characters, short paragraphs separated by blank lines: who they are, what they are good at with evidence from the CV, what they are looking for, how to reach them.\n- experience: one entry per role in the CV (most recent first, max 6), each a 2-4 line description with what they did and achieved; plain text lines, no markdown.\n- skills: 10 to 20 skills actually supported by the CV, most relevant to the jobs they want first.\n- tips: 3 to 6 short, specific things to fix themselves on LinkedIn (photo, missing sections, 'open to work', custom URL, things missing from the CV).\n\n"
+   +"WHAT THEY ARE LOOKING FOR\n"+(p.specs||"(not stated)")+"\n\nCV\n"+(p.cvText.slice(0,10000)||"(none)")+"\n\nCURRENT LINKEDIN PROFILE\n"+(p.liText.slice(0,10000)||"(empty or not provided: build it from the CV)")+"\n\nWRITING SAMPLE\n"+(p.example.slice(0,2500)||"(none)")
+   +"\n\nReply with only a JSON object: {\"headline\":\"...\",\"about\":\"...\",\"experience\":[{\"role\":\"...\",\"company\":\"...\",\"text\":\"...\"}],\"skills\":[\"...\"],\"tips\":[\"...\"]}";
+  try{
+    const r=await sample.json(prompt,{modelTier:"default",cache:false});
+    const str=x=>String(x||"").trim(), arr=x=>Array.isArray(x)?x:[];
+    S.li={headline:str(r.headline).slice(0,220),about:str(r.about).slice(0,2600),experience:arr(r.experience).slice(0,6).map(x=>({role:str(x&&x.role).slice(0,100),company:str(x&&x.company).slice(0,100),text:str(x&&x.text).slice(0,1500)})),skills:arr(r.skills).slice(0,25).map(x=>str(x).slice(0,60)).filter(Boolean),tips:arr(r.tips).slice(0,8).map(x=>str(x).slice(0,240)).filter(Boolean),t:Date.now()};
+    save(); renderLi(); n.className="note ok"; n.textContent="Klart. Kopiera varje del och klistra in den på din LinkedIn-profil.";
+  }catch(e){ n.className="note err"; n.textContent=sampleCopy(e&&e.code); if(e&&OFF.includes(e.code)) sample=null; }
+  b.disabled=false;
+};
+$("ext-copy").onclick=async()=>{ const n=$("ext-note"); try{ await navigator.clipboard.writeText(bridgeData()); n.className="note ok"; n.textContent="Kopierat. Öppna tillägget, välj Hämta från Jobbsvep manuellt och klistra in."; }catch(_){ n.className="note err"; n.textContent="Det gick inte att kopiera härifrån. Ha den här sidan öppen i Chrome så hämtar tillägget uppgifterna själv."; } };
+
+/* ---------- import an ad found elsewhere ---------- */
+let impFiles=[];
+function impRender(){ $("imp-status").textContent=impFiles.length?impFiles.map(f=>f.name||"bild").join(", "):"Släpp en bild här, klistra in den eller välj en fil"; $("imp-clear").hidden=!impFiles.length; }
+function impAdd(files){ impFiles=impFiles.concat([...files].filter(f=>/^image\/(jpeg|png|webp|gif)$/.test(f.type))).slice(0,4); impRender(); }
+function impOpen(){ go("apps"); $("imp").hidden=false; $("imp-note").textContent=""; $("imp-text").focus(); $("imp").scrollIntoView({block:"nearest"}); }
+function impClose(){ $("imp").hidden=true; $("imp-text").value=""; impFiles=[]; $("imp-file").value=""; impRender(); }
+$("imp-pick").onclick=()=>$("imp-file").click(); $("imp-file").onchange=e=>impAdd(e.target.files); $("imp-clear").onclick=()=>{impFiles=[];$("imp-file").value="";impRender();}; $("imp-cancel").onclick=impClose;
+const impDrop=$("imp-drop");
+["dragenter","dragover"].forEach(t=>impDrop.addEventListener(t,e=>{e.preventDefault();impDrop.classList.add("over");}));
+["dragleave","drop"].forEach(t=>impDrop.addEventListener(t,e=>{e.preventDefault();impDrop.classList.remove("over");}));
+impDrop.addEventListener("drop",e=>impAdd(e.dataTransfer.files));
+$("imp").addEventListener("paste",e=>{ const fs=[...((e.clipboardData&&e.clipboardData.files)||[])].filter(f=>f.type.startsWith("image/")); if(fs.length){ e.preventDefault(); impAdd(fs); } });
+$("imp-go").onclick=async()=>{
+  const text=$("imp-text").value.trim(), n=$("imp-note"), b=$("imp-go");
+  if(!text&&!impFiles.length){ n.className="note err"; n.textContent="Klistra in annonsens text eller lägg till en bild först."; return; }
+  if(impFiles.length&&!sample){ n.className="note err"; n.textContent="Bilder behöver Claude, som inte är tillgängligt i den här vyn. Klistra in texten i stället."; return; }
+  let r={};
+  if(sample){
+    b.disabled=true; n.className="note"; n.innerHTML='<span class="spin"></span> Läser annonsen…';
+    const prompt="A job seeker found a job ad or hiring post (for example on Instagram, Facebook, a shop notice or a website) and wants to apply. Read the pasted text and/or the attached image(s) and extract the ad. Transcribe faithfully; never invent an email address, name or link that is not visible.\n\nPASTED TEXT:\n"+(text.slice(0,8000)||"(none, see image)")
+      +"\n\nReply with only a JSON object: {\"is_job\":<true if this is a job ad or hiring post>,\"title\":\"<role being hired, short>\",\"employer\":\"<company or shop name>\",\"email\":\"<application email if shown, else empty>\",\"url\":\"<application link if shown, else empty>\",\"place\":\"<town or area if shown>\",\"contact\":\"<contact person's name if shown>\",\"reference\":\"\",\"text\":\"<the full ad text, transcribed, max 3500 characters>\"}";
+    try{
+      const opts={modelTier:"default"};
+      if(impFiles.length){ const lim=await sample.limits().catch(()=>null); if(!lim||!lim.images) throw {code:"images_unavailable"}; opts.images=impFiles.slice(0,lim.images.maxCount||1); }
+      r=await sample.json(prompt,opts)||{};
+    }catch(e){
+      b.disabled=false; n.className="note err";
+      n.textContent=e&&e.code==="images_unavailable"?"Den här vyn kan inte skicka bilder till Claude. Klistra in annonsens text i stället.":e&&e.code==="image_rejected"?"Bilden gick inte att läsa. Prova en annan fil eller klistra in texten.":sampleCopy(e&&e.code);
+      if(e&&OFF.includes(e.code)) sample=null; return;
+    }
+    b.disabled=false;
+    if(r.is_job===false){ n.className="note err"; n.textContent="Det där ser inte ut som en jobbannons. Kontrollera texten eller bilden och försök igen."; return; }
+  }
+  const adText=String(r.text||text||"").slice(0,6000), mail=String(r.email||"").trim()||((text.match(/[^\s@<>()]+@[^\s@<>()]+\.[a-z]{2,}/i)||[""])[0]);
+  const id="imp"+Date.now().toString(36);
+  S.apps[id]={id,imp:1,h:String(r.title||"Importerad annons").slice(0,120),e:String(r.employer||"Okänd arbetsgivare").slice(0,80),m:String(r.place||"").slice(0,60),dl:"",ci:-1,to:/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)?mail:"",url:/^https?:\/\//.test(String(r.url||""))?String(r.url):"",web:"",ref:String(r.reference||"").slice(0,60),contact:String(r.contact||"").slice(0,80),ad:adText,subject:"",body:"",status:"queued",t:Date.now()};
+  const A=S.apps[id], doc={id,h:A.h,e:A.e,m:A.m,to:A.to,url:A.url,ref:A.ref,contact:A.contact,ad:A.ad,t:A.t};
+  S.swipes[id]="l"; SHARED.push(doc); mergeShared();
+  let shared=false;
+  if(sharedDb){ try{ await sharedDb.collection("imported").doc(id).set(doc); shared=true; }catch(e){} }
+  openApp=id; impClose(); save(); pushApp(id); pushSwipes(); renderChrome(); renderApps(); pumpQueue();
+  toast(shared?"Annonsen är sparad i jobbdatabasen":"Ansökan skrivs till "+A.e);
+};
+
+/* ---------- profile ---------- */
+function buildOptions(){
+  const p=S.profile, f=$("p-field");
+  if(META&&f.options.length<2) META.fields.forEach((x,i)=>f.add(new Option(x.name,String(i))));
+  f.value=p.fields.length?String(p.fields[0]):""; $("p-emp").value=p.emp[0]||""; $("p-hours").value=p.hours[0]||"";
+}
+function fillProfile(){
+  const p=S.profile; $("p-specs").value=p.specs; $("p-name").value=p.name; $("p-phone").value=p.phone; $("p-email").value=p.email; $("p-cv").value=p.cvText; $("p-example").value=p.example; $("p-lang").value=p.lang; $("p-emailonly").checked=p.emailOnly; $("p-attach").checked=p.attach; $("p-home").value=p.home||""; $("p-radius").value=String(p.radius||0); $("p-student").checked=p.student!==false; $("p-li").value=p.linkedin||""; $("p-litext").value=p.liText||""; $("p-lilang").value=p.liLang||"sv"; cvStatus(); renderLi();
+  if(p.homeLL){ const n=$("home-note"); n.className="note ok"; n.textContent="Avstånd räknas från "+p.homeLabel+"."; }
+}
+function readProfile(){
+  const p=S.profile; p.specs=$("p-specs").value; p.name=$("p-name").value.trim(); p.phone=$("p-phone").value.trim(); p.email=$("p-email").value.trim(); p.cvText=$("p-cv").value; p.example=$("p-example").value; p.lang=$("p-lang").value; p.emailOnly=$("p-emailonly").checked; p.attach=$("p-attach").checked;
+  p.emp=$("p-emp").value?[$("p-emp").value]:[]; p.hours=$("p-hours").value?[$("p-hours").value]:[]; if(META) p.fields=$("p-field").value===""?[]:[Number($("p-field").value)]; p.munis=[];
+  p.radius=Number($("p-radius").value)||0; p.student=$("p-student").checked;
+  p.linkedin=$("p-li").value.trim(); p.liText=$("p-litext").value; p.liLang=$("p-lilang").value;
+  $("li-open").href=/^https:\/\/([a-z]+\.)?linkedin\.com\//.test(p.linkedin)?p.linkedin:"https://www.linkedin.com/in/me/";
+  const home=$("p-home").value.trim(); if(home!==(p.home||"").trim()||(home&&!p.homeLL&&PLACES&&!homeSeq)){ p.home=home; resolveHome(); }
+  p.t=Date.now(); save(); pushProfile(); renderChrome();
+}
+$("v-profile").addEventListener("change",readProfile);
+$("v-profile").addEventListener("input",e=>{ if(e.target.matches("textarea,input[type=text],input[type=tel],input[type=email]")){ clearTimeout(readProfile.t); readProfile.t=setTimeout(readProfile,500); } });
+function cvStatus(msg,err){
+  const s=$("cv-status"), p=S.profile; s.style.color=err?"var(--err)":"";
+  s.textContent=msg||(cvFile?cvFile.name+" · "+Math.round(cvFile.size/1024)+" kB"+(p.cvText?" · texten är inläst":""):(p.cvName&&p.cvText?p.cvName+" (texten finns kvar; lägg till filen igen på den här enheten för att bifoga den)":"Släpp ditt CV här eller välj en fil"));
+  $("cv-clear").hidden=!cvFile&&!p.cvName;
+}
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=()=>rej(new Error("load"));document.head.appendChild(s);});}
+async function readCV(file){
+  const name=file.name.toLowerCase();
+  if(name.endsWith(".pdf")||file.type==="application/pdf"){
+    if(!window.pdfjsLib){ await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"); await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"); }
+    const pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false}).promise; let out="";
+    for(let i=1;i<=Math.min(pdf.numPages,12);i++){ const c=await (await pdf.getPage(i)).getTextContent(); let last=null,line=""; c.items.forEach(it=>{ if(last!==null&&Math.abs(it.transform[5]-last)>4){out+=line.trim()+"\n";line="";} line+=it.str+(it.hasEOL?"\n":" "); last=it.transform[5]; }); out+=line.trim()+"\n\n"; }
+    return out;
+  }
+  if(name.endsWith(".docx")){
+    if(!window.mammoth) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js");
+    return (await window.mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()})).value;
+  }
+  return await file.text();
+}
+async function takeCV(file){
+  if(!file) return; if(file.size>12*1024*1024){cvStatus("Filen är större än 12 MB. Använd en mindre export av ditt CV.",true);return;}
+  cvStatus("Läser "+file.name+"…");
+  try{
+    const text=(await readCV(file)).replace(/[ \t]+\n/g,"\n").replace(/\n{3,}/g,"\n\n").trim();
+    cvFile=file; S.profile.cvName=file.name; idbPut(file);
+    if(text.length>40){ $("p-cv").value=text.slice(0,20000); readProfile(); cvStatus(); }
+    else { readProfile(); cvStatus(file.name+" har ingen läsbar text (den kan vara inskannad). Klistra in din CV-text nedan; filen kan fortfarande bifogas.",true); }
+  }catch(e){ cvStatus("Det gick inte att läsa filen. Klistra in din CV-text nedan i stället.",true); }
+}
+$("cv-pick").onclick=()=>$("cv-file").click();
+$("cv-file").onchange=e=>takeCV(e.target.files[0]);
+$("cv-clear").onclick=()=>{cvFile=null;S.profile.cvName="";idbPut(null);$("cv-file").value="";readProfile();cvStatus();};
+const drop=$("cv-drop");
+["dragenter","dragover"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>takeCV(e.dataTransfer.files[0]));
+/* the CV file itself is kept in this browser only */
+function idb(){return new Promise((res,rej)=>{try{const r=indexedDB.open("jobbsvep",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}});}
+function idbPut(file){idb().then(d=>{const tx=d.transaction("kv","readwrite");file?tx.objectStore("kv").put(file,"cv"):tx.objectStore("kv").delete("cv");}).catch(()=>{});}
+function idbGet(){return idb().then(d=>new Promise(res=>{const r=d.transaction("kv").objectStore("kv").get("cv");r.onsuccess=()=>res(r.result||null);r.onerror=()=>res(null);})).catch(()=>null);}
+
+/* ---------- account sync (private per viewer) ---------- */
+const chains={};
+function queueWrite(key,fn){ clearTimeout((chains[key]||{}).t); const c=chains[key]=chains[key]||{p:Promise.resolve()}; c.t=setTimeout(()=>{ c.p=c.p.then(fn).catch(e=>{ if(e&&["revoked","not_granted","capability_disabled","capability_removed","quota_exceeded"].includes(e.code)) cloud=null; }); },1200); }
+function pushProfile(){ if(!cloud) return; queueWrite("profile",()=>cloud.profile.set({v:JSON.stringify(S.profile),plan:JSON.stringify(S.plan||null),t:S.profile.t||Date.now()})); }
+function pushSwipes(){ if(!cloud) return; queueWrite("swipes",()=>{const ks=Object.keys(S.swipes);return cloud.swipes.set({p:ks.filter(k=>S.swipes[k]==="p").slice(-15000).join(","),s:ks.filter(k=>S.swipes[k]==="s").slice(-500).join(","),t:Date.now()});}); }
+function pushApp(id,del){ if(!cloud) return; queueWrite("app:"+id,()=>{const a=S.apps[id]; return (del||!a)?cloud.apps.doc(id).delete():cloud.apps.doc(id).set(JSON.parse(JSON.stringify(a)));}); }
+async function cloudInit(){
+  try{
+    const [db,user]=await Promise.all([cap("db"),cap("user")]); if(!db) return;
+    sharedDb=db; db.collection("imported").limit(500).get().then(q=>{ SHARED=q.docs.map(x=>x.data()); mergeShared(); }).catch(()=>{});
+    if(!user) return;
+    const uid=await user.id(); if(!uid) return;
+    const profile=db.doc("data/users/"+uid+"/profile"), c={profile,swipes:db.doc("data/users/"+uid+"/swipes"),apps:profile.collection("apps")};
+    const [ps,ss,as]=await Promise.all([c.profile.get(),c.swipes.get(),c.apps.limit(500).get()]);
+    let changed=false;
+    if(ps.exists){ const d=ps.data(); if((d.t||0)>(S.profile.t||0)){ try{ S.profile=Object.assign(blank().profile,JSON.parse(d.v)); if(!S.plan&&d.plan) S.plan=JSON.parse(d.plan); S.seen=true; changed=true; }catch(_){} } }
+    if(ss.exists){ const d=ss.data(); String(d.p||"").split(",").forEach(id=>{ if(id&&!S.swipes[id]){S.swipes[id]="p";changed=true;} }); String(d.s||"").split(",").forEach(id=>{ if(id&&!S.swipes[id]){S.swipes[id]="s";changed=true;} }); }
+    const seen={}; as.docs.forEach(doc=>{ const a=doc.data(); if(!a||!a.id) return; seen[a.id]=1; const l=S.apps[a.id]; if(!l||(a.t||0)>(l.t||0)){ S.apps[a.id]=JSON.parse(JSON.stringify(a)); if(["sending","drafting"].includes(S.apps[a.id].status)) S.apps[a.id].status=a.body?"ready":"queued"; S.swipes[a.id]="l"; changed=true; } });
+    cloud=c;
+    Object.keys(S.apps).forEach(id=>{ if(!seen[id]) pushApp(id); });
+    if(!ps.exists&&S.profile.t) pushProfile();
+    $("sync-note").textContent="Din profil och dina ansökningar sparas privat på ditt Claude-konto.";
+    if(changed){ save(); fillProfile(); buildOptions(); if(S.seen) $("land").hidden=true; if(META){ rebuildPool(); renderDeck(); } renderChrome(); if(tab==="apps") renderApps(); pumpQueue(); }
+  }catch(e){}
+}
+
+/* ---------- navigation + boot ---------- */
+function go(t,keep){
+  tab=t; $("v-swipe").hidden=t!=="swipe"; $("v-profile").hidden=t!=="profile"; $("v-apps").hidden=t!=="apps";
+  if(t==="apps") renderApps();
+  if(t==="swipe"&&META){ if(!keep){ const top=order[0]; rebuildPool(); if(top&&order.includes(top)&&history.length) order=[top].concat(order.filter(i=>i!==top)); } renderDeck(); maybeRank(); }
+  else renderChrome();
+}
+document.addEventListener("click",e=>{
+  if(e.target.closest("[data-imp]")){ impOpen(); return; }
+  const g=e.target.closest("[data-go]"); if(g){ go(g.dataset.go); return; }
+  const a=e.target.closest("[data-app]"); if(a){ openApp=a.dataset.app; confirmApp=null; go("apps"); const el=document.querySelector('#apps-list .item[data-id="'+openApp+'"]'); if(el) el.scrollIntoView({block:"nearest"}); }
+});
+$("b-yes").onclick=()=>fly("yes"); $("b-no").onclick=()=>fly("no"); $("b-save").onclick=()=>fly("up"); $("b-match").onclick=findMatches; $("toast-undo").onclick=undo;
+document.addEventListener("keydown",e=>{
+  if(!$("land").hidden||!$("match").hidden||tab!=="swipe"||e.target.closest("input,textarea,select")) return;
+  if(e.key==="Escape"&&sheetOpen) closeSheet();
+  else if(e.key==="ArrowRight") fly("yes"); else if(e.key==="ArrowLeft") fly("no"); else if(e.key==="ArrowUp"&&!sheetOpen){e.preventDefault();fly("up");}
+  else if(e.key==="z"&&(e.metaKey||e.ctrlKey)) undo();
+});
+function endLanding(to){ S.seen=true; save(); $("land").hidden=true; go(to); }
+$("l-start").onclick=()=>endLanding("profile"); $("l-skip").onclick=()=>endLanding("swipe");
+
+Object.values(S.apps).forEach(a=>{ if(a.status==="drafting"||a.status==="sending") a.status=a.body?"ready":"queued"; });
+if(!S.seen&&!S.profile.t&&!Object.keys(S.swipes).length) $("land").hidden=false;
+fillProfile(); buildOptions(); renderChrome(); updateBridge();
+idbGet().then(f=>{ if(f){cvFile=f;cvStatus();} });
+loadData().then(()=>{ if(S.profile.home&&!S.profile.homeLL) resolveHome(); });
+cap("sample").then(s=>{ sample=s; pumpQueue(); if(s&&META&&S.plan) maybeRank(); renderChrome(); });
+cap("mcp").then(m=>{ mcp=m; gmailOK=!!m; if(tab==="apps") renderApps(); });
+cloudInit();
+})();
+</script>

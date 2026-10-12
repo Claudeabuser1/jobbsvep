@@ -1,0 +1,9 @@
+# generated job data (about 47 MB) – rebuild with: python3 scripts/build_data.py
+web/data/
+# one-off listing snapshots from other sites
+jobteaser.json
+.DS_Store
+__pycache__/
+node_modules/
+.env
+web/index.html

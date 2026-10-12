@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<style>
+  :root{--accent:#5b4fd6;--ink:#1d1715;--muted:#6e6460;--line:#ddd5d0;--bg:#fbf9f7}
+  *{box-sizing:border-box}
+  body{margin:0;width:340px;font:14px/1.45 "Onest","Segoe UI",system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+  main{padding:16px;display:flex;flex-direction:column;gap:12px}
+  h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.02em}
+  p{margin:0;color:var(--muted);font-size:13px}
+  label{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:12px}
+  input,select,textarea{font:inherit;font-weight:400;font-size:14px;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:#fff;color:var(--ink);width:100%}
+  button{font:inherit;font-weight:700;border:0;border-radius:999px;padding:11px 16px;background:var(--accent);color:#fff;cursor:pointer}
+  button.ghost{background:#fff;color:var(--ink);border:1px solid var(--line);font-weight:600}
+  details{border-top:1px solid var(--line);padding-top:10px}
+  summary{cursor:pointer;font-weight:700}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .grid .w{grid-column:1/-1}
+  #status{color:var(--ink);font-weight:600;min-height:18px}
+</style>
+</head>
+<body>
+<main>
+  <h1>jobbsvep</h1>
+  <p id="sync"></p>
+  <label>Vilken ansökan?<select id="app"><option value="">Bara mina uppgifter, inget brev</option></select></label>
+  <button id="fill">Fyll i formuläret</button>
+  <button id="grab" class="ghost">Kopiera annonsen på den här sidan</button>
+  <p id="status"></p>
+  <details id="me">
+    <summary>Mina uppgifter</summary>
+    <div class="grid">
+      <label class="w">Namn<input id="name" autocomplete="off"></label>
+      <label>Mejl<input id="email" autocomplete="off"></label>
+      <label>Telefon<input id="phone" autocomplete="off"></label>
+      <label class="w">Gatuadress<input id="street" autocomplete="off"></label>
+      <label>Postnummer<input id="postcode" autocomplete="off"></label>
+      <label>Ort<input id="city" autocomplete="off"></label>
+      <label class="w">LinkedIn<input id="linkedin" autocomplete="off" placeholder="https://www.linkedin.com/in/…"></label>
+      <label class="w">Webbplats eller portfolio<input id="website" autocomplete="off"></label>
+      <label class="w">CV-fil som laddas upp i formulär<input id="cv" type="file" accept=".pdf,.doc,.docx"></label>
+      <p class="w" id="cvname"></p>
+    </div>
+  </details>
+  <details>
+    <summary>Hämta från Jobbsvep manuellt</summary>
+    <p style="margin-top:8px">Tryck på "Kopiera mina uppgifter till tillägget" i Jobbsvep och klistra in här.</p>
+    <textarea id="paste" rows="3" style="margin-top:8px"></textarea>
+    <button id="load" class="ghost" style="margin-top:8px">Läs in</button>
+  </details>
+  <p>Tillägget skickar aldrig in något och kryssar aldrig i rutor. Läs igenom formuläret innan du skickar.</p>
+</main>
+<script src="popup.js"></script>
+</body>
+</html>
