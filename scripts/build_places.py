@@ -7,8 +7,7 @@ Data © OpenStreetMap contributors, ODbL. Run now and then: python3 scripts/buil
 import json, os, re, sys, time, urllib.parse, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ENDPOINTS = ["https://overpass-api.de/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
-             "https://overpass.kumi.systems/api/interpreter"]
+ENDPOINTS = ["https://overpass-api.de/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter"]
 BBOX = (58.75, 17.25, 60.25, 19.35)  # south, west, north, east: Stockholm county, roughly
 GRID = 4  # fetched as GRID x GRID tiles; small boxes answer in seconds where one big area query times out
 # (label shown in the app, Overpass filters)
@@ -25,17 +24,18 @@ TYPES = [
 
 
 def overpass(query):
+    """The public Overpass servers are often busy: fail fast and keep retrying for a while."""
     last = None
-    for attempt in range(4):
+    for attempt in range(12):
         for url in ENDPOINTS:
             try:
                 req = urllib.request.Request(url, data=urllib.parse.urlencode({"data": query}).encode(),
                                              headers={"user-agent": "jobbsvep-build/1.0 (github.com/Claudeabuser1/jobbsvep)"})
-                with urllib.request.urlopen(req, timeout=100) as r:
+                with urllib.request.urlopen(req, timeout=75) as r:
                     return json.load(r)
-            except Exception as e:  # busy server: try the next one
+            except Exception as e:
                 last = e
-        time.sleep(8 + attempt * 15)
+        time.sleep(min(60, 6 + attempt * 6))
     raise last
 
 
@@ -54,12 +54,15 @@ def type_of(tags):
 def main():
     s, w, n, e = BBOX
     rows, seen, counts = [], set(), [0] * len(TYPES)
-    parts = "".join('nwr[%s]["name"];' % f for _, fs in TYPES for f in fs)
     for i in range(GRID):
         for k in range(GRID):
             box = "%.4f,%.4f,%.4f,%.4f" % (s + (n - s) * i / GRID, w + (e - w) * k / GRID, s + (n - s) * (i + 1) / GRID, w + (e - w) * (k + 1) / GRID)
-            d = overpass("[out:json][timeout:90][bbox:%s];(%s);out center tags;" % (box, parts))
-            for el in d.get("elements", []):
+            elements = []
+            for _, fs in TYPES:  # one small query per type keeps each request light
+                parts = "".join('nwr[%s]["name"];' % f for f in fs)
+                elements += overpass("[out:json][timeout:60][bbox:%s];(%s);out center tags;" % (box, parts)).get("elements", [])
+                time.sleep(1)
+            for el in elements:
                 t = el.get("tags", {})
                 lat = el.get("lat") or (el.get("center") or {}).get("lat")
                 lon = el.get("lon") or (el.get("center") or {}).get("lon")
