@@ -67,22 +67,51 @@ def hours(label):
     return label
 
 
-STU_HEAD = re.compile(r"student|studerande|extrajobb|extra\s?personal|sommarjobb|praktik|trainee|intern(ship)?\b|exjobb|examensarbete|feriejobb|helgjobb|deltid|timanställ|junior", re.I)
-STU_TEXT = re.compile(r"student|studerande|extrajobb|jobba extra|vid sidan (av|om) (dina |sina )?studier|under studierna|sommarjobb|praktikplats|trainee|internship|exjobb|examensarbete|helgjobb|kvällar och helger|part[- ]time", re.I)
-SENIOR = re.compile(r"\bsenior\b|\bchef\b|\blead\b|\bhead of\b|specialist|överläkare|director|manager", re.I)
+# ---- how suitable is an ad for someone aged about 16-21 with little experience? ----
+YOUTH_OCC = re.compile(r"butik|kassa|kassör|dagligvaror|varuplock|lagerarbet|lagermedarbet|terminalarbet|restaurangbiträde|snabbmat|servitör|servitris|"
+                       r"serveringspersonal|diskare|köksbiträde|kaf[ée]biträde|barista|pizzabagare|städare|lokalvårdare|hotellstäd|\bbud\b|cykelbud|"
+                       r"tidnings(distribut|bud)|reklamutdelare|brevbärare|kundtjänst|telefonförsäljare|telemarketing|vaktmästare|barnvakt|barnpassning|"
+                       r"läxhjälp|fritidsledare|simlärare|siminstruktör|ungdomsledare|personlig assistent|vårdbiträde|parkarbetare|trädgårdsarbet|eventpersonal|"
+                       r"promotor|flyttarbet|biltvätt|rekond|frukostvärd|garderob|biograf|nöjespark|glass|kiosk|stationsbiträde|hundrastare|medhjälpare|"
+                       r"biträde|extrapersonal|säsongsarbet|plockare|crew|team member|värd(inna)?\b|badvakt|funktionär|flyerutdelare|inventerare", re.I)
+YOUTH_HEAD = re.compile(r"sommarjobb|extrajobb|feriejobb|helgjobb|kvällsjobb|ungdom|skolungdom|gymnasie|student|studerande|praktik|lärling|"
+                        r"timanställ|extra\b|jobba extra|ingen erfarenhet|no experience|första jobb|trainee|internship|intern\b", re.I)
+YOUTH_TEXT = re.compile(r"extrajobb|jobba extra|vid sidan (av|om) (dina |sina )?studier|under studierna|sommarjobb|feriejobb|helgjobb|kvällar och helger|"
+                        r"ingen (tidigare )?erfarenhet (krävs|behövs)|inga förkunskaper|vi lär upp dig|upplärning|first job|no experience (needed|required)|"
+                        r"student|studerande|gymnasie", re.I)
+BLOCK = re.compile(r"sjuksköterska|läkare|undersköterska|barnmorska|tandläkare|tandsköterska|tandhygienist|psykolog|fysioterapeut|arbetsterapeut|socionom|"
+                   r"socialsekreterare|kurator|lärare(?! *assistent)|förskollärare|specialpedagog|rektor|ingenjör|arkitekt|jurist|advokat|revisor|controller|"
+                   r"ekonom|redovisning|utvecklare|developer|engineer|programmerare|projektledare|\bchef|manager|director|specialist|konsult|elektriker|"
+                   r"rörläggare|\bvvs|svetsare|snickare|målare|murare|plåtslagare|mekaniker|tekniker|lastbil|bussförare|taxiförare|väktare|ordningsvakt|"
+                   r"\bkock|frisör|optiker|apotekare|farmaceut|handläggare|utredare|forskare|doktorand|analytiker|analyst|senior|erfaren|legitimerad|behörig|"
+                   r"adjunkt|professor|biomedicinsk|veterinär|pilot|mäklare|key account|account manager|inköpare|rekryterare|lönespecialist|\blead\b|head of|"
+                   r"architect|scientist|\bphd\b|överläkare|skötare|behandlingsassistent|stödpedagog|maskinförare|kranförare|operatör|säkerhetsskyddad|truck|koordinator|samordnare|administratör|fastighetsskötare", re.I)
+REQS = re.compile(r"(minst|minimum|least)\s+(\d+|ett|två|tre|fyra|fem|flera|one|two|three|several)\s+(års?|years?)|flerårig|\d\+?\s*years? of|"
+                  r"högskole(utbildning|examen)|universitets(utbildning|examen)|akademisk examen|civilingenjör|yrkesbevis|yrkesexamen|legitimation", re.I)
+AGE = re.compile(r"(?:fyllt|minst|över|lägst|vara|at least|över)\s*(1[5-9]|2[0-5])\s*(?:år|years)", re.I)
+LICENSE = re.compile(r"(b-?körkort|körkort)[^.]{0,30}(krav|krävs|måste|required)|(krav|krävs|kräver)[^.]{0,30}körkort", re.I)
 
 
-def student_score(head, text, emp, hrs, exp):
-    """0-3: how suitable an ad looks for a student."""
-    if SENIOR.search(head):
+def youth_score(head, occ, text, hrs, exp, edu=False):
+    """0-3. 3 = made for young beginners, 2 = likely fine, 1 = no stated barriers, 0 = needs training or experience."""
+    hay = head + " " + occ
+    if BLOCK.search(hay) or REQS.search(text):
         return 0
-    if STU_HEAD.search(head):
-        return 3
-    if STU_TEXT.search(text):
-        return 2
-    if hrs == "Part-time" or emp in ("On-call", "Summer job") or not exp:
-        return 1
-    return 0
+    friendly = bool(YOUTH_OCC.search(hay) or YOUTH_HEAD.search(head))
+    if friendly and not exp:
+        y = 3
+    elif friendly or YOUTH_TEXT.search(text):
+        y = 2
+    elif not exp:
+        y = 1
+    else:
+        y = 0
+    return min(y, 1) if edu else y
+
+
+def min_age(text):
+    m = AGE.search(text)
+    return int(m.group(1)) if m else 0
 
 
 def main():
@@ -116,7 +145,7 @@ def main():
 
     meta = {"built": datetime.now(timezone.utc).isoformat(timespec="seconds"), "region": "Stockholms län",
             "source": "Arbetsförmedlingen Platsbanken + JobAd Links (JobTech open APIs)", "fields": [], "chunks": [],
-            "total": 0, "withEmail": 0, "student": 0, "otherSites": 0, "sources": {}}
+            "total": 0, "withEmail": 0, "student": 0, "starter": 0, "otherSites": 0, "sources": {}}
     seen, seen_key = set(), set()
     pl_m, pl_s, pl_p = defaultdict(list), defaultdict(list), defaultdict(list)
 
@@ -170,7 +199,10 @@ def main():
                 email = ""
             must, nice = h.get("must_have") or {}, h.get("nice_to_have") or {}
             et, hr = short_emp(lab(h.get("employment_type"))), hours(lab(h.get("working_hours_type")))
-            stu = student_score(head, desc, et, hr, bool(h.get("experience_required")))
+            edu = bool((must.get("education") or []) or (must.get("education_level") or []))
+            stu = youth_score(head, lab(h.get("occupation")) + " " + lab(h.get("occupation_group")), desc, hr, bool(h.get("experience_required")), edu)
+            age = min_age(desc)
+            lic = 1 if h.get("driving_license_required") or LICENSE.search(desc) else 0
             co = wa.get("coordinates") or []
             lat = round(co[1], 4) if len(co) == 2 and co[1] else None
             lon = round(co[0], 4) if len(co) == 2 and co[0] else None
@@ -199,9 +231,10 @@ def main():
             add(h["id"], det, lambda ci: [
                 h["id"], head, ename, wa.get("municipality") or "", lab(h.get("occupation")), lab(h.get("occupation_group")),
                 et, hr, (h.get("publication_date") or "")[:10], (h.get("application_deadline") or "")[:10],
-                1 if email else 0, ci, re.sub(r"\s+", " ", desc)[:SNIPPET], lat, lon, street, stu, ""])
+                1 if email else 0, ci, re.sub(r"\s+", " ", desc)[:SNIPPET], lat, lon, street, stu, "", age, lic])
             meta["withEmail"] += 1 if email else 0
             meta["student"] += 1 if stu >= 2 else 0
+            meta["starter"] += 1 if stu >= 1 else 0
 
         for h in extra.get(fi, []):
             head, ename = clean(h.get("headline")), clean((h.get("employer") or {}).get("name"))
@@ -212,12 +245,12 @@ def main():
             src = h["source_links"][0]
             wa = (h.get("workplace_addresses") or [{}])[0]
             brief = clean(h.get("brief"))
-            stu = student_score(head, brief + (" student" if "student" in (src.get("label") or "") else ""), "", "", True)
+            stu = youth_score(head, lab(h.get("occupation_group")), brief + (" student" if "student" in (src.get("label") or "") else ""), "", False)
             jid = "x" + h["id"][:15]
             add(jid, {"d": brief, "url": src.get("url") or "", "web": src.get("url") or ""}, lambda ci: [
                 jid, head, ename, wa.get("municipality") or "", lab(h.get("occupation_group")), lab(h.get("occupation_group")),
                 "", "", (h.get("publication_date") or "")[:10], "", 0, ci, re.sub(r"\s+", " ", brief)[:SNIPPET],
-                None, None, "", stu, src.get("label") or "annan sajt"])
+                None, None, "", stu, src.get("label") or "annan sajt", min_age(brief), 1 if LICENSE.search(brief) else 0])
             meta["otherSites"] += 1
             meta["student"] += 1 if stu >= 2 else 0
             meta["sources"][src.get("label") or "?"] = meta["sources"].get(src.get("label") or "?", 0) + 1
@@ -250,12 +283,12 @@ def main():
             if dur: label += ", " + dur.group(1).replace(" to ", "–") + " mån"
             loc = clean(a.get("loc"))
             muni = "" if loc.lower().startswith("multiple") else re.sub(r"\s+Municipality$", "", loc.split(",")[0]).strip()
-            stu = 0 if SENIOR.search(head) else (3 if label not in ("Heltidstjänst", "Visstidsanställning", "Frilans") else max(1, student_score(head, "", "", hr, False)))
+            stu = youth_score(head, label, "student" if label not in ("Heltidstjänst", "Visstidsanställning", "Frilans") else "", hr, False)
             jid = "jt" + m.group(1).replace("-", "")[:14]
             full = "https://www.jobteaser.com" + url if url.startswith("/") else url
             chunk[jid] = {"d": "Hela annonsen finns på JobTeaser. Öppna den för att läsa mer och ansöka.", "url": full, "web": full}
             index.append([jid, head, ename, muni, label, "", "", hr, today, "", 0, ci, label + (" · " + loc if loc else "") + ". Hela annonsen finns på JobTeaser.",
-                          None, None, "", stu, "jobteaser.com"])
+                          None, None, "", stu, "jobteaser.com", 0, 0])
             meta["student"] += 1 if stu >= 2 else 0
         if index:
             fn = "d-%d-%d.json" % (fi, ci)
@@ -273,8 +306,8 @@ def main():
     with open(os.path.join(OUT, "meta.json"), "w", encoding="utf-8") as fh:
         json.dump(meta, fh, ensure_ascii=False, separators=(",", ":"))
     tot = sum(os.path.getsize(os.path.join(OUT, f)) for f in os.listdir(OUT))
-    print("total %d, email %d, student %d, other sites %d %s, files %d, %.1f MB" % (
-        meta["total"], meta["withEmail"], meta["student"], meta["otherSites"], meta["sources"], len(os.listdir(OUT)), tot / 1e6), file=sys.stderr)
+    print("total %d, email %d, youth-friendly %d (no barriers %d), other sites %d %s, files %d, %.1f MB" % (
+        meta["total"], meta["withEmail"], meta["student"], meta["starter"], meta["otherSites"], meta["sources"], len(os.listdir(OUT)), tot / 1e6), file=sys.stderr)
 
 
 if __name__ == "__main__":

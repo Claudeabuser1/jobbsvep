@@ -1,0 +1,47 @@
+name: Update jobs and deploy site
+
+# Rebuilds the job data twice a week (so removed ads disappear and new ones appear) and deploys the site.
+on:
+  schedule:
+    - cron: "15 3 * * 1,4"   # Mondays and Thursdays, early morning Swedish time
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["web/**", "scripts/**", ".github/workflows/update.yml"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch current job ads
+        run: python3 scripts/build_data.py
+      - name: Assemble site
+        env:
+          JOBBSVEP_API: ${{ vars.JOBBSVEP_API }}
+          SITE_DOMAIN: ${{ vars.SITE_DOMAIN }}
+        run: python3 scripts/build_site.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

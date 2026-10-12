@@ -1,0 +1,17 @@
+app = "jobbsvep-api"
+primary_region = "arn"   # Stockholm
+
+[env]
+  # Set to the site's address so only your site can call the API, e.g. "https://jobbsvep.se,https://www.jobbsvep.se"
+  ALLOWED_ORIGINS = ""
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"    # sleeps when idle, so it costs close to nothing
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

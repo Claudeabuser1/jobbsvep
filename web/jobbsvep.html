@@ -25,7 +25,7 @@ h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.02em;line-height:1.05;text-wr
 .mhead{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 12px;gap:12px}
 .fpill{border:1px solid var(--line2);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;color:var(--ink)}
 main{min-height:0;position:relative;overflow:hidden}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:var(--surface);padding:0 0 env(safe-area-inset-bottom,0px)}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--surface);padding:0 0 env(safe-area-inset-bottom,0px)}
 .tab{border:0;background:none;padding:14px 4px 16px;font-size:12px;font-weight:600;color:var(--muted);position:relative}
 .tab[aria-selected="true"]{color:var(--accent-d)}
 .tab .n{display:inline-block;margin-left:5px;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;padding:0 5px;font-variant-numeric:tabular-nums}
@@ -118,6 +118,12 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
 .li-sec{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:8px}
 .li-sec h3{font-size:17px;font-weight:700;letter-spacing:0}
 .li-sec pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;color:var(--ink2);user-select:text;-webkit-user-select:text}
+.tips{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:var(--ink2)}
+.lead{margin:0;color:var(--ink2);max-width:62ch}
+.go-row{display:flex;gap:12px;align-items:center;padding:12px 0;flex-wrap:wrap}
+.go-row .t{flex:1;min-width:150px;display:flex;flex-direction:column;gap:2px}
+.go-row .t b{font-size:15px;font-weight:700;overflow-wrap:anywhere}
+.go-row .t small{font-size:14px;color:var(--ink2)}
 .confirm{background:var(--subtle);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
 .confirm p{margin:0;overflow-wrap:anywhere}
 .sel{user-select:all;-webkit-user-select:all;font-weight:700}
@@ -196,6 +202,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
 <div class="app">
   <aside class="side" aria-label="Ansökningar">
     <div class="side-top"><button class="logo-t" data-go="swipe">jobbsvep</button><button class="me" id="me" data-go="profile" title="Din profil" aria-label="Din profil">?</button></div>
+    <div class="side-sec"><button class="btn ghost sm" data-go="go" style="align-self:flex-start">Gå dit själv: ställen nära dig</button></div>
     <div class="side-sec"><b>Redo att skicka</b><div id="s-rings"></div></div>
     <div class="side-sec"><b>Ansökningar</b><div id="s-list"></div><button class="btn ghost sm" data-imp="1" style="align-self:flex-start">Importera en annons</button></div>
     <div class="side-foot" id="snap"></div>
@@ -230,10 +237,11 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
           </div>
           <div class="row">
             <label class="f" for="p-home">Var bor du?<input type="text" id="p-home" autocomplete="off" placeholder="T.ex. Sveavägen 20, Solna eller 113 50"></label>
+            <label class="f" for="p-age">Ålder<select id="p-age"><option value="">Välj</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option value="21">21 eller äldre</option></select></label>
             <label class="f" for="p-radius">Max avstånd<select id="p-radius"><option value="0">Hela Stockholms län</option><option value="5">5 km</option><option value="10">10 km</option><option value="20">20 km</option><option value="40">40 km</option></select></label>
           </div>
           <p class="note" id="home-note">Skriv en adress, ett område eller en ort så visas avståndet till varje jobb.</p>
-          <label class="check" for="p-student"><input type="checkbox" id="p-student"><span>Studentläge: visa främst extrajobb, deltid, sommarjobb, praktik och jobb utan krav på erfarenhet</span></label>
+          <label class="check" for="p-student"><input type="checkbox" id="p-student"><span>Ungdomsläge: visa bara jobb som går att få utan utbildning och lång erfarenhet, som extrajobb, sommarjobb och första jobbet</span></label>
           <label class="check" for="p-emailonly"><input type="checkbox" id="p-emailonly"><span>Visa bara jobb som tar emot ansökan via mejl, så att jag kan skicka direkt härifrån</span></label>
         </div>
         <div class="panel">
@@ -303,6 +311,26 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
       </div>
     </section>
 
+    <section class="view" id="v-go" hidden>
+      <div class="col">
+        <button class="back" data-go="swipe">← Tillbaka till jobben</button>
+        <h1 class="vh">Gå dit själv</h1>
+        <p class="lead">Många butiker, kaféer och restauranger anställer utan att annonsera. Att kliva in, presentera sig och lämna sitt CV fungerar ofta bättre än ett mejl, särskilt för ditt första jobb.</p>
+        <div class="panel" id="go-need" hidden><p>Lägg till var du bor i din profil, så visas ställen nära dig.</p><div class="btns"><button class="btn" data-go="profile">Lägg till adress</button></div></div>
+        <div id="go-body" class="col" hidden>
+          <div class="panel"><h2>Så gör du</h2>
+            <ol class="tips"><li>Gå dit när det är lugnt, inte mitt i lunchen eller rusningen.</li><li>Be att få prata med den som anställer. Är hen inte där, fråga när det passar att komma tillbaka.</li><li>Säg vem du är, när du kan jobba och att du lär dig snabbt. Tjugo sekunder räcker.</li><li>Lämna ett utskrivet CV med ditt telefonnummer överst.</li><li>Hör av dig igen efter några dagar. De flesta gör inte det, så det märks.</li></ol></div>
+          <h2 style="font-size:24px">Anställer just nu nära dig</h2>
+          <div id="go-hiring" class="lst"></div>
+          <h2 style="font-size:24px;padding-top:6px">Ställen att gå in på</h2>
+          <label class="f" for="go-type">Typ av ställe<select id="go-type"><option value="">Alla</option></select></label>
+          <div id="go-places" class="lst"></div>
+          <div class="btns"><button class="btn ghost" id="go-more" type="button">Visa fler</button></div>
+          <p class="note" id="go-src"></p>
+        </div>
+      </div>
+    </section>
+
     <div class="toast" id="toast" hidden><span id="toast-t"></span><button id="toast-undo" hidden>Ångra</button></div>
     <div class="match" id="match" hidden>
       <h2>Ansökan skickad!</h2>
@@ -313,6 +341,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
   </main>
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" data-go="swipe" aria-selected="true">Svepa</button>
+    <button class="tab" role="tab" data-go="go" aria-selected="false">Gå dit</button>
     <button class="tab" role="tab" data-go="apps" aria-selected="false">Ansökningar<span class="n" id="apps-count" hidden>0</span></button>
     <button class="tab" role="tab" data-go="profile" aria-selected="false">Profil</button>
   </nav>
@@ -321,14 +350,14 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
     <header><span class="logo-t">jobbsvep</span><button class="out" id="l-skip">Börja svepa</button></header>
     <div class="hero">
       <h1>Svep. Matcha.<br>Börja jobba.</h1>
-      <p>Extrajobb, sommarjobb och första jobbet i Stockholm, utvalda efter din profil. Svep höger på det du gillar så skrivs din ansökan direkt, redo att skicka.</p>
+      <p>Extrajobb, sommarjobb och första jobbet nära dig i Stockholm, för dig som är ung och inte har hunnit jobba så mycket. Svep höger på det du gillar så skrivs din ansökan direkt.</p>
       <button class="btn big" id="l-start">Skapa din profil</button>
       <span class="src" id="l-src">Lediga jobb i Stockholms län från Platsbanken</span>
     </div>
     <div class="steps">
-      <div><b>1. Skapa din profil</b><span>Vad du pluggar, vad du kan och var du bor, på fem minuter.</span></div>
+      <div><b>1. Skapa din profil</b><span>Din ålder, var du bor och vad du kan, på fem minuter.</span></div>
       <div><b>2. Svep bland jobben</b><span>Höger för att ansöka, vänster för att gå vidare.</span></div>
-      <div><b>3. Läs och skicka</b><span>Ansökan skrivs i din ton. Du trycker på skicka.</span></div>
+      <div><b>3. Skicka eller gå dit</b><span>Ansökan skrivs i din ton. Eller få en pitch och gå dit själv.</span></div>
     </div>
   </div>
 </div>
@@ -341,13 +370,37 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cap=n=>(window.claude&&typeof window.claude.use==="function")?window.claude.use(n).catch(()=>null):Promise.resolve(null);
 const LS="jobbsvep:v1";
+const STANDALONE=!(window.claude&&typeof window.claude.use==="function");
+const API=(((document.querySelector('meta[name="jobbsvep-api"]')||{}).content)||"").replace(/\/$/,"");
+/* On the public website Claude is reached through the site's own small API instead of the artifact host. */
+async function shrinkImage(file){
+  try{ const bmp=await createImageBitmap(file), k=Math.min(1,1600/Math.max(bmp.width,bmp.height)), c=document.createElement("canvas"); c.width=Math.round(bmp.width*k); c.height=Math.round(bmp.height*k); c.getContext("2d").drawImage(bmp,0,0,c.width,c.height); return {type:"image/jpeg",data:c.toDataURL("image/jpeg",.82).split(",")[1]}; }
+  catch(_){ const buf=new Uint8Array(await file.arrayBuffer()); let b=""; for(let i=0;i<buf.length;i+=8192) b+=String.fromCharCode.apply(null,buf.subarray(i,i+8192)); return {type:file.type||"image/jpeg",data:btoa(b)}; }
+}
+function parseLoose(text){ try{ return JSON.parse(text); }catch(_){} const f=text.match(/```(?:json)?\s*([\s\S]*?)```/); if(f){ try{ return JSON.parse(f[1]); }catch(_){} } const a=text.search(/[\[{]/), b=Math.max(text.lastIndexOf("}"),text.lastIndexOf("]")); if(a>=0&&b>a){ try{ return JSON.parse(text.slice(a,b+1)); }catch(_){} } throw {code:"invalid_json",text}; }
+function httpSample(){
+  const call=async(prompt,opts)=>{
+    const body={prompt:typeof prompt==="string"?prompt:prompt.map(m=>m.content).join("\n\n"),tier:(opts&&opts.modelTier)||"default"};
+    if(opts&&opts.images) body.images=await Promise.all([].concat([...opts.images]).slice(0,3).map(shrinkImage));
+    let r; try{ r=await fetch(API+"/ai",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}); }catch(_){ throw {code:"upstream_error"}; }
+    if(r.status===429) throw {code:"rate_limited"};
+    if(r.status===503) throw {code:"sampling_disabled"};
+    if(r.status===413) throw {code:"prompt_too_large"};
+    if(!r.ok) throw {code:"upstream_error"};
+    const d=await r.json(); if(d.refused) throw {code:"refused"}; if(!d.text) throw {code:"empty_completion"}; return d.text;
+  };
+  const f=async(p,o)=>({text:await call(p,o),truncated:false});
+  f.json=async(p,o)=>parseLoose(await call(p,o));
+  f.limits=async()=>({maxPromptBytes:120000,images:{maxCount:3,maxInputBytes:2e7,mediaTypes:["image/jpeg","image/png","image/webp","image/gif"]}});
+  return f;
+}
 const EMP=["Permanent","Fixed-term","Temporary cover","Summer job","On-call"], HOURS=["Full-time","Part-time"];
 const SV={"Permanent":"Tillsvidare","Fixed-term":"Visstid","Temporary cover":"Vikariat","Summer job":"Sommarjobb","On-call":"Behovsanställning","Full-time":"Heltid","Part-time":"Deltid"};
 const sv=x=>SV[x]||x||"";
 const REDUCED=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ---------- state ---------- */
-const blank=()=>({profile:{name:"",email:"",phone:"",specs:"",emp:[],hours:[],fields:[],munis:[],emailOnly:false,lang:"ad",cvText:"",cvName:"",attach:true,example:"",linkedin:"",liText:"",liLang:"sv",home:"",homeLL:null,homeLabel:"",radius:0,student:true,t:0},swipes:{},apps:{},plan:null,ai:{},li:null,seen:false});
+const blank=()=>({profile:{name:"",email:"",phone:"",specs:"",emp:[],hours:[],fields:[],munis:[],emailOnly:false,lang:"ad",cvText:"",cvName:"",attach:true,example:"",linkedin:"",liText:"",liLang:"sv",home:"",homeLL:null,homeLabel:"",radius:0,radiusSet:0,age:"",student:true,t:0},swipes:{},apps:{},plan:null,ai:{},li:null,visits:{},seen:false});
 let S=blank();
 try{const raw=localStorage.getItem(LS); if(raw){const o=JSON.parse(raw); S=Object.assign(blank(),o); S.profile=Object.assign(blank().profile,o.profile||{});}}catch(e){}
 let saveT=0;
@@ -366,7 +419,7 @@ function initials(s){const w=String(s||"?").replace(/\b(AB|HB|KB|i|och|&)\b/g," 
 function fmtDate(d){if(!d)return"";const x=new Date(String(d).length>10?d:d+"T12:00:00");return isNaN(x)?d:x.toLocaleDateString("sv-SE",{day:"numeric",month:"short"});}
 function daysLeft(d){if(!d)return null;return Math.ceil((new Date(d+"T23:59:59")-Date.now())/864e5);}
 const OFF=["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"];
-function sampleCopy(code){return ({not_granted:"Claude är inte tillåtet på den här sidan än, så matchning och utkast är avstängda. Ladda om sidan och tillåt Claude.",rate_limited:"Du har nått en användningsgräns just nu. Försök igen om en stund.",session_expired:"Din Claude-session har gått ut. Logga in igen och försök på nytt.",sampling_disabled:"Claude är inte tillgängligt för det här kontot.",refused:"Claude avböjde att skriva den här. Ändra din profiltext eller skriv för hand.",prompt_too_large:"Ditt CV eller exempelmejl är för långt. Korta ner det och försök igen."})[code]||"Claude kunde inte svara just nu. Försök igen.";}
+function sampleCopy(code){return ({not_granted:"Claude är inte tillåtet på den här sidan än, så matchning och utkast är avstängda. Ladda om sidan och tillåt Claude.",rate_limited:"Du har nått en användningsgräns just nu. Försök igen om en stund.",session_expired:"Din Claude-session har gått ut. Logga in igen och försök på nytt.",sampling_disabled:"AI-hjälpen är inte påslagen just nu.",refused:"Claude avböjde att skriva den här. Ändra din profiltext eller skriv för hand.",prompt_too_large:"Ditt CV eller exempelmejl är för långt. Korta ner det och försök igen."})[code]||"Claude kunde inte svara just nu. Försök igen.";}
 function mcpCopy(e){const c=e&&e.code;return ({needs_reauth:"Gmail behöver anslutas igen. Öppna claude.ai Inställningar, Connectors, och anslut Gmail på nytt.",server_not_connected:"Gmail är inte anslutet. Lägg till det i claude.ai Inställningar, Connectors.",selection_required:"Du har flera Gmail-anslutningar. Välj en i rutan som visas och tryck sedan på skicka igen.",not_in_manifest:"Gmail är avstängt för den här sidan. Tillåt det i sidans behörighetsmeny.",not_granted:"Sidan fick inte tillgång till Gmail.",approval_required:"Du behöver godkänna utskicket. Tryck på skicka igen och välj Tillåt.",blocked_by_policy:"Din organisation tillåter inte utskick härifrån.",cancelled:"Utskicket avbröts.",tool_error:"Gmail tog inte emot mejlet: "+(e.message||"okänd orsak"),server_unavailable:"Gmail svarade inte. Titta i Skickat innan du försöker igen, mejlet kan ha gått iväg.",upstream_error:"Något avbröt utskicket. Titta i Skickat innan du försöker igen."})[c]||"Det gick inte att skicka. Titta i Skickat innan du försöker igen.";}
 
 /* ---------- data ---------- */
@@ -375,7 +428,7 @@ async function loadData(){
     META=await (await fetch("data/meta.json")).json();
     const parts=await Promise.all(META.fields.map((f,i)=>fetch("data/i-"+i+".json").then(r=>r.json())));
     parts.forEach((rows,fi)=>rows.forEach(r=>{
-      const j={id:r[0],h:r[1],e:r[2]||"Arbetsgivare ej angiven",m:r[3],o:r[4],g:r[5],et:r[6],hr:r[7],pub:r[8],dl:r[9],em:r[10],ci:r[11],sn:r[12],lat:r[13],lon:r[14],street:(r[15]||"").replace(/[,\s]+$/,""),stu:r[16]||0,src:r[17]||"",f:fi};
+      const j={id:r[0],h:r[1],e:r[2]||"Arbetsgivare ej angiven",m:r[3],o:r[4],g:r[5],et:r[6],hr:r[7],pub:r[8],dl:r[9],em:r[10],ci:r[11],sn:r[12],lat:r[13],lon:r[14],street:(r[15]||"").replace(/[,\s]+$/,""),stu:r[16]||0,src:r[17]||"",age:r[18]||0,lic:r[19]||0,f:fi};
       j.h1=(j.h+" "+j.o+" "+j.g).toLowerCase(); j.h2=j.sn.toLowerCase();
       JOBS.push(j);BYID.set(j.id,j);
     }));
@@ -408,11 +461,8 @@ async function detail(j){
 
 /* ---------- places, distance, photos ---------- */
 function jobLL(j){ if(j.lat&&j.lon) return [j.lat,j.lon]; return (PLACES&&PLACES.m[(j.m||"").toLowerCase()])||null; }
-function distKm(j){
-  const h=S.profile.homeLL, ll=h&&jobLL(j); if(!ll) return null;
-  const R=6371, r=Math.PI/180, dLa=(ll[0]-h[0])*r, dLo=(ll[1]-h[1])*r, a=Math.sin(dLa/2)**2+Math.cos(h[0]*r)*Math.cos(ll[0]*r)*Math.sin(dLo/2)**2;
-  return 2*R*Math.asin(Math.sqrt(a));
-}
+function hav(h,ll){ const R=6371, r=Math.PI/180, dLa=(ll[0]-h[0])*r, dLo=(ll[1]-h[1])*r, a=Math.sin(dLa/2)**2+Math.cos(h[0]*r)*Math.cos(ll[0]*r)*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(a)); }
+function distKm(j){ const h=S.profile.homeLL, ll=h&&jobLL(j); return ll?hav(h,ll):null; }
 function fmtKm(d){ return d<1?"under 1 km":(d<10?d.toFixed(1).replace(".",","):Math.round(d))+" km"; }
 function mapURL(j,d){
   const st=j.street||(d&&d.street)||"";
@@ -442,7 +492,7 @@ async function resolveHome(){
   if(!PLACES){ return; }
   n.className="note"; n.innerHTML='<span class="spin"></span> Letar upp platsen…';
   const g=await geocode(p.home); if(seq!==homeSeq) return;
-  if(g){ p.homeLL=g.ll; p.homeLabel=g.label; n.className="note ok"; n.textContent="Avstånd räknas från "+g.label+(g.approx?" (ungefärligt läge)":"")+"."; }
+  if(g){ p.homeLL=g.ll; p.homeLabel=g.label; if(!p.radius&&!p.radiusSet){ p.radius=10; p.radiusSet=1; $("p-radius").value="10"; } n.className="note ok"; n.textContent="Avstånd räknas från "+g.label+(g.approx?" (ungefärligt läge)":"")+"."; }
   else { p.homeLL=null; p.homeLabel=""; n.className="note err"; n.textContent="Hittade inte platsen. Prova ett område, en ort eller ett postnummer, t.ex. Solna eller 113 50."; }
   p.t=Date.now(); save(); pushProfile(); renderChrome();
 }
@@ -461,6 +511,7 @@ function passes(j){
   if(p.hours.length&&!p.hours.includes(j.hr)) return false;
   if(p.fields.length&&!p.fields.includes(j.f)) return false;
   if(p.student&&j.stu<1) return false;
+  const ag=Number(p.age)||0; if(ag){ if(j.age&&j.age>ag) return false; if(ag<18&&j.lic) return false; }
   if(p.radius&&p.homeLL){ const km=distKm(j); if(km!==null&&km>p.radius) return false; }
   const d=daysLeft(j.dl); if(d!==null&&d<0) return false;
   return true;
@@ -470,7 +521,7 @@ function localScore(j,plan){
   for(const t of plan.titles){ if(j.h1.includes(t)) s+=8; else if(j.h2.includes(t)) s+=2; }
   for(const t of plan.keywords){ if(j.h1.includes(t)) s+=4; else if(j.h2.includes(t)) s+=1.5; }
   for(const t of plan.avoid){ if(j.h1.includes(t)) s-=10; else if(j.h2.includes(t)) s-=2; }
-  if(s>0){ if(plan.fields.includes(j.f)) s+=3; const age=(Date.now()-new Date(j.pub))/864e5; if(age<14) s+=2-age/7; if(j.em) s+=1; if(S.profile.student) s+=j.stu*2.5; const km=distKm(j); if(km!==null) s+=km<3?2:km<8?1:0; }
+  if(s>0){ if(plan.fields.includes(j.f)) s+=3; const age=(Date.now()-new Date(j.pub))/864e5; if(age<14) s+=2-age/7; if(j.em) s+=1; if(S.profile.student) s+=j.stu*2.5; const km=distKm(j); if(km!==null) s+=km<2?4:km<5?3:km<10?1.5:km>25?-2:0; }
   return s;
 }
 function rebuildPool(){
@@ -482,7 +533,7 @@ function rebuildPool(){
     const max=list.length?list[0]._s:1; list.forEach(j=>j._pct=Math.round(55+40*Math.min(1,j._s/max)));
   }else{
     list.forEach(j=>{j._s=0;j._pct=0;});
-    const st=S.profile.student; list.sort((a,b)=>(st?(b.stu-a.stu):0)||(b.em-a.em)||(b.pub<a.pub?-1:b.pub>a.pub?1:0)); list=list.slice(0,300);
+    const st=S.profile.student; list.forEach(j=>{const k=distKm(j); j._km=k===null?99:Math.round(k/2);}); list.sort((a,b)=>(st?(b.stu-a.stu):0)||(a._km-b._km)||(b.em-a.em)||(b.pub<a.pub?-1:b.pub>a.pub?1:0)); list=list.slice(0,300);
   }
   pool=list.map(j=>j.id);
   const ranked=pool.filter(id=>S.ai[id]&&S.ai[id].s>=30).sort((a,b)=>S.ai[b].s-S.ai[a].s);
@@ -509,7 +560,7 @@ async function rankBatch(){
   const p=S.profile;
   const lines=ids.map(id=>{const j=BYID.get(id);const km=distKm(j);return id+" | "+j.h+" | "+j.e+" | "+j.o+" | "+j.m+(km!==null?" ("+Math.round(km)+" km from home)":"")+" | "+sv(j.et)+", "+sv(j.hr)+" | "+j.sn.slice(0,230);}).join("\n");
   const prompt="You are a recruiter matching one candidate to open jobs in Stockholm. Judge fit honestly: seniority, skills, what they asked for and what they said they don't want.\n\n"
-   +"WHAT THE CANDIDATE WANTS:\n"+(p.specs||"(not stated)")+(p.student?"\nThe candidate is a student: favour part-time, extra, summer, internship and entry-level jobs that fit beside studies, and mark down jobs that need years of experience or full-time daytime presence unless they asked for that.":"")+"\n\nCANDIDATE CV:\n"+(p.cvText.slice(0,6000)||"(no CV given)")
+   +"WHAT THE CANDIDATE WANTS:\n"+(p.specs||"(not stated)")+(p.student?"\nThe candidate is young (age "+(p.age||"16-21")+") with little or no work experience: favour extra, part-time, summer and entry-level jobs they can realistically get, score jobs close to home higher, and mark down hard any job that needs a qualification, a licence or years of experience.":"")+"\n\nCANDIDATE CV:\n"+(p.cvText.slice(0,6000)||"(no CV given)")
    +"\n\nJOBS (id | title | employer | occupation | place | terms | ad excerpt):\n"+lines
    +"\n\nReply with only a JSON array, one object per job, every id included: [{\"id\":\"<id>\",\"s\":<fit 0-100>,\"why\":\"<one short sentence in Swedish, max 18 words, addressed to the candidate as 'du', saying why it fits or what the catch is>\"}]. Be strict: under 40 means not worth their time.";
   try{
@@ -546,7 +597,7 @@ function filterParts(){
   const p=S.profile, a=[];
   a.push(p.fields.length===1&&META?META.fields[p.fields[0]].name:(p.fields.length>1?p.fields.length+" områden":(S.plan?"Mina matchningar":"Alla jobb")));
   a.push(p.homeLL?(p.homeLabel+(p.radius?" · "+p.radius+" km":"")):"Stockholm");
-  if(p.student) a.push("Student");
+  if(p.student) a.push("Ungdomsläge");
   if(p.hours.length===1) a.push(sv(p.hours[0]));
   return a;
 }
@@ -581,7 +632,7 @@ function cardHTML(j,under){
    +(under?'':'<button class="readbtn" data-act="read">Läs annonsen</button>')
    +'<div class="stamp y">JA</div><div class="stamp n">NEJ</div>'
    +'<div class="info"><div class="co"><span class="ini">'+esc(initials(j.e))+'</span><span>'+esc(j.e)+'</span></div>'
-   +(j.stu>=2?'<span class="stu">Passar studenter</span>':'')
+   +(j.stu>=3?'<span class="stu">Bra första jobb</span>':j.stu===2?'<span class="stu">Passar unga</span>':'')
    +'<span class="ti">'+esc(j.h)+'</span><span class="sal">'+esc([sv(j.et),sv(j.hr)].filter(Boolean).join(" · ")||j.o)+'</span><span class="meta">'+esc(meta)+'</span>'
    +(under?'':'<a class="map" href="'+esc(mapURL(j))+'" target="_blank" rel="noopener">'+esc(j.street?j.street+" · visa på karta":"Visa på karta")+'</a>')
    +(ai&&ai.why?'<span class="why">'+esc(ai.why)+'</span>':'')+'</div></article>';
@@ -687,7 +738,7 @@ async function draft(a,fresh){
    +"- Sign off with the candidate's name, then phone and email on their own lines if given.\n"
    +"- Subject line: short and clear, the role title, plus the reference number if the ad has one.\n\n"
    +"CANDIDATE\nName: "+(p.name||"(not given, sign off without a name)")+"\nPhone: "+(p.phone||"-")+"\nEmail: "+(p.email||"-")+"\nLinkedIn (add as a last signature line if given): "+(p.linkedin||"-")+"\nWhat they are looking for: "+(p.specs||"-")
-   +(p.student?"\nThe candidate is a student; if the CV shows studies, mention them briefly and how the job fits beside them.":"")+"\n\nCV\n"+((p.cvText||p.liText).slice(0,12000)||"(no CV text provided)")+"\n\nEXAMPLE EMAIL WRITTEN BY THE CANDIDATE (style reference only, do not reuse its content)\n"+(p.example.slice(0,4000)||"(none)")
+   +(p.student?"\nThe candidate is young (age "+(p.age||"16-21")+") with little work experience. Do not apologise for that: lead with reliability, willingness to learn, availability (evenings, weekends, holidays) and anything concrete from school, sports or volunteering that the CV shows.":"")+"\n\nCV\n"+((p.cvText||p.liText).slice(0,12000)||"(no CV text provided)")+"\n\nEXAMPLE EMAIL WRITTEN BY THE CANDIDATE (style reference only, do not reuse its content)\n"+(p.example.slice(0,4000)||"(none)")
    +"\n\nJOB AD\nTitle: "+j.h+"\nEmployer: "+j.e+"\nPlace: "+(j.m||"")+"\nContact person: "+(contact||"(none named)")+"\nReference: "+(d.ref||"(none)")+"\nApplication instructions: "+([d.info,d.other].filter(Boolean).join(" ")||"(none)")+"\nAd text:\n"+((d.d||j.sn||"").slice(0,5000))
    +"\n\nReply with only a JSON object: {\"subject\":\"...\",\"body\":\"...\"}";
   try{
@@ -703,7 +754,7 @@ const STATUS={queued:["I kö",""],drafting:["Skrivs",""],ready:["Redo att skicka
 let openApp=null, confirmApp=null;
 function renderApps(){
   const list=$("apps-list"), apps=Object.values(S.apps).sort((a,b)=>{const r=x=>["sent","applied"].includes(x.status)?1:0;return r(a)-r(b)||b.t-a.t;});
-  const gn=$("gmail-note"); gn.hidden=gmailOK!==false; gn.textContent="Gmail går inte att nå i den här vyn, så det går inte att skicka härifrån. Du kan fortfarande kopiera varje ansökan och skicka den själv.";
+  const gn=$("gmail-note"); gn.hidden=gmailOK!==false; gn.textContent=STANDALONE?"Tryck på Öppna i mejlappen så öppnas ditt mejlprogram med ansökan ifylld. Bifoga ditt CV där och tryck på skicka.":"Gmail går inte att nå i den här vyn, så det går inte att skicka härifrån. Du kan fortfarande kopiera varje ansökan och skicka den själv.";
   const act=document.activeElement&&document.activeElement.id, sel=act&&document.activeElement.selectionStart;
   if(!apps.length) list.innerHTML='<div class="panel"><p>Här är det tomt än så länge. Svep höger på ett jobb så skrivs ansökan åt dig.</p><div class="btns"><button class="btn" data-go="swipe">Börja svepa</button></div></div>';
   else list.innerHTML=apps.map(a=>{
@@ -722,6 +773,7 @@ function renderApps(){
            :'<div class="btns">'
             +(a.to&&gmailOK!==false&&!done?'<button class="btn" data-act="send"'+(a.status==="sending"?" disabled":"")+'>'+(a.status==="sending"?'<span class="spin"></span> Skickar':'Skicka ansökan')+'</button>':'')
             +(a.to&&gmailOK!==false&&!done?'<button class="btn ghost" data-act="gdraft">Spara i Gmail-utkast</button>':'')
+            +(STANDALONE&&a.to&&!done?'<a class="btn" href="mailto:'+encodeURIComponent(a.to.trim())+'?subject='+encodeURIComponent(a.subject)+'&amp;body='+encodeURIComponent(a.body)+'">Öppna i mejlappen</a>':'')
             +(a.url?'<a class="btn'+(a.to?" ghost":"")+'" href="'+esc(a.url)+'" target="_blank" rel="noopener">Öppna ansökningssidan</a>':'')
             +'<button class="btn ghost" data-act="copy">Kopiera text</button>'
             +(!done?'<button class="btn ghost" data-act="regen">Skriv om</button>':'')
@@ -788,6 +840,70 @@ function showSent(a){
 }
 $("mt-go").onclick=()=>{$("match").hidden=true;go("swipe");};
 $("mt-apps").onclick=()=>{$("match").hidden=true;go("apps");};
+
+/* ---------- walk in: places near you + what to say ---------- */
+let POIS=null, goCount=20, openPitch=null; const pitches={};
+async function loadPois(){ if(POIS) return; try{ POIS=await (await fetch("pois.json")).json(); }catch(_){ POIS={types:[],places:[]}; } const sel=$("go-type"); POIS.types.forEach((t,i)=>sel.add(new Option(t,String(i)))); $("go-src").textContent=POIS.places.length?"Platser från OpenStreetMap, © OpenStreetMap-bidragsgivare. Uppgifterna kan vara inaktuella, kolla att stället finns kvar.":""; }
+const GO_WHO={"Mataffär":"butikschefen eller den som ansvarar för personal","Butik":"butikschefen","Kafé och bageri":"ägaren eller den som är ansvarig i dag","Snabbmat":"restaurangchefen eller skiftledaren","Restaurang":"restaurangchefen eller ägaren","Hotell":"receptionen, och be att få prata med den som anställer","Fritid och nöje":"platschefen","Bensinstation":"stationschefen"};
+const GO_WHEN={"Mataffär":"En vardag mellan 10 och 11 eller 14 och 16. Undvik rusningen efter jobbet och helgerna.","Butik":"En vardag på förmiddagen, strax efter att de har öppnat.","Kafé och bageri":"Mitt på eftermiddagen en vardag, när lunchen är över.","Snabbmat":"Mellan lunch och middag, ungefär 14.30 till 16.30.","Restaurang":"Mellan lunch och middag, ungefär 14.30 till 16.30. Aldrig under servering.","Hotell":"En vardag på eftermiddagen, efter utcheckningen.","Fritid och nöje":"En vardag på dagen, när det är lugnt.","Bensinstation":"En vardag mitt på dagen."};
+function templatePitch(name,type,job){
+  const p=S.profile, me=p.name?p.name.split(/\s+/)[0]:"";
+  return {tpl:true,
+    say:"Hej! "+(me?"Jag heter "+me:"Jag bor här i närheten")+(p.age&&p.age!=="21"?" och är "+p.age+" år":"")+". "+(job?"Jag såg att ni söker "+job.toLowerCase()+" och ville komma förbi själv.":"Jag undrar om ni behöver extrapersonal, till exempel på kvällar och helger.")+" Jag lär mig snabbt, passar tider och kan börja direkt. Får jag lämna mitt CV till den som anställer?",
+    ask_for:GO_WHO[type]||"den som är ansvarig för personal", when:GO_WHEN[type]||"En vardag när det är lugnt, inte mitt i lunchen.",
+    bring:["Ett utskrivet CV på en sida, med ditt telefonnummer överst","Hela och rena kläder som passar stället","Telefonen laddad, de kan ringa samma dag"],
+    followup:"Hej! "+(me?"Jag heter "+me+" och ":"Jag ")+"var inne hos er på "+name+" häromdagen och lämnade mitt CV. Jag är fortfarande väldigt intresserad av att jobba hos er och kan börja direkt."+(p.phone?" Ni når mig på "+p.phone+".":"")+(me?" Vänliga hälsningar, "+p.name:"")};
+}
+async function aiPitch(key,name,type,job){
+  const p=S.profile, cur=pitches[key]; cur.busy=true; renderGo();
+  const prompt="A young job seeker in Stockholm is going to walk into a workplace in person and ask for a job. Write what they should say and do. Everything in Swedish, natural spoken language a teenager would actually say, confident but polite, no clichés.\n\n"
+   +"PLACE: "+name+" ("+(type||"arbetsplats")+")"+(job?"\nThey currently advertise this job: "+job:"\nNo job is advertised: this is a spontaneous visit.")
+   +"\n\nJOB SEEKER\nFirst name: "+(p.name.split(/\s+/)[0]||"(unknown, leave the name out)")+"\nAge: "+(p.age||"not given")+"\nLooking for: "+(p.specs||"extra work")+"\nCV (use only facts from here, never invent experience):\n"+((p.cvText||p.liText).slice(0,3000)||"(no CV yet)")
+   +"\n\nReply with only a JSON object: {\"say\":\"<what to say when walking in, 45-70 words, first person>\",\"ask_for\":\"<who to ask for at this kind of place>\",\"when\":\"<best day and time to go to this kind of place, one sentence>\",\"bring\":[\"<3 short things to bring or prepare>\"],\"followup\":\"<a short follow-up text message or email to send 3-4 days later, 35-55 words>\",\"tip\":\"<one specific tip for this kind of workplace, one sentence>\"}";
+  try{
+    const r=await sample.json(prompt,{modelTier:"quick",cache:false}), str=x=>String(x||"").trim();
+    if(!str(r.say)) throw {code:"empty_completion"};
+    pitches[key]={say:str(r.say).slice(0,700),ask_for:str(r.ask_for).slice(0,160),when:str(r.when).slice(0,220),bring:(Array.isArray(r.bring)?r.bring:[]).slice(0,4).map(x=>str(x).slice(0,120)).filter(Boolean),followup:str(r.followup).slice(0,600),tip:str(r.tip).slice(0,240)};
+  }catch(e){ cur.busy=false; cur.err=sampleCopy(e&&e.code); if(e&&OFF.includes(e.code)) sample=null; }
+  renderGo();
+}
+function pitchHTML(key){
+  const x=pitches[key]; if(!x) return "";
+  return '<div class="item-b">'+(x.err?'<p class="note err">'+esc(x.err)+'</p>':'')
+   +'<div class="li-sec"><h3>Säg så här</h3><pre id="pt-say">'+esc(x.say)+'</pre><div class="btns"><button class="btn ghost sm" data-copy="pt-say">Kopiera</button>'+(x.tpl&&sample?'<button class="btn sm" data-gact="ai"'+(x.busy?" disabled":"")+'>'+(x.busy?'<span class="spin"></span> Skriver':'Gör den personlig')+'</button>':'')+'</div></div>'
+   +'<div class="li-sec"><h3>Fråga efter</h3><pre>'+esc(x.ask_for)+'</pre></div>'
+   +'<div class="li-sec"><h3>Bästa tiden att gå dit</h3><pre>'+esc(x.when)+'</pre></div>'
+   +'<div class="li-sec"><h3>Ta med</h3><pre>'+esc(x.bring.map(b=>"• "+b).join("\n"))+'</pre></div>'
+   +(x.tip?'<div class="li-sec"><h3>Tips</h3><pre>'+esc(x.tip)+'</pre></div>':'')
+   +'<div class="li-sec"><h3>Hör av dig efter några dagar</h3><pre id="pt-fu">'+esc(x.followup)+'</pre><div class="btns"><button class="btn ghost sm" data-copy="pt-fu">Kopiera</button></div></div></div>';
+}
+function goRow(key,name,sub,map,type,job,jobId){
+  const v=S.visits[key];
+  return '<div class="item" data-key="'+esc(key)+'" data-name="'+esc(name)+'" data-type="'+esc(type||"")+'" data-job="'+esc(job||"")+'"><div class="go-row"><span class="av">'+esc(initials(name))+'</span><span class="t"><b>'+esc(name)+'</b><small>'+esc(sub)+'</small></span><span class="btns">'
+   +'<button class="btn sm" data-gact="pitch">'+(openPitch===key?"Stäng":"Min pitch")+'</button>'
+   +(jobId?'<button class="btn ghost sm" data-gact="job" data-id="'+esc(jobId)+'">Annonsen</button>':'')
+   +'<a class="btn ghost sm" href="'+esc(map)+'" target="_blank" rel="noopener">Karta</a>'
+   +'<button class="btn ghost sm" data-gact="visit">'+(v?"Besökt "+fmtDate(new Date(v).toISOString()):"Markera besökt")+'</button></span></div>'+(openPitch===key?pitchHTML(key):'')+'</div>';
+}
+function renderGo(){
+  const p=S.profile, need=!p.homeLL; $("go-need").hidden=!need; $("go-body").hidden=need; if(need||!POIS) return;
+  const seen={}, hiring=JOBS.filter(j=>j.stu>=2&&!S.swipes[j.id]&&passes(j)).map(j=>({j,km:distKm(j)})).filter(x=>x.km!==null&&(j=>j.lat)(x.j)&&x.km<=(p.radius||10)).sort((a,b)=>a.km-b.km).filter(x=>seen[x.j.e]?false:(seen[x.j.e]=1)).slice(0,8);
+  $("go-hiring").innerHTML=hiring.length?hiring.map(x=>goRow("j:"+x.j.id,x.j.e,x.j.h+" · "+fmtKm(x.km),mapURL(x.j),"",x.j.o||x.j.h,x.j.id)).join(""):'<p class="note">Inga annonser med adress nära dig just nu. Ställena nedan kan anställa ändå.</p>';
+  const ti=$("go-type").value, h=p.homeLL;
+  const near=POIS.places.filter(r=>ti===""||r[1]===Number(ti)).map(r=>({r,km:hav(h,[r[2],r[3]])})).sort((a,b)=>a.km-b.km).slice(0,goCount);
+  $("go-places").innerHTML=near.length?near.map(x=>{const r=x.r,t=POIS.types[r[1]]||"";return goRow("p:"+r[0]+"@"+r[2]+","+r[3],r[0],[t,r[4],fmtKm(x.km)].filter(Boolean).join(" · "),"https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(r[4]?r[0]+", "+r[4]:r[2]+","+r[3]),t,"");}).join(""):'<p class="note">Platslistan kunde inte läsas in.</p>';
+  $("go-more").hidden=near.length<goCount;
+}
+$("go-type").onchange=()=>{ goCount=20; renderGo(); };
+$("go-more").onclick=()=>{ goCount+=20; renderGo(); };
+$("v-go").addEventListener("click",async e=>{
+  const c=e.target.closest("[data-copy]"); if(c){ const t=$(c.dataset.copy).textContent; try{ await navigator.clipboard.writeText(t); toast("Kopierat"); }catch(_){ toast("Markera texten och kopiera den själv."); } return; }
+  const b=e.target.closest("[data-gact]"), it=e.target.closest(".item"); if(!b||!it) return; const key=it.dataset.key, act=b.dataset.gact;
+  if(act==="pitch"){ openPitch=openPitch===key?null:key; if(openPitch&&!pitches[key]) pitches[key]=templatePitch(it.dataset.name,it.dataset.type,it.dataset.job); renderGo(); }
+  else if(act==="ai"){ aiPitch(key,it.dataset.name,it.dataset.type,it.dataset.job); }
+  else if(act==="visit"){ if(S.visits[key]) delete S.visits[key]; else S.visits[key]=Date.now(); save(); renderGo(); }
+  else if(act==="job"){ const id=b.dataset.id; rebuildPool(); order=[id].concat(order.filter(x=>x!==id)); go("swipe",true); }
+});
 
 /* ---------- LinkedIn profile ---------- */
 $("li-pick").onclick=()=>$("li-file").click();
@@ -887,18 +1003,19 @@ function buildOptions(){
   f.value=p.fields.length?String(p.fields[0]):""; $("p-emp").value=p.emp[0]||""; $("p-hours").value=p.hours[0]||"";
 }
 function fillProfile(){
-  const p=S.profile; $("p-specs").value=p.specs; $("p-name").value=p.name; $("p-phone").value=p.phone; $("p-email").value=p.email; $("p-cv").value=p.cvText; $("p-example").value=p.example; $("p-lang").value=p.lang; $("p-emailonly").checked=p.emailOnly; $("p-attach").checked=p.attach; $("p-home").value=p.home||""; $("p-radius").value=String(p.radius||0); $("p-student").checked=p.student!==false; $("p-li").value=p.linkedin||""; $("p-litext").value=p.liText||""; $("p-lilang").value=p.liLang||"sv"; cvStatus(); renderLi();
+  const p=S.profile; $("p-specs").value=p.specs; $("p-name").value=p.name; $("p-phone").value=p.phone; $("p-email").value=p.email; $("p-cv").value=p.cvText; $("p-example").value=p.example; $("p-lang").value=p.lang; $("p-emailonly").checked=p.emailOnly; $("p-attach").checked=p.attach; $("p-home").value=p.home||""; $("p-radius").value=String(p.radius||0); $("p-student").checked=p.student!==false; $("p-age").value=p.age||""; $("p-li").value=p.linkedin||""; $("p-litext").value=p.liText||""; $("p-lilang").value=p.liLang||"sv"; cvStatus(); renderLi();
   if(p.homeLL){ const n=$("home-note"); n.className="note ok"; n.textContent="Avstånd räknas från "+p.homeLabel+"."; }
 }
 function readProfile(){
   const p=S.profile; p.specs=$("p-specs").value; p.name=$("p-name").value.trim(); p.phone=$("p-phone").value.trim(); p.email=$("p-email").value.trim(); p.cvText=$("p-cv").value; p.example=$("p-example").value; p.lang=$("p-lang").value; p.emailOnly=$("p-emailonly").checked; p.attach=$("p-attach").checked;
   p.emp=$("p-emp").value?[$("p-emp").value]:[]; p.hours=$("p-hours").value?[$("p-hours").value]:[]; if(META) p.fields=$("p-field").value===""?[]:[Number($("p-field").value)]; p.munis=[];
-  p.radius=Number($("p-radius").value)||0; p.student=$("p-student").checked;
+  p.radius=Number($("p-radius").value)||0; p.student=$("p-student").checked; p.age=$("p-age").value;
   p.linkedin=$("p-li").value.trim(); p.liText=$("p-litext").value; p.liLang=$("p-lilang").value;
   $("li-open").href=/^https:\/\/([a-z]+\.)?linkedin\.com\//.test(p.linkedin)?p.linkedin:"https://www.linkedin.com/in/me/";
   const home=$("p-home").value.trim(); if(home!==(p.home||"").trim()||(home&&!p.homeLL&&PLACES&&!homeSeq)){ p.home=home; resolveHome(); }
   p.t=Date.now(); save(); pushProfile(); renderChrome();
 }
+$("p-radius").addEventListener("change",()=>{ S.profile.radiusSet=1; });
 $("v-profile").addEventListener("change",readProfile);
 $("v-profile").addEventListener("input",e=>{ if(e.target.matches("textarea,input[type=text],input[type=tel],input[type=email]")){ clearTimeout(readProfile.t); readProfile.t=setTimeout(readProfile,500); } });
 function cvStatus(msg,err){
@@ -971,7 +1088,8 @@ async function cloudInit(){
 
 /* ---------- navigation + boot ---------- */
 function go(t,keep){
-  tab=t; $("v-swipe").hidden=t!=="swipe"; $("v-profile").hidden=t!=="profile"; $("v-apps").hidden=t!=="apps";
+  tab=t; $("v-swipe").hidden=t!=="swipe"; $("v-profile").hidden=t!=="profile"; $("v-apps").hidden=t!=="apps"; $("v-go").hidden=t!=="go";
+  if(t==="go"){ renderGo(); loadPois().then(renderGo); }
   if(t==="apps") renderApps();
   if(t==="swipe"&&META){ if(!keep){ const top=order[0]; rebuildPool(); if(top&&order.includes(top)&&history.length) order=[top].concat(order.filter(i=>i!==top)); } renderDeck(); maybeRank(); }
   else renderChrome();
@@ -996,7 +1114,7 @@ if(!S.seen&&!S.profile.t&&!Object.keys(S.swipes).length) $("land").hidden=false;
 fillProfile(); buildOptions(); renderChrome(); updateBridge();
 idbGet().then(f=>{ if(f){cvFile=f;cvStatus();} });
 loadData().then(()=>{ if(S.profile.home&&!S.profile.homeLL) resolveHome(); });
-cap("sample").then(s=>{ sample=s; pumpQueue(); if(s&&META&&S.plan) maybeRank(); renderChrome(); });
+cap("sample").then(s=>{ sample=s||(STANDALONE&&API?httpSample():null); s=sample; pumpQueue(); if(s&&META&&S.plan) maybeRank(); renderChrome(); });
 cap("mcp").then(m=>{ mcp=m; gmailOK=!!m; if(tab==="apps") renderApps(); });
 cloudInit();
 })();
