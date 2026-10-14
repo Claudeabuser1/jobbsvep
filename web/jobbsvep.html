@@ -1494,6 +1494,7 @@ fillProfile(); buildOptions(); renderChrome(); updateBridge(); renderHelp();
 idbGet().then(f=>{ if(f){cvFile=f;cvStatus();} });
 loadData().then(()=>{ if(S.profile.home&&!S.profile.homeLL) resolveHome(); });
 if(STANDALONE&&API){ ensureAccount().then(handleCheckoutReturn); }
+if(STANDALONE&&"serviceWorker" in navigator&&/^https?:$/.test(location.protocol)&&!/^https?:/.test(BASE)){ navigator.serviceWorker.register((LANG==="en"?"../":"")+"sw.js").catch(()=>{}); }
 renderPlan();
 cap("sample").then(s=>{ sample=s||(STANDALONE&&API?httpSample():null); s=sample; pumpQueue(); if(s&&META&&S.plan) maybeRank(); renderChrome(); });
 cap("mcp").then(m=>{ mcp=m; gmailOK=!!m; if(tab==="apps") renderApps(); });

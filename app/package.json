@@ -1,0 +1,20 @@
+{
+  "name": "jobbsvep-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Jobbsvep as an iPhone and Android app. Wraps the same web code as the website with Capacitor.",
+  "scripts": {
+    "web": "cd .. && JOBBSVEP_API=${JOBBSVEP_API:-https://jobbsvep-api.fly.dev} APP_DATA_BASE=${APP_DATA_BASE:-https://claudeabuser1.github.io/jobbsvep/} python3 scripts/build_site.py && rm -rf app/www && mkdir -p app/www && cp site/index.html app/www/ && cp -R site/en site/icons site/manifest.webmanifest app/www/",
+    "sync": "npm run web && npx cap sync",
+    "ios": "npm run sync && npx cap open ios",
+    "android": "npm run sync && npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.3"
+  }
+}

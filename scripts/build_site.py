@@ -6,6 +6,7 @@ Environment (all optional):
   SITE_DOMAIN    custom domain for GitHub Pages; writes site/CNAME
   CONTACT_EMAIL  shown on the help page
   OWNER_NAME     name of the person or company running Jobbsvep (privacy policy)
+  APP_DATA_BASE  for app builds only: where to load job data from, e.g. https://jobbsvep.se/
 
 Run:  python3 scripts/build_site.py
 """
@@ -25,6 +26,8 @@ def main():
     api = html.escape(os.environ.get("JOBBSVEP_API", "").strip(), quote=True)
     contact = html.escape(os.environ.get("CONTACT_EMAIL", "").strip(), quote=True)
     owner = html.escape(os.environ.get("OWNER_NAME", "").strip(), quote=True)
+    # for the store apps: load job data from the live site so it stays fresh without app updates
+    data_base = html.escape(os.environ.get("APP_DATA_BASE", "").strip(), quote=True)
 
     def wrap(body, lang, base, desc):
         head = ('<!doctype html><html lang="%s"><head><meta charset="utf-8">'
@@ -34,9 +37,11 @@ def main():
                 '<meta name="jobbsvep-api" content="%s"><meta name="jobbsvep-contact" content="%s"><meta name="jobbsvep-owner" content="%s">'
                 '<meta name="jobbsvep-lang" content="%s"><meta name="jobbsvep-base" content="%s">'
                 '<link rel="alternate" hreflang="sv" href="%s"><link rel="alternate" hreflang="en" href="%sen/"><link rel="icon" href="%s">'
+                '<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="%sicons/apple-touch-icon.png">'
+                '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Jobbsvep">'
                 '<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%%}'
                 ':root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>'
-                '</head><body>') % (lang, desc, desc, api, contact, owner, lang, base, base or "./", base or "./", ICON)
+                '</head><body>') % (lang, desc, desc, api, contact, owner, lang, data_base or base, base or "./", base or "./", ICON, base)
         return head + body + "</body></html>"
 
     open(os.path.join(SITE, "index.html"), "w", encoding="utf-8").write(wrap(page, "sv", "", DESC))
@@ -48,6 +53,12 @@ def main():
     data = os.path.join(ROOT, "web", "data")
     if os.path.isdir(data):
         shutil.copytree(data, os.path.join(SITE, "data"))
+    shutil.copytree(os.path.join(ROOT, "web", "icons"), os.path.join(SITE, "icons"))
+    shutil.copy(os.path.join(ROOT, "web", "manifest.webmanifest"), SITE)
+    shutil.copy(os.path.join(ROOT, "web", "manifest.en.webmanifest"), os.path.join(SITE, "en", "manifest.webmanifest"))
+    import time
+    sw = open(os.path.join(ROOT, "web", "sw.js"), encoding="utf-8").read().replace("__BUILD__", time.strftime("%Y%m%d%H%M%S"))
+    open(os.path.join(SITE, "sw.js"), "w", encoding="utf-8").write(sw)
     pois = os.path.join(ROOT, "web", "pois.json")
     if os.path.exists(pois):
         shutil.copy(pois, SITE)

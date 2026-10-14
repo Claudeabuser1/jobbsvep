@@ -1,0 +1,7 @@
+{
+  "appId": "se.jobbsvep.app",
+  "appName": "Jobbsvep",
+  "webDir": "www",
+  "server": { "androidScheme": "https" },
+  "ios": { "contentInset": "always" }
+}
