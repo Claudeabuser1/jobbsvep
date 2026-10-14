@@ -124,6 +124,16 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
 .go-row .t{flex:1;min-width:150px;display:flex;flex-direction:column;gap:2px}
 .go-row .t b{font-size:15px;font-weight:700;overflow-wrap:anywhere}
 .go-row .t small{font-size:14px;color:var(--ink2)}
+.modal{position:absolute;inset:0;z-index:40;background:rgba(29,23,21,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-card{background:var(--surface);border-radius:24px;max-width:560px;width:100%;max-height:100%;overflow:auto;padding:26px 22px 22px;display:flex;flex-direction:column;gap:14px;position:relative}
+.modal-card h2{font-size:28px;padding-right:40px}
+.modal-card>.x{position:absolute;top:16px;right:16px}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.plan{border:1.5px solid var(--line2);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.plan.best{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,79,214,.12)}
+.plan .pn{font-weight:700;font-size:15px} .plan .price{font-size:30px;font-weight:800;letter-spacing:-.02em} .plan .price small{font-size:15px;font-weight:600;color:var(--muted)}
+.plan ul{margin:0;padding-left:18px;color:var(--ink2);font-size:14px;display:flex;flex-direction:column;gap:3px}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--subtle);border-radius:10px;padding:8px 10px;overflow-wrap:anywhere;user-select:all;-webkit-user-select:all}
 .confirm{background:var(--subtle);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
 .confirm p{margin:0;overflow-wrap:anywhere}
 .sel{user-select:all;-webkit-user-select:all;font-weight:700}
@@ -268,6 +278,20 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
           <label class="f" for="p-lang">Språk i ansökningarna
             <select id="p-lang"><option value="ad">Samma språk som annonsen</option><option value="sv">Alltid svenska</option><option value="en">Alltid engelska</option></select></label>
         </div>
+        <div class="panel" id="plan-panel" hidden>
+          <h2>Ditt abonnemang</h2>
+          <p id="plan-status">Hämtar…</p>
+          <div class="btns"><button class="btn" id="plan-up" type="button">Få fler AI-ansökningar</button><button class="btn ghost" id="plan-manage" type="button" hidden>Hantera abonnemang</button></div>
+          <details><summary style="cursor:pointer;font-weight:600">Använda Jobbsvep på en annan enhet</summary>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+              <p class="note">Din kontokod kopplar ihop dina enheter med ditt abonnemang. Dela den inte med någon.</p>
+              <div class="code" id="acct-code"></div>
+              <div class="btns"><button class="btn ghost sm" id="acct-copy" type="button">Kopiera koden</button></div>
+              <label class="f" for="acct-in">Har du en kod från en annan enhet?<input type="text" id="acct-in" autocomplete="off" placeholder="jsv_…"></label>
+              <div class="btns"><button class="btn ghost sm" id="acct-use" type="button">Använd koden</button></div>
+            </div>
+          </details>
+        </div>
         <div class="panel">
           <h2>LinkedIn</h2>
           <p>LinkedIn släpper inte in andra appar i din profil, så kopplingen går via dig: ladda upp din profil som PDF (på din profilsida: Resurser, sedan Spara som PDF) eller klistra in texten. Då kan Jobbsvep använda den som CV och föreslå en vassare profil som du klistrar in på LinkedIn.</p>
@@ -304,6 +328,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
           <div class="btns"><button class="btn" id="imp-go" type="button">Skapa ansökan</button><button class="btn ghost" id="imp-cancel" type="button">Avbryt</button></div>
           <p class="note" id="imp-note"></p>
         </div>
+        <p class="note" id="credit-note" hidden></p>
         <p class="note" id="gmail-note" hidden></p>
         <div id="apps-list" class="lst"></div>
         <h2 id="saved-h" hidden style="font-size:24px;padding-top:10px">Sparade jobb</h2>
@@ -346,6 +371,21 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
     <button class="tab" role="tab" data-go="profile" aria-selected="false">Profil</button>
   </nav>
 
+  <div class="modal" id="paywall" hidden role="dialog" aria-modal="true" aria-labelledby="pw-title">
+    <div class="modal-card">
+      <button class="x" id="pw-close" aria-label="Stäng">✕</button>
+      <h2 id="pw-title">Fler ansökningar med AI</h2>
+      <p id="pw-lead" style="margin:0;color:var(--ink2)">AI:n läser annonsen och ditt CV och skriver ett brev som låter som du. Välj hur mycket hjälp du vill ha.</p>
+      <div class="plans">
+        <div class="plan"><span class="pn">Vecka</span><span class="price">19 kr</span><ul><li>7 dagar</li><li>Ungefär 15 AI-ansökningar</li><li>Förnyas inte automatiskt</li></ul><button class="btn ghost" data-plan="week" type="button">Välj Vecka</button></div>
+        <div class="plan best"><span class="pn">Månad</span><span class="price">49 kr <small>/ mån</small></span><ul><li>Ungefär 40 AI-ansökningar i månaden</li><li>AI-pitchar och LinkedIn-hjälp</li><li>Avsluta när du vill</li></ul><button class="btn" data-plan="month" type="button">Välj Månad</button></div>
+      </div>
+      <p class="note">Svepa, matchning, mallbrev, Gå dit och dina sparade jobb är alltid gratis. Du betalar säkert via Stripe.</p>
+      <p class="note" id="pw-note"></p>
+      <div class="btns"><button class="btn ghost" id="pw-free" type="button">Fortsätt gratis</button></div>
+    </div>
+  </div>
+
   <div class="land" id="land" hidden>
     <header><span class="logo-t">jobbsvep</span><button class="out" id="l-skip">Börja svepa</button></header>
     <div class="hero">
@@ -378,16 +418,79 @@ async function shrinkImage(file){
   catch(_){ const buf=new Uint8Array(await file.arrayBuffer()); let b=""; for(let i=0;i<buf.length;i+=8192) b+=String.fromCharCode.apply(null,buf.subarray(i,i+8192)); return {type:file.type||"image/jpeg",data:btoa(b)}; }
 }
 function parseLoose(text){ try{ return JSON.parse(text); }catch(_){} const f=text.match(/```(?:json)?\s*([\s\S]*?)```/); if(f){ try{ return JSON.parse(f[1]); }catch(_){} } const a=text.search(/[\[{]/), b=Math.max(text.lastIndexOf("}"),text.lastIndexOf("]")); if(a>=0&&b>a){ try{ return JSON.parse(text.slice(a,b+1)); }catch(_){} } throw {code:"invalid_json",text}; }
+/* ---------- account, AI credits and plans (public website only) ---------- */
+const ACCT_KEY="jobbsvep:acct"; let acctInfo=null;
+function acctToken(){ try{ return localStorage.getItem(ACCT_KEY)||""; }catch(_){ return ""; } }
+function setAcct(t){ try{ if(t) localStorage.setItem(ACCT_KEY,t); else localStorage.removeItem(ACCT_KEY); }catch(_){} }
+async function api(path,body){
+  const t=acctToken(), h={"content-type":"application/json"}; if(t) h.authorization="Bearer "+t;
+  let r; try{ r=await fetch(API+path,{method:body?"POST":"GET",headers:h,body:body?JSON.stringify(body):undefined}); }catch(_){ return {status:0,data:{}}; }
+  let d={}; try{ d=await r.json(); }catch(_){} return {status:r.status,data:d};
+}
+function takeStatus(d){ if(d&&d.plan){ acctInfo=d; renderPlan(); } }
+async function ensureAccount(){
+  if(!API) return null;
+  if(acctToken()){ const m=await api("/me"); if(m.status===200){ takeStatus(m.data); return acctInfo; } if(m.status!==401) return null; setAcct(""); }
+  const s=await api("/session",{}); if(s.status===200){ setAcct(s.data.token); takeStatus(s.data); }
+  return acctInfo;
+}
+function untilDate(ms){ return new Date(ms).toLocaleDateString("sv-SE",{day:"numeric",month:"long"}); }
+function lettersLeft(n){ return "ungefär "+n+" "+(n===1?"AI-ansökan":"AI-ansökningar")+" kvar"; }
+function renderPlan(){
+  const show=STANDALONE&&!!API; $("plan-panel").hidden=!show; if(!show) return;
+  const a=acctInfo, cn=$("credit-note");
+  if(!a){ $("plan-status").textContent="AI-hjälpen går inte att nå just nu. Allt annat fungerar som vanligt."; cn.hidden=true; return; }
+  $("plan-status").textContent=a.plan_name+" · "+lettersLeft(a.est_letters)+(a.plan==="free"?" till ":" · gäller till ")+untilDate(a.period_end)+".";
+  $("plan-manage").hidden=!a.can_manage; $("acct-code").textContent=acctToken();
+  cn.hidden=false; cn.innerHTML=esc(a.plan_name)+": "+lettersLeft(a.est_letters)+". "+(a.plan==="free"?'<button class="linkbtn" data-paywall="1" style="border:0;background:none;padding:0;color:var(--accent-d);font-weight:600;cursor:pointer">Få fler</button>':"");
+}
+function openPaywall(reason){
+  const pw=$("paywall"); $("pw-note").textContent="";
+  $("pw-title").textContent=reason==="no_credits"?"Dina AI-ansökningar är slut för nu":reason==="free_pool_empty"?"Gratis-AI:n är slut för i dag":"Fler ansökningar med AI";
+  pw.hidden=false; pw.querySelector("[data-plan=month]").focus();
+}
+function closePaywall(){ $("paywall").hidden=true; }
+$("pw-close").onclick=closePaywall; $("pw-free").onclick=closePaywall;
+$("paywall").addEventListener("click",async e=>{
+  if(e.target.id==="paywall") return closePaywall();
+  const b=e.target.closest("[data-plan]"); if(!b) return;
+  const n=$("pw-note"); n.className="note"; n.innerHTML='<span class="spin"></span> Öppnar betalningen…';
+  if(!acctToken()) await ensureAccount();
+  const r=await api("/checkout",{plan:b.dataset.plan});
+  if(r.status===200&&r.data.url){ location.href=r.data.url; return; }
+  n.className="note err"; n.textContent=r.status===503?"Betalningen är inte igång än. Den öppnar snart, fortsätt gratis så länge.":"Det gick inte att öppna betalningen. Försök igen om en stund.";
+});
+document.addEventListener("click",e=>{ if(e.target.closest("[data-paywall]")) openPaywall(); });
+$("plan-up").onclick=()=>openPaywall();
+$("plan-manage").onclick=async()=>{ const r=await api("/portal",{}); if(r.status===200&&r.data.url) location.href=r.data.url; else toast("Det gick inte att öppna dina betalningsinställningar just nu."); };
+$("acct-copy").onclick=async()=>{ try{ await navigator.clipboard.writeText(acctToken()); toast("Kontokoden är kopierad"); }catch(_){ toast("Markera koden och kopiera den själv."); } };
+$("acct-use").onclick=async()=>{
+  const code=$("acct-in").value.trim(); if(!/^jsv_[A-Za-z0-9_-]{20,}$/.test(code)){ toast("Det där ser inte ut som en kontokod."); return; }
+  const old=acctToken(); setAcct(code); const m=await api("/me");
+  if(m.status===200){ takeStatus(m.data); $("acct-in").value=""; toast("Klart! Den här enheten använder nu ditt konto."); } else { setAcct(old); toast("Koden fungerade inte. Kontrollera att du kopierade hela."); }
+};
+async function handleCheckoutReturn(){
+  const q=new URLSearchParams(location.search).get("checkout"); if(!q) return;
+  history.replaceState(null,"",location.pathname+location.hash);
+  if(q==="cancel"){ toast("Betalningen avbröts. Inget har dragits."); return; }
+  await ensureAccount(); const r=await api("/checkout/confirm?session_id="+encodeURIComponent(q));
+  if(r.status===200){ if(r.data.token) setAcct(r.data.token); takeStatus(r.data); toast("Tack! Du har nu "+r.data.plan_name+" med ungefär "+r.data.est_letters+" AI-ansökningar."); }
+  else toast("Vi kunde inte bekräfta betalningen än. Ladda om sidan om en minut.");
+}
 function httpSample(){
-  const call=async(prompt,opts)=>{
+  const call=async(prompt,opts,retried)=>{
     const body={prompt:typeof prompt==="string"?prompt:prompt.map(m=>m.content).join("\n\n"),tier:(opts&&opts.modelTier)||"default"};
     if(opts&&opts.images) body.images=await Promise.all([].concat([...opts.images]).slice(0,3).map(shrinkImage));
-    let r; try{ r=await fetch(API+"/ai",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}); }catch(_){ throw {code:"upstream_error"}; }
+    if(!acctToken()) await ensureAccount();
+    const h={"content-type":"application/json"}; if(acctToken()) h.authorization="Bearer "+acctToken();
+    let r; try{ r=await fetch(API+"/ai",{method:"POST",headers:h,body:JSON.stringify(body)}); }catch(_){ throw {code:"upstream_error"}; }
+    if(r.status===401&&!retried){ setAcct(""); await ensureAccount(); return call(prompt,opts,true); }
+    if(r.status===402){ let d={}; try{ d=await r.json(); }catch(_){} takeStatus(d); openPaywall(d.error); throw {code:"no_credits"}; }
     if(r.status===429) throw {code:"rate_limited"};
     if(r.status===503) throw {code:"sampling_disabled"};
     if(r.status===413) throw {code:"prompt_too_large"};
     if(!r.ok) throw {code:"upstream_error"};
-    const d=await r.json(); if(d.refused) throw {code:"refused"}; if(!d.text) throw {code:"empty_completion"}; return d.text;
+    const d=await r.json(); takeStatus(d); if(d.refused) throw {code:"refused"}; if(!d.text) throw {code:"empty_completion"}; return d.text;
   };
   const f=async(p,o)=>({text:await call(p,o),truncated:false});
   f.json=async(p,o)=>parseLoose(await call(p,o));
@@ -419,7 +522,7 @@ function initials(s){const w=String(s||"?").replace(/\b(AB|HB|KB|i|och|&)\b/g," 
 function fmtDate(d){if(!d)return"";const x=new Date(String(d).length>10?d:d+"T12:00:00");return isNaN(x)?d:x.toLocaleDateString("sv-SE",{day:"numeric",month:"short"});}
 function daysLeft(d){if(!d)return null;return Math.ceil((new Date(d+"T23:59:59")-Date.now())/864e5);}
 const OFF=["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"];
-function sampleCopy(code){return ({not_granted:"Claude är inte tillåtet på den här sidan än, så matchning och utkast är avstängda. Ladda om sidan och tillåt Claude.",rate_limited:"Du har nått en användningsgräns just nu. Försök igen om en stund.",session_expired:"Din Claude-session har gått ut. Logga in igen och försök på nytt.",sampling_disabled:"AI-hjälpen är inte påslagen just nu.",refused:"Claude avböjde att skriva den här. Ändra din profiltext eller skriv för hand.",prompt_too_large:"Ditt CV eller exempelmejl är för långt. Korta ner det och försök igen."})[code]||"Claude kunde inte svara just nu. Försök igen.";}
+function sampleCopy(code){return ({not_granted:"Claude är inte tillåtet på den här sidan än, så matchning och utkast är avstängda. Ladda om sidan och tillåt Claude.",rate_limited:"Du har nått en användningsgräns just nu. Försök igen om en stund.",session_expired:"Din Claude-session har gått ut. Logga in igen och försök på nytt.",sampling_disabled:"AI-hjälpen är inte påslagen just nu.",no_credits:"Dina AI-ansökningar för den här perioden är slut. Välj ett paket för att fortsätta, eller fortsätt gratis med mallbrev.",refused:"Claude avböjde att skriva den här. Ändra din profiltext eller skriv för hand.",prompt_too_large:"Ditt CV eller exempelmejl är för långt. Korta ner det och försök igen."})[code]||"Claude kunde inte svara just nu. Försök igen.";}
 function mcpCopy(e){const c=e&&e.code;return ({needs_reauth:"Gmail behöver anslutas igen. Öppna claude.ai Inställningar, Connectors, och anslut Gmail på nytt.",server_not_connected:"Gmail är inte anslutet. Lägg till det i claude.ai Inställningar, Connectors.",selection_required:"Du har flera Gmail-anslutningar. Välj en i rutan som visas och tryck sedan på skicka igen.",not_in_manifest:"Gmail är avstängt för den här sidan. Tillåt det i sidans behörighetsmeny.",not_granted:"Sidan fick inte tillgång till Gmail.",approval_required:"Du behöver godkänna utskicket. Tryck på skicka igen och välj Tillåt.",blocked_by_policy:"Din organisation tillåter inte utskick härifrån.",cancelled:"Utskicket avbröts.",tool_error:"Gmail tog inte emot mejlet: "+(e.message||"okänd orsak"),server_unavailable:"Gmail svarade inte. Titta i Skickat innan du försöker igen, mejlet kan ha gått iväg.",upstream_error:"Något avbröt utskicket. Titta i Skickat innan du försöker igen."})[c]||"Det gick inte att skicka. Titta i Skickat innan du försöker igen.";}
 
 /* ---------- data ---------- */
@@ -564,7 +667,7 @@ async function rankBatch(){
    +"\n\nJOBS (id | title | employer | occupation | place | terms | ad excerpt):\n"+lines
    +"\n\nReply with only a JSON array, one object per job, every id included: [{\"id\":\"<id>\",\"s\":<fit 0-100>,\"why\":\"<one short sentence in Swedish, max 18 words, addressed to the candidate as 'du', saying why it fits or what the catch is>\"}]. Be strict: under 40 means not worth their time.";
   try{
-    const r=await sample.json(prompt,{modelTier:"default"});
+    const r=await sample.json(prompt,{modelTier:"quick"});
     (Array.isArray(r)?r:[]).forEach(x=>{const id=String(x.id);if(BYID.has(id))S.ai[id]={s:Math.max(0,Math.min(100,Math.round(Number(x.s)||0))),why:String(x.why||"").slice(0,200)};});
     ids.forEach(id=>{if(!S.ai[id])S.ai[id]={s:45,why:""};});
     const top=order[0]; const keepTop=history.length>0||sheetOpen;
@@ -722,11 +825,12 @@ async function draft(a,fresh){
   const d=a.imp?{d:a.ad||"",email:a.to,url:a.url,ref:a.ref||"",contacts:a.contact?[{name:a.contact}]:[]}:(META&&BYID.has(a.id)?await detail(j):{});
   if(!a.imp){ if(!a.to) a.to=d.email||""; a.url=d.url||""; a.web=d.web||""; }
   const contact=(d.contacts||[]).map(c=>[c.name,c.description].filter(Boolean).join(", ")).filter(Boolean)[0]||"";
-  if(!sample){
+  const template=note=>{
     a.subject="Ansökan: "+j.h+(d.ref?" (ref. "+d.ref+")":"");
-    a.body="Hej,\n\nJag vill söka tjänsten som "+j.h+" hos "+j.e+".\n\n[Claude är inte tillgängligt på den här sidan just nu, så det här är bara en mall. Skriv några rader om varför du passar för rollen.]\n\nMed vänliga hälsningar,\n"+[p.name,p.phone,p.email].filter(Boolean).join("\n");
-    a.status="ready"; touchApp(a); return;
-  }
+    a.body="Hej,\n\nJag vill söka tjänsten som "+j.h+" hos "+j.e+".\n\n[Skriv två eller tre meningar om varför du passar: när du kan jobba, vad du har gjort förut (skola, idrott, ideellt) och att du lär dig snabbt.]\n\nJag kan börja direkt och kommer gärna på en intervju.\n\nMed vänliga hälsningar,\n"+[p.name,p.phone,p.email].filter(Boolean).join("\n");
+    a.err=note||""; a.status="ready"; touchApp(a);
+  };
+  if(!sample){ template("AI-hjälpen är inte påslagen, så det här är en mall. Fyll i raden inom hakparentes innan du skickar."); return; }
   const lang=p.lang==="sv"?"Write in Swedish.":p.lang==="en"?"Write in English.":"Write in the same language as the job ad (a Swedish ad gets a Swedish application, an English ad an English one).";
   const prompt="Write a job application email for the candidate below. It will be sent as-is from their own email account, so it must be finished, truthful and ready to send.\n\n"
    +"RULES\n- "+lang+"\n- Sound like the candidate: copy the rhythm, greeting style, warmth and typical phrasing of their EXAMPLE EMAIL, but keep it professional and free of slang and spelling mistakes. If there is no example, write in a natural, direct, modern tone, not stiff.\n"
@@ -746,7 +850,10 @@ async function draft(a,fresh){
     a.subject=String(r.subject||("Ansökan: "+j.h)).replace(/\s+/g," ").trim(); a.body=String(r.body||"").trim();
     if(!a.body) throw {code:"empty_completion"};
     a.status="ready";
-  }catch(e){ a.status="error"; a.err=sampleCopy(e&&e.code); if(e&&OFF.includes(e.code)) sample=null; }
+  }catch(e){
+    if(e&&e.code==="no_credits"){ template("Dina AI-ansökningar är slut för den här perioden, så här är en mall. Fyll i raden inom hakparentes innan du skickar."); return; }
+    a.status="error"; a.err=sampleCopy(e&&e.code); if(e&&OFF.includes(e.code)) sample=null;
+  }
   touchApp(a);
 }
 function touchApp(a){ a.t=Date.now(); save(); pushApp(a.id); renderChrome(); if(tab==="apps") renderApps(); }
@@ -1114,6 +1221,8 @@ if(!S.seen&&!S.profile.t&&!Object.keys(S.swipes).length) $("land").hidden=false;
 fillProfile(); buildOptions(); renderChrome(); updateBridge();
 idbGet().then(f=>{ if(f){cvFile=f;cvStatus();} });
 loadData().then(()=>{ if(S.profile.home&&!S.profile.homeLL) resolveHome(); });
+if(STANDALONE&&API){ ensureAccount().then(handleCheckoutReturn); }
+renderPlan();
 cap("sample").then(s=>{ sample=s||(STANDALONE&&API?httpSample():null); s=sample; pumpQueue(); if(s&&META&&S.plan) maybeRank(); renderChrome(); });
 cap("mcp").then(m=>{ mcp=m; gmailOK=!!m; if(tab==="apps") renderApps(); });
 cloudInit();

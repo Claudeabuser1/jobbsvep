@@ -3,7 +3,9 @@ primary_region = "arn"   # Stockholm
 
 [env]
   # Set to the site's address so only your site can call the API, e.g. "https://jobbsvep.se,https://www.jobbsvep.se"
-  ALLOWED_ORIGINS = ""
+  ALLOWED_ORIGINS = "https://claudeabuser1.github.io"
+  SITE_URL = "https://claudeabuser1.github.io/jobbsvep/"   # where Stripe sends people back after paying
+  DATA_DIR = "/data"
 
 [http_service]
   internal_port = 8080
@@ -15,3 +17,8 @@ primary_region = "arn"   # Stockholm
 [[vm]]
   size = "shared-cpu-1x"
   memory = "256mb"
+
+# accounts and AI budgets are kept in a small file on this volume
+[mounts]
+  source = "jobbsvep_data"
+  destination = "/data"

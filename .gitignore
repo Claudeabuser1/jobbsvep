@@ -10,3 +10,4 @@ web/index.html
 site/
 server/node_modules/
 .claude/
+server/data/
