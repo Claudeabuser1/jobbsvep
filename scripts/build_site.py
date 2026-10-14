@@ -4,6 +4,8 @@
 Environment (all optional):
   JOBBSVEP_API   base URL of the AI server (server/), e.g. https://api.example.se
   SITE_DOMAIN    custom domain for GitHub Pages; writes site/CNAME
+  CONTACT_EMAIL  shown on the help page
+  OWNER_NAME     name of the person or company running Jobbsvep (privacy policy)
 
 Run:  python3 scripts/build_site.py
 """
@@ -20,14 +22,16 @@ def main():
     os.makedirs(SITE)
     page = open(os.path.join(ROOT, "web", "jobbsvep.html"), encoding="utf-8").read()
     api = html.escape(os.environ.get("JOBBSVEP_API", "").strip(), quote=True)
+    contact = html.escape(os.environ.get("CONTACT_EMAIL", "").strip(), quote=True)
+    owner = html.escape(os.environ.get("OWNER_NAME", "").strip(), quote=True)
     head = ('<!doctype html><html lang="sv"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
             '<meta name="description" content="%s"><meta property="og:title" content="Jobbsvep">'
             '<meta property="og:description" content="%s"><meta name="theme-color" content="#5b4fd6">'
-            '<meta name="jobbsvep-api" content="%s"><link rel="icon" href="%s">'
+            '<meta name="jobbsvep-api" content="%s"><meta name="jobbsvep-contact" content="%s"><meta name="jobbsvep-owner" content="%s"><link rel="icon" href="%s">'
             '<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%%}'
             ':root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>'
-            '</head><body>') % (DESC, DESC, api, ICON)
+            '</head><body>') % (DESC, DESC, api, contact, owner, ICON)
     open(os.path.join(SITE, "index.html"), "w", encoding="utf-8").write(head + page + "</body></html>")
     data = os.path.join(ROOT, "web", "data")
     if os.path.isdir(data):

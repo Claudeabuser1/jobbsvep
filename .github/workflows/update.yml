@@ -32,6 +32,8 @@ jobs:
         env:
           JOBBSVEP_API: ${{ vars.JOBBSVEP_API }}
           SITE_DOMAIN: ${{ vars.SITE_DOMAIN }}
+          CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+          OWNER_NAME: ${{ vars.OWNER_NAME }}
         run: python3 scripts/build_site.py
       - uses: actions/upload-pages-artifact@v3
         with:

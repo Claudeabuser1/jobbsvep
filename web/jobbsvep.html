@@ -161,6 +161,18 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
 .tour-tip .row2 .sp{flex:1}
 .tour-tip .skip{border:0;background:none;color:var(--muted);font-weight:600;padding:6px 0}
 @media (prefers-reduced-motion:reduce){ .tour-hole{transition:none} }
+.faq{display:flex;flex-direction:column}
+.faq details{border-bottom:1px solid var(--line);padding:4px 0}
+.faq summary{cursor:pointer;font-weight:700;font-size:16px;padding:12px 0;list-style-position:outside}
+.faq details>div{padding:0 0 14px;color:var(--ink2);display:flex;flex-direction:column;gap:8px}
+.faq details>div p{margin:0}
+.legal{color:var(--ink2);font-size:14px;line-height:1.55;display:flex;flex-direction:column;gap:8px}
+.legal h3{font-size:16px;color:var(--ink);letter-spacing:0;margin-top:6px}
+.legal p,.legal ul{margin:0} .legal ul{padding-left:18px}
+.helpbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line2);background:var(--surface);font-weight:800;font-size:16px;flex:none}
+.mhead .right{display:flex;gap:8px;align-items:center;min-width:0}
+.foot-links{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
+.foot-links button{border:0;background:none;padding:0;color:inherit;text-decoration:underline;cursor:pointer;font:inherit}
 .confirm{background:var(--subtle);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
 .confirm p{margin:0;overflow-wrap:anywhere}
 .sel{user-select:all;-webkit-user-select:all;font-weight:700}
@@ -242,9 +254,9 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
     <div class="side-sec"><button class="btn ghost sm" data-go="go" style="align-self:flex-start">Gå dit själv: ställen nära dig</button></div>
     <div class="side-sec"><b>Redo att skicka</b><div id="s-rings"></div></div>
     <div class="side-sec"><b>Ansökningar</b><div id="s-list"></div><button class="btn ghost sm" data-imp="1" style="align-self:flex-start">Importera en annons</button></div>
-    <div class="side-foot" id="snap"></div>
+    <div class="side-foot"><div class="foot-links" style="margin-bottom:8px"><button data-go="help">Hjälp och kontakt</button><button data-help="privacy">Integritet</button><button data-help="terms">Villkor</button></div><span id="snap"></span></div>
   </aside>
-  <header class="mhead"><button class="logo-t" data-go="swipe">jobbsvep</button><button class="fpill" id="m-filter" data-go="profile">Stockholm · Filter</button></header>
+  <header class="mhead"><button class="logo-t" data-go="swipe">jobbsvep</button><span class="right"><button class="fpill" id="m-filter" data-go="profile">Stockholm · Filter</button><button class="helpbtn" data-go="help" aria-label="Hjälp och kontakt" title="Hjälp och kontakt">?</button></span></header>
   <main>
     <section class="view" id="v-swipe">
       <div class="deskpill" id="deskpill"></div>
@@ -384,6 +396,46 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
       </div>
     </section>
 
+    <section class="view" id="v-help" hidden>
+      <div class="col">
+        <button class="back" data-go="swipe">← Tillbaka till jobben</button>
+        <h1 class="vh">Hjälp och kontakt</h1>
+        <div class="panel"><h2>Kom igång</h2><p>Vill du se genomgången igen, eller svara på frågorna en gång till?</p><div class="btns"><button class="btn" id="h-tour" type="button">Visa guiden igen</button><button class="btn ghost" id="h-onb" type="button">Gör om frågorna</button></div></div>
+        <div class="panel" id="h-faq"><h2>Vanliga frågor</h2><div class="faq">
+          <details><summary>Kostar Jobbsvep något?</summary><div><p>Nej, inte för att använda det. Att svepa, få jobb som passar dig, mallbrev, Gå dit och dina sparade jobb är alltid gratis. Du får också ungefär fem AI-skrivna ansökningar i månaden utan kostnad.</p><p>Vill du ha fler AI-ansökningar finns Vecka för 19 kr (förnyas inte) och Månad för 49 kr i månaden (avsluta när du vill under Profil, Hantera abonnemang).</p></div></details>
+          <details><summary>Var kommer jobben ifrån?</summary><div><p>Från Arbetsförmedlingens Platsbanken och från andra svenska jobbsajter som Arbetsförmedlingen samlar ihop, till exempel studentjob.se och ledigajobb.se. Listan uppdateras varje måndag och torsdag, och annonser som har tagits bort försvinner då.</p></div></details>
+          <details><summary>Hur väljer ni vilka jobb jag ser?</summary><div><p>Vi går igenom varje annons och sorterar bort jobb som kräver utbildning, legitimation, körkort eller flera års erfarenhet när Ungdomsläget är på. Sedan visar vi jobben närmast dig först. När AI-hjälpen är på läser den också din profil och sätter en matchning i procent.</p><p>Sorteringen bygger på annonsens text och kan ibland bli fel. Läs alltid annonsen innan du söker.</p></div></details>
+          <details><summary>Varför ser jag inga jobb nära mig?</summary><div><p>Kontrollera att du har skrivit var du bor under Profil och att maxavståndet inte är för litet. Vissa områden har helt enkelt få annonser just nu. Prova då Gå dit, där ser du ställen nära dig som kan anställa utan att annonsera.</p></div></details>
+          <details><summary>Hur skickas min ansökan?</summary><div><p>Ingenting skickas utan att du trycker på det. När arbetsgivaren tar emot ansökningar via mejl öppnas ditt eget mejlprogram med brevet ifyllt, och du bifogar ditt CV och trycker på skicka. Annars öppnar vi arbetsgivarens ansökningssida och du klistrar in brevet där.</p></div></details>
+          <details><summary>Hittar AI:n på saker om mig?</summary><div><p>Den är instruerad att bara använda det som står i ditt CV och din profil. Den kan ändå göra fel, så läs alltid brevet och ändra det du vill innan du skickar.</p></div></details>
+          <details><summary>Jag är under 18. Vad gäller?</summary><div><p>Du får jobba från 16 år, men det finns regler för hur sent och hur mycket du får jobba och vilka arbetsuppgifter du får ha. Ofta behöver en vårdnadshavare godkänna anställningen. Läs mer på <a href="https://www.av.se/" target="_blank" rel="noopener">Arbetsmiljöverkets webbplats</a>.</p></div></details>
+          <details><summary>Hur avslutar jag mitt abonnemang?</summary><div><p>Gå till Profil och tryck på Hantera abonnemang. Där kan du avsluta direkt. Du behåller det du har betalat för perioden ut. Ett veckopass förnyas aldrig automatiskt.</p></div></details>
+          <details><summary>Hur använder jag mitt konto på en annan enhet?</summary><div><p>Under Profil, Ditt abonnemang, finns din kontokod. Kopiera den och klistra in den på den andra enheten. Dela inte koden med någon annan.</p></div></details>
+        </div></div>
+        <div class="panel" id="h-contact"><h2>Kontakta oss</h2><p id="h-contact-text"></p><div class="btns" id="h-contact-btns"></div></div>
+        <div class="panel" id="h-privacy"><h2>Integritetspolicy</h2><div class="legal">
+          <p>Senast uppdaterad 14 oktober 2026. <span id="h-owner"></span></p>
+          <h3>Det här sparas i din webbläsare</h3><p>Din profil, ditt CV, dina ansökningar och vilka jobb du har svept på sparas i den här webbläsaren på din enhet. Vi kan inte se det. Du kan radera allt med knappen längst ner.</p>
+          <h3>Det här sparas på vår server</h3><p>En slumpad kontokod, vilket paket du har, hur mycket AI du har använt och när din period tar slut. Har du betalat sparar vi också det kund-id som betalningsleverantören Stripe ger oss. Servern står i Stockholm. Vi sparar inte dina brev eller ditt CV på servern.</p>
+          <h3>När du använder AI-hjälpen</h3><p>För att skriva brev, pitchar eller matcha jobb skickas den text som behövs (till exempel din profil, ditt CV och annonsen) via vår server till Anthropic i USA, som tar fram texten. Anthropic använder inte uppgifterna för att träna sina AI-modeller och behandlar dem enligt sina villkor för företagskunder.</p>
+          <h3>Betalningar</h3><p>Betalningar hanteras av Stripe. Vi ser aldrig ditt kortnummer.</p>
+          <h3>Kartor och länkar</h3><p>Trycker du på en kartlänk öppnas Google Maps med arbetsplatsens adress. Länkar till annonser öppnar arbetsgivarens eller jobbsajtens egen sida.</p>
+          <h3>Ingen spårning</h3><p>Vi använder inga reklam- eller spårningscookies och säljer aldrig dina uppgifter.</p>
+          <h3>Dina rättigheter</h3><p>Du har rätt att få veta vilka uppgifter vi har om dig, få dem rättade eller raderade. Kontakta oss så hjälper vi dig. Du kan också klaga till Integritetsskyddsmyndigheten (IMY).</p>
+        </div></div>
+        <div class="panel" id="h-terms"><h2>Villkor</h2><div class="legal">
+          <p>Senast uppdaterad 14 oktober 2026.</p>
+          <h3>Tjänsten</h3><p>Jobbsvep hjälper dig att hitta lediga jobb och skriva ansökningar. Vi lovar inte att du får ett jobb, och vi ansvarar inte för innehållet i arbetsgivarnas annonser.</p>
+          <h3>AI-texter</h3><p>Brev och pitchar skrivs av AI. Du ansvarar för det du skickar, så läs alltid igenom texten först.</p>
+          <h3>Paket och betalning</h3><p>Vecka kostar 19 kr och gäller i 7 dagar utan att förnyas. Månad kostar 49 kr och förnyas varje månad tills du avslutar under Profil, Hantera abonnemang. Priserna är inklusive moms. AI-hjälpen i ett paket gäller under paketets period och sparas inte till nästa period.</p>
+          <h3>Ångerrätt</h3><p>Du har 14 dagars ångerrätt. Om du ber oss att börja leverera direkt och använder AI-hjälpen under ångerfristen betalar du för det du har hunnit använda. Kontakta oss för att ångra ett köp.</p>
+          <h3>Rimlig användning</h3><p>Det är inte tillåtet att försöka komma runt begränsningarna, skapa många konton eller använda tjänsten automatiserat.</p>
+        </div></div>
+        <div class="panel"><h2>Radera mina uppgifter</h2><p>Tar bort din profil, ditt CV, dina ansökningar och din kontokod från den här enheten. Har du ett abonnemang, avsluta det först under Profil.</p><div class="btns" id="h-del-btns"><button class="btn danger" id="h-del" type="button">Radera allt på den här enheten</button></div></div>
+        <p class="note">Jobbdata: Arbetsförmedlingen (JobTech Dev). Platser: © OpenStreetMap-bidragsgivare.</p>
+      </div>
+    </section>
+
     <div class="toast" id="toast" hidden><span id="toast-t"></span><button id="toast-undo" hidden>Ångra</button></div>
     <div class="match" id="match" hidden>
       <h2>Ansökan skickad!</h2>
@@ -436,6 +488,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
       <p>Extrajobb, sommarjobb och första jobbet nära dig i Stockholm, för dig som är ung och inte har hunnit jobba så mycket. Svep höger på det du gillar så skrivs din ansökan direkt.</p>
       <button class="btn big" id="l-start">Skapa din profil</button>
       <span class="src" id="l-src">Lediga jobb i Stockholms län från Platsbanken</span>
+      <span class="src foot-links" style="justify-content:center"><button data-help="faq">Hjälp</button><button data-help="privacy">Integritet</button><button data-help="terms">Villkor</button><button data-help="contact">Kontakt</button></span>
     </div>
     <div class="steps">
       <div><b>1. Skapa din profil</b><span>Din ålder, var du bor och vad du kan, på fem minuter.</span></div>
@@ -993,6 +1046,25 @@ function showSent(a){
 $("mt-go").onclick=()=>{$("match").hidden=true;go("swipe");};
 $("mt-apps").onclick=()=>{$("match").hidden=true;go("apps");};
 
+/* ---------- help, contact and legal ---------- */
+const CONTACT=(((document.querySelector('meta[name="jobbsvep-contact"]')||{}).content)||"").trim();
+const OWNER=(((document.querySelector('meta[name="jobbsvep-owner"]')||{}).content)||"").trim();
+function renderHelp(){
+  $("h-contact-text").textContent=CONTACT?"Har du en fråga, hittat ett fel eller vill ta bort dina uppgifter? Skriv till oss så svarar vi så snart vi kan.":"Vi håller på att sätta upp vår kontaktadress. Den kommer upp här inom kort.";
+  $("h-contact-btns").innerHTML=CONTACT?'<a class="btn" href="mailto:'+esc(CONTACT)+'">Mejla oss</a><span class="code">'+esc(CONTACT)+'</span>':'';
+  $("h-owner").textContent=OWNER?"Personuppgiftsansvarig: "+OWNER+(CONTACT?", "+CONTACT:"")+".":"";
+}
+function openHelp(section){ go("help"); const el=$(({faq:"h-faq",contact:"h-contact",privacy:"h-privacy",terms:"h-terms"})[section]||"h-faq"); if(el) setTimeout(()=>el.scrollIntoView({block:"start"}),50); }
+document.addEventListener("click",e=>{ const b=e.target.closest("[data-help]"); if(!b) return; if(!$("land").hidden){ S.seen=true; save(); $("land").hidden=true; } openHelp(b.dataset.help); });
+$("h-tour").onclick=()=>tourStart();
+$("h-onb").onclick=()=>onbOpen();
+$("h-del-btns").addEventListener("click",e=>{
+  const id=e.target.id, box=$("h-del-btns");
+  if(id==="h-del") box.innerHTML='<span>Är du säker? Det går inte att ångra.</span><button class="btn danger" id="h-del-yes" type="button">Ja, radera</button><button class="btn ghost" id="h-del-no" type="button">Avbryt</button>';
+  if(id==="h-del-no") box.innerHTML='<button class="btn danger" id="h-del" type="button">Radera allt på den här enheten</button>';
+  if(id==="h-del-yes"){ try{ localStorage.clear(); indexedDB.deleteDatabase("jobbsvep"); }catch(_){} location.href=location.pathname; }
+});
+
 /* ---------- guided tour after the questionnaire ---------- */
 const TOUR=[
   {tab:"profile",sel:"#p-specs",h:"Först: din profil",p:"Jobbsvep visar bara jobb som passar dig, och det är profilen som avgör vad som passar. Skriv vad du vill jobba med, när du kan jobba och vad du inte vill göra. Ju tydligare du är, desto bättre blir matchningen."},
@@ -1379,7 +1451,7 @@ async function cloudInit(){
 
 /* ---------- navigation + boot ---------- */
 function go(t,keep){
-  tab=t; $("v-swipe").hidden=t!=="swipe"; $("v-profile").hidden=t!=="profile"; $("v-apps").hidden=t!=="apps"; $("v-go").hidden=t!=="go";
+  tab=t; $("v-swipe").hidden=t!=="swipe"; $("v-profile").hidden=t!=="profile"; $("v-apps").hidden=t!=="apps"; $("v-go").hidden=t!=="go"; $("v-help").hidden=t!=="help";
   if(t==="go"){ renderGo(); loadPois().then(renderGo); }
   if(t==="apps") renderApps();
   if(t==="swipe"&&META){ if(!keep){ const top=order[0]; rebuildPool(); if(top&&order.includes(top)&&history.length) order=[top].concat(order.filter(i=>i!==top)); } renderDeck(); maybeRank(); }
@@ -1402,7 +1474,7 @@ $("l-start").onclick=()=>onbOpen(); $("l-skip").onclick=()=>endLanding("swipe");
 
 Object.values(S.apps).forEach(a=>{ if(a.status==="drafting"||a.status==="sending") a.status=a.body?"ready":"queued"; });
 if(!S.seen&&!S.profile.t&&!Object.keys(S.swipes).length) $("land").hidden=false;
-fillProfile(); buildOptions(); renderChrome(); updateBridge();
+fillProfile(); buildOptions(); renderChrome(); updateBridge(); renderHelp();
 idbGet().then(f=>{ if(f){cvFile=f;cvStatus();} });
 loadData().then(()=>{ if(S.profile.home&&!S.profile.homeLL) resolveHome(); });
 if(STANDALONE&&API){ ensureAccount().then(handleCheckoutReturn); }
