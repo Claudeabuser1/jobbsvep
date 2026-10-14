@@ -32,7 +32,7 @@ Estimated cost per action (actual cost is measured on every call):
 | Plan | Price | AI budget | About | Your income after VAT and card fee | Your worst case |
 | --- | --- | --- | --- | --- | --- |
 | Gratis | 0 kr | 1.50 kr / 30 days | 5 letters | 0 kr | −1.50 kr per active free user, capped by the daily pool |
-| Vecka | 19 kr, once, 7 days | 5 kr | 15 letters | 13.12 kr | **+8.12 kr** |
+| Vecka | 19 kr, once, 7 days | 5 kr | 15 letters | 13.11 kr | **+8.11 kr** |
 | Månad | 49 kr / month | 12 kr | 40 letters | 36.67 kr | **+24.67 kr** |
 
 How "income after VAT and card fee" is worked out:

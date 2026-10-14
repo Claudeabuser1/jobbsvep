@@ -134,6 +134,23 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
 .plan .pn{font-weight:700;font-size:15px} .plan .price{font-size:30px;font-weight:800;letter-spacing:-.02em} .plan .price small{font-size:15px;font-weight:600;color:var(--muted)}
 .plan ul{margin:0;padding-left:18px;color:var(--ink2);font-size:14px;display:flex;flex-direction:column;gap:3px}
 .code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--subtle);border-radius:10px;padding:8px 10px;overflow-wrap:anywhere;user-select:all;-webkit-user-select:all}
+.onb{position:absolute;inset:0;z-index:35;background:var(--bg);display:flex;flex-direction:column;overflow-y:auto}
+.onb-top{display:flex;align-items:center;gap:14px;padding:16px 20px 8px;max-width:600px;width:100%;margin:0 auto}
+.onb-top button{border:0;background:none;font-weight:600;color:var(--muted);padding:6px 2px}
+.onb-bar{flex:1;height:6px;background:var(--subtle);border-radius:3px;overflow:hidden}
+.onb-bar i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .3s ease}
+.onb-body{flex:1;display:flex;flex-direction:column;gap:18px;padding:18px 20px 32px;max-width:600px;width:100%;margin:0 auto}
+.onb-body h1{font-size:clamp(30px,7vw,42px)} .onb-body .sub{margin:0;color:var(--ink2);font-size:17px;line-height:1.5}
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice{border:1.5px solid var(--line2);background:var(--surface);border-radius:18px;padding:16px 18px;font-size:17px;font-weight:600;text-align:left;color:var(--ink);display:flex;gap:12px;align-items:center}
+.choice[aria-pressed="true"]{border-color:var(--accent);background:#f1effc}
+.choice small{display:block;font-weight:400;color:var(--muted);font-size:14px;margin-top:2px}
+.stat{font-size:clamp(64px,18vw,96px);font-weight:800;letter-spacing:-.04em;color:var(--accent);line-height:.95}
+.statsrc{font-size:13px;color:var(--muted);margin:0}
+.planbox{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.planbox div{display:flex;justify-content:space-between;gap:12px;font-size:15px} .planbox div b{text-align:right}
+.onb-foot{position:sticky;bottom:0;background:linear-gradient(to top,var(--bg) 70%,transparent);padding:16px 0 4px;margin-top:auto}
+.onb-foot .btn{width:100%}
 .confirm{background:var(--subtle);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
 .confirm p{margin:0;overflow-wrap:anywhere}
 .sel{user-select:all;-webkit-user-select:all;font-weight:700}
@@ -328,6 +345,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
           <div class="btns"><button class="btn" id="imp-go" type="button">Skapa ansökan</button><button class="btn ghost" id="imp-cancel" type="button">Avbryt</button></div>
           <p class="note" id="imp-note"></p>
         </div>
+        <p class="note" id="week-note" hidden style="font-size:15px;color:var(--ink)"></p>
         <p class="note" id="credit-note" hidden></p>
         <p class="note" id="gmail-note" hidden></p>
         <div id="apps-list" class="lst"></div>
@@ -384,6 +402,11 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
       <p class="note" id="pw-note"></p>
       <div class="btns"><button class="btn ghost" id="pw-free" type="button">Fortsätt gratis</button></div>
     </div>
+  </div>
+
+  <div class="onb" id="onb" hidden role="dialog" aria-modal="true" aria-label="Kom igång">
+    <div class="onb-top"><button id="onb-back" type="button" aria-label="Tillbaka">←</button><div class="onb-bar"><i id="onb-bar"></i></div><button id="onb-skip" type="button">Hoppa över</button></div>
+    <div class="onb-body" id="onb-body"></div>
   </div>
 
   <div class="land" id="land" hidden>
@@ -503,7 +526,7 @@ const sv=x=>SV[x]||x||"";
 const REDUCED=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ---------- state ---------- */
-const blank=()=>({profile:{name:"",email:"",phone:"",specs:"",emp:[],hours:[],fields:[],munis:[],emailOnly:false,lang:"ad",cvText:"",cvName:"",attach:true,example:"",linkedin:"",liText:"",liLang:"sv",home:"",homeLL:null,homeLabel:"",radius:0,radiusSet:0,age:"",student:true,t:0},swipes:{},apps:{},plan:null,ai:{},li:null,visits:{},seen:false});
+const blank=()=>({profile:{name:"",email:"",phone:"",specs:"",emp:[],hours:[],fields:[],munis:[],emailOnly:false,lang:"ad",cvText:"",cvName:"",attach:true,example:"",linkedin:"",liText:"",liLang:"sv",home:"",homeLL:null,homeLabel:"",radius:0,radiusSet:0,age:"",student:true,t:0},swipes:{},apps:{},plan:null,ai:{},li:null,visits:{},onb:null,seen:false});
 let S=blank();
 try{const raw=localStorage.getItem(LS); if(raw){const o=JSON.parse(raw); S=Object.assign(blank(),o); S.profile=Object.assign(blank().profile,o.profile||{});}}catch(e){}
 let saveT=0;
@@ -511,6 +534,7 @@ function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{const ids=Object.k
 function bridgeData(){ const p=S.profile; return JSON.stringify({v:1,profile:{name:p.name,email:p.email,phone:p.phone,linkedin:p.linkedin},apps:Object.values(S.apps).filter(a=>a.body&&!["sent","applied"].includes(a.status)).sort((a,b)=>b.t-a.t).slice(0,30).map(a=>({id:a.id,e:a.e,h:a.h,subject:a.subject,body:a.body,url:a.url||""}))}); }
 function updateBridge(){ const el=document.getElementById("jobbsvep-bridge"); if(el) el.textContent=bridgeData(); }
 
+let dataDone; const dataReady=new Promise(r=>dataDone=r);
 let PLACES=null, SHARED=[], sharedDb=null, META=null, JOBS=[], BYID=new Map(), chunkCache={}, cvFile=null;
 let pool=[], order=[], history=[], ranking=false, sheetOpen=false, sample=null, mcp=null, gmailOK=null, cloud=null;
 let tab="swipe";
@@ -538,7 +562,7 @@ async function loadData(){
     try{ PLACES=await (await fetch("data/places.json")).json(); }catch(_){ PLACES={m:{},s:{},p:{}}; }
     const txt=JOBS.length.toLocaleString("sv-SE")+" lediga jobb i Stockholms län från Platsbanken"+(META.otherSites?" och "+Object.keys(META.sources||{}).length+" andra jobbsajter":"")+", uppdaterat "+fmtDate(META.built);
     $("snap").textContent=txt; $("l-src").textContent=txt;
-    mergeShared(); buildOptions(); rebuildPool(); renderDeck();
+    mergeShared(); buildOptions(); rebuildPool(); renderDeck(); dataDone();
     if(S.plan&&sample) maybeRank();
   }catch(e){
     $("deck").innerHTML='<div class="empty"><h2>Jobben gick inte att hämta</h2><p>Jobblistan kunde inte läsas. Ladda om sidan för att försöka igen.</p></div>';
@@ -663,7 +687,7 @@ async function rankBatch(){
   const p=S.profile;
   const lines=ids.map(id=>{const j=BYID.get(id);const km=distKm(j);return id+" | "+j.h+" | "+j.e+" | "+j.o+" | "+j.m+(km!==null?" ("+Math.round(km)+" km from home)":"")+" | "+sv(j.et)+", "+sv(j.hr)+" | "+j.sn.slice(0,230);}).join("\n");
   const prompt="You are a recruiter matching one candidate to open jobs in Stockholm. Judge fit honestly: seniority, skills, what they asked for and what they said they don't want.\n\n"
-   +"WHAT THE CANDIDATE WANTS:\n"+(p.specs||"(not stated)")+(p.student?"\nThe candidate is young (age "+(p.age||"16-21")+") with little or no work experience: favour extra, part-time, summer and entry-level jobs they can realistically get, score jobs close to home higher, and mark down hard any job that needs a qualification, a licence or years of experience.":"")+"\n\nCANDIDATE CV:\n"+(p.cvText.slice(0,6000)||"(no CV given)")
+   +"WHAT THE CANDIDATE WANTS:\n"+(p.specs||"(not stated)")+(p.student?"\nThe candidate is young (age "+(p.age||"16-21")+") with "+expText()+": favour extra, part-time, summer and entry-level jobs they can realistically get, score jobs close to home higher, and mark down hard any job that needs a qualification, a licence or years of experience.":"")+"\n\nCANDIDATE CV:\n"+(p.cvText.slice(0,6000)||"(no CV given)")
    +"\n\nJOBS (id | title | employer | occupation | place | terms | ad excerpt):\n"+lines
    +"\n\nReply with only a JSON array, one object per job, every id included: [{\"id\":\"<id>\",\"s\":<fit 0-100>,\"why\":\"<one short sentence in Swedish, max 18 words, addressed to the candidate as 'du', saying why it fits or what the catch is>\"}]. Be strict: under 40 means not worth their time.";
   try{
@@ -842,7 +866,7 @@ async function draft(a,fresh){
    +"- Sign off with the candidate's name, then phone and email on their own lines if given.\n"
    +"- Subject line: short and clear, the role title, plus the reference number if the ad has one.\n\n"
    +"CANDIDATE\nName: "+(p.name||"(not given, sign off without a name)")+"\nPhone: "+(p.phone||"-")+"\nEmail: "+(p.email||"-")+"\nLinkedIn (add as a last signature line if given): "+(p.linkedin||"-")+"\nWhat they are looking for: "+(p.specs||"-")
-   +(p.student?"\nThe candidate is young (age "+(p.age||"16-21")+") with little work experience. Do not apologise for that: lead with reliability, willingness to learn, availability (evenings, weekends, holidays) and anything concrete from school, sports or volunteering that the CV shows.":"")+"\n\nCV\n"+((p.cvText||p.liText).slice(0,12000)||"(no CV text provided)")+"\n\nEXAMPLE EMAIL WRITTEN BY THE CANDIDATE (style reference only, do not reuse its content)\n"+(p.example.slice(0,4000)||"(none)")
+   +(p.student?"\nThe candidate is young (age "+(p.age||"16-21")+") with "+expText()+". Do not apologise for that: lead with reliability, willingness to learn, availability (evenings, weekends, holidays) and anything concrete from school, sports or volunteering that the CV shows.":"")+"\n\nCV\n"+((p.cvText||p.liText).slice(0,12000)||"(no CV text provided)")+"\n\nEXAMPLE EMAIL WRITTEN BY THE CANDIDATE (style reference only, do not reuse its content)\n"+(p.example.slice(0,4000)||"(none)")
    +"\n\nJOB AD\nTitle: "+j.h+"\nEmployer: "+j.e+"\nPlace: "+(j.m||"")+"\nContact person: "+(contact||"(none named)")+"\nReference: "+(d.ref||"(none)")+"\nApplication instructions: "+([d.info,d.other].filter(Boolean).join(" ")||"(none)")+"\nAd text:\n"+((d.d||j.sn||"").slice(0,5000))
    +"\n\nReply with only a JSON object: {\"subject\":\"...\",\"body\":\"...\"}";
   try{
@@ -861,6 +885,7 @@ const STATUS={queued:["I kö",""],drafting:["Skrivs",""],ready:["Redo att skicka
 let openApp=null, confirmApp=null;
 function renderApps(){
   const list=$("apps-list"), apps=Object.values(S.apps).sort((a,b)=>{const r=x=>["sent","applied"].includes(x.status)?1:0;return r(a)-r(b)||b.t-a.t;});
+  const wp=weekProgress(), wn=$("week-note"); wn.hidden=!wp; if(wp) wn.innerHTML='<b>Veckans mål:</b> '+Math.min(wp.done,wp.goal)+' av '+wp.goal+' ansökningar skickade'+(wp.done>=wp.goal?'. Snyggt jobbat!':'.');
   const gn=$("gmail-note"); gn.hidden=gmailOK!==false; gn.textContent=STANDALONE?"Tryck på Öppna i mejlappen så öppnas ditt mejlprogram med ansökan ifylld. Bifoga ditt CV där och tryck på skicka.":"Gmail går inte att nå i den här vyn, så det går inte att skicka härifrån. Du kan fortfarande kopiera varje ansökan och skicka den själv.";
   const act=document.activeElement&&document.activeElement.id, sel=act&&document.activeElement.selectionStart;
   if(!apps.length) list.innerHTML='<div class="panel"><p>Här är det tomt än så länge. Svep höger på ett jobb så skrivs ansökan åt dig.</p><div class="btns"><button class="btn" data-go="swipe">Börja svepa</button></div></div>';
@@ -947,6 +972,102 @@ function showSent(a){
 }
 $("mt-go").onclick=()=>{$("match").hidden=true;go("swipe");};
 $("mt-apps").onclick=()=>{$("match").hidden=true;go("apps");};
+
+/* ---------- first-run questionnaire ---------- */
+function expText(){ const e=S.onb&&S.onb.exp; return e==="none"?"no work experience yet":e==="some"?"a little work experience (summer job, internship or extra work)":e==="lots"?"some work experience":"little or no work experience"; }
+const ONB=[
+  {t:"intro"},
+  {t:"one",k:"goal",q:"Vad letar du efter?",sub:"Vi visar jobb som passar just det.",o:[["extra","Extrajobb vid sidan av skolan","Kvällar, helger, några timmar i veckan"],["summer","Sommarjobb","Att söka i god tid"],["first","Mitt första heltidsjobb","Efter gymnasiet eller ett mellanår"],["intern","Praktik eller trainee","För att få in en fot"]]},
+  {t:"one",k:"age",q:"Hur gammal är du?",sub:"Vissa jobb kräver att man har fyllt 18. Dem gömmer vi om de inte passar.",o:[["16","16"],["17","17"],["18","18"],["19","19"],["20","20"],["21","21 eller äldre"]]},
+  {t:"where",q:"Var bor du?",sub:"Skriv en adress, ett område eller ett postnummer. Då visar vi jobb du kan ta dig till."},
+  {t:"statLocal"},
+  {t:"one",k:"exp",q:"Har du jobbat förut?",sub:"Det gör inget om svaret är nej. Många av jobben här är gjorda för första jobbet.",o:[["none","Nej, inte än"],["some","Lite","Sommarjobb, praktik, extrajobb"],["lots","Ja, flera jobb"]]},
+  {t:"one",k:"applied",q:"Hur många jobb har du sökt den senaste månaden?",o:[["0","Inga"],["1-5","1 till 5"],["6-20","6 till 20"],["20+","Fler än 20"]]},
+  {t:"many",k:"hard",q:"Vad är svårast med att söka jobb?",sub:"Välj allt som stämmer.",o:[["find","Att hitta jobb som passar mig"],["letter","Att skriva personligt brev"],["reply","Att få svar"],["say","Att veta vad jag ska säga"],["far","Att hitta jobb nära mig"]]},
+  {t:"statYouth"},
+  {t:"one",k:"why",q:"Varför vill du ha ett jobb?",sub:"Det hjälper oss att hålla dig motiverad.",o:[["money","Egna pengar"],["save","Spara till något särskilt"],["cv","Erfarenhet till CV:t"],["move","Flytta hemifrån"],["other","Något annat"]]},
+  {t:"one",k:"weekly",q:"Hur många jobb vill du söka i veckan?",sub:"Ett tydligt mål gör det lättare att fortsätta. Du kan ändra det sen.",o:[["3","3 i veckan","Lugnt och stadigt"],["5","5 i veckan","Bra balans, vårt förslag"],["10","10 i veckan","Om du vill ha jobb snabbt"]]},
+  {t:"plan"},
+];
+let onbStep=0;
+const GOAL_TXT={extra:"Extrajobb vid sidan av skolan",summer:"Sommarjobb",first:"Första heltidsjobbet",intern:"Praktik eller trainee"};
+const WHY_TXT={money:"egna pengar",save:"att spara till något särskilt",cv:"erfarenhet till CV:t",move:"att flytta hemifrån",other:"det du vill"};
+const HELP_TXT={find:["Hitta rätt jobb","Vi sorterar bort jobb som kräver utbildning eller lång erfarenhet, och visar de närmaste först."],letter:["Personliga brev","Svep höger så skrivs ett brev utifrån ditt CV och annonsen, i din egen ton."],reply:["Få svar","Fler och bättre anpassade ansökningar ger fler svar. Ditt veckomål hjälper dig att hålla takten."],say:["Veta vad du ska säga","Under Gå dit får du en färdig pitch för varje ställe du vill gå in på."],far:["Jobb nära dig","Vi räknar avståndet till varje jobb och visar ställen inom gångavstånd."]};
+function onbOpen(){ S.onb=S.onb||{}; onbStep=0; $("land").hidden=true; $("onb").hidden=false; onbRender(); }
+function onbClose(){ $("onb").hidden=true; }
+function onbNext(){ onbStep=Math.min(ONB.length-1,onbStep+1); onbRender(); }
+function choiceBtn(val,label,sub,on){ return '<button type="button" class="choice" data-v="'+esc(val)+'" aria-pressed="'+on+'"><span>'+esc(label)+(sub?'<small>'+esc(sub)+'</small>':'')+'</span></button>'; }
+function youthCounts(){
+  const p=S.profile, near=p.homeLL; let all=0, close=0, mail=0;
+  for(const j of JOBS){ if(j.stu<1||(j.dl&&daysLeft(j.dl)<0)) continue; const ag=Number(p.age)||0; if(ag&&((j.age&&j.age>ag)||(ag<18&&j.lic))) continue; all++; if(j.em) mail++; if(near){ const k=distKm(j); if(k!==null&&k<=10) close++; } }
+  return {all,close,mail};
+}
+async function onbRender(){
+  const st=ONB[onbStep], o=S.onb, b=$("onb-body");
+  $("onb-bar").style.width=Math.round(onbStep/(ONB.length-1)*100)+"%"; $("onb-back").style.visibility=onbStep?"visible":"hidden"; $("onb-skip").hidden=st.t==="plan";
+  let h="";
+  if(st.t==="intro") h='<h1>Hej! Vi ska hitta ett jobb som passar dig.</h1><p class="sub">Svara på några snabba frågor, så anpassar vi Jobbsvep efter dig. Det tar ungefär en minut.</p><div class="onb-foot"><button class="btn big" data-next="1">Sätt igång</button></div>';
+  else if(st.t==="one"||st.t==="many"){
+    const cur=o[st.k]; h='<h1>'+esc(st.q)+'</h1>'+(st.sub?'<p class="sub">'+esc(st.sub)+'</p>':'')+'<div class="choices">'+st.o.map(x=>choiceBtn(x[0],x[1],x[2],st.t==="many"?(cur||[]).includes(x[0]):cur===x[0])).join("")+'</div>'+(st.t==="many"?'<div class="onb-foot"><button class="btn big" data-next="1"'+((cur||[]).length?"":" disabled")+'>Fortsätt</button></div>':'');
+  }
+  else if(st.t==="where") h='<h1>'+esc(st.q)+'</h1><p class="sub">'+esc(st.sub)+'</p><label class="f" for="onb-home">Adress, område eller postnummer<input type="text" id="onb-home" autocomplete="off" placeholder="T.ex. Solna, Södermalm eller 113 50" value="'+esc(S.profile.home||"")+'"></label><p class="note" id="onb-home-note"></p><div class="onb-foot"><button class="btn big" id="onb-home-go">Fortsätt</button></div>';
+  else if(st.t==="statLocal"){
+    b.innerHTML='<p class="note"><span class="spin"></span> Räknar jobb nära dig…</p>'; await dataReady; if(ONB[onbStep]!==st) return;
+    const c=youthCounts();
+    h=(S.profile.homeLL&&c.close?'<p class="sub">Inom 10 km från '+esc(S.profile.homeLabel)+' finns just nu</p><div class="stat">'+c.close.toLocaleString("sv-SE")+'</div><h1>jobb som går att få utan lång erfarenhet.</h1>':'<p class="sub">I Stockholms län finns just nu</p><div class="stat">'+c.all.toLocaleString("sv-SE")+'</div><h1>jobb som går att få utan lång erfarenhet.</h1>')
+      +'<p class="sub">'+c.mail.toLocaleString("sv-SE")+' av dem i länet tar emot ansökan via mejl, så du kan söka direkt härifrån. Listan uppdateras två gånger i veckan.</p><p class="statsrc">Källa: Arbetsförmedlingens Platsbanken och andra jobbsajter, '+esc(fmtDate(META.built))+'</p><div class="onb-foot"><button class="btn big" data-next="1">Fortsätt</button></div>';
+  }
+  else if(st.t==="statYouth"){
+    const hard=(o.hard||[]).filter(k=>HELP_TXT[k]);
+    h='<div class="stat">23,8 %</div><h1>av unga i arbetskraften saknar jobb just nu.</h1><p class="sub">Det är alltså inte dig det är fel på. Det är svårt för många. De som får jobb först brukar söka fler jobb, anpassa varje ansökan och ibland gå dit själva.</p><p class="statsrc">Källa: SCB, Arbetskraftsundersökningarna augusti 2026, unga 15–24 år, säsongsrensat.</p>'
+      +(hard.length?'<div class="planbox"><b>Så hjälper Jobbsvep dig med det som är svårast</b>'+hard.map(k=>'<p style="margin:0"><b>'+esc(HELP_TXT[k][0])+'.</b> '+esc(HELP_TXT[k][1])+'</p>').join("")+'</div>':'')+'<div class="onb-foot"><button class="btn big" data-next="1">Fortsätt</button></div>';
+  }
+  else if(st.t==="plan"){
+    const w=Number(o.weekly||5), apps=w*4;
+    h='<h1>Din plan är klar.</h1><div class="planbox"><div><span>Du letar efter</span><b>'+esc(GOAL_TXT[o.goal]||"Ett jobb")+'</b></div><div><span>Nära</span><b>'+esc(S.profile.homeLabel||"Stockholms län")+'</b></div><div><span>Veckomål</span><b>'+w+' ansökningar</b></div><div><span>På fyra veckor</span><b>'+apps+' ansökningar</b></div><div><span>Du gör det för</span><b>'+esc(WHY_TXT[o.why]||"dig själv")+'</b></div></div>'
+      +'<p class="sub">Varje sommarjobb eller extrajobb räknas mer än det verkar. Forskning visar att kontakter från extra- och sommarjobb under gymnasiet hjälper unga att snabbare få ett stadigt jobb senare.</p><p class="statsrc">Källa: IFAU, Kontakter och ungdomars arbetsmarknadsinträde (rapport 2013:20).</p>'
+      +(STANDALONE&&API?'<div class="planbox"><b>Gratis räcker långt</b><p style="margin:0;color:var(--ink2)">Svepa, matchning, mallbrev, Gå dit och ungefär 5 AI-ansökningar i månaden ingår alltid. Vill du ha fler AI-skrivna ansökningar finns Vecka för 19 kr och Månad för 49 kr. Du kan välja det när som helst.</p></div>':'')
+      +'<div class="onb-foot" style="display:flex;flex-direction:column;gap:10px"><button class="btn big" id="onb-done">Börja gratis</button>'+(STANDALONE&&API?'<button class="btn ghost" id="onb-plans">Se paketen</button>':'')+'</div>';
+  }
+  b.innerHTML=h;
+  const hi=$("onb-home"); if(hi){ hi.focus(); hi.addEventListener("keydown",e=>{ if(e.key==="Enter") $("onb-home-go").click(); }); }
+}
+$("onb-body").addEventListener("click",async e=>{
+  const st=ONB[onbStep], o=S.onb;
+  if(e.target.closest("[data-next]")){ onbNext(); return; }
+  const c=e.target.closest(".choice");
+  if(c&&st.k){
+    if(st.t==="many"){ const arr=o[st.k]||[], v=c.dataset.v, i=arr.indexOf(v); if(i<0) arr.push(v); else arr.splice(i,1); o[st.k]=arr; save(); onbRender(); return; }
+    o[st.k]=c.dataset.v; save(); onbRender(); setTimeout(onbNext,220); return;
+  }
+  if(e.target.id==="onb-home-go"){
+    const v=$("onb-home").value.trim(), n=$("onb-home-note");
+    if(!v){ onbNext(); return; }
+    S.profile.home=v; $("p-home").value=v; await dataReady; await resolveHome();
+    if(S.profile.homeLL) onbNext(); else { n.className="note err"; n.textContent="Vi hittade inte platsen. Prova ett område eller postnummer, eller tryck på Fortsätt igen för att hoppa över."; $("onb-home").value=""; }
+    return;
+  }
+  if(e.target.id==="onb-done"||e.target.id==="onb-plans"){ onbFinish(e.target.id==="onb-plans"); }
+});
+$("onb-back").onclick=()=>{ onbStep=Math.max(0,onbStep-1); onbRender(); };
+$("onb-skip").onclick=()=>onbFinish(false);
+function onbFinish(showPlans){
+  const o=S.onb||{}, p=S.profile; o.done=Date.now(); S.onb=o; S.seen=true;
+  if(o.age) p.age=o.age;
+  if(o.goal==="extra"&&!p.hours.length) p.hours=["Part-time"];
+  if(o.goal==="summer"&&!p.emp.length) p.emp=["Summer job"];
+  if(!p.specs.trim()&&o.goal) p.specs=({extra:"Extrajobb vid sidan av skolan, gärna kvällar och helger.",summer:"Sommarjobb.",first:"Mitt första heltidsjobb, gärna något jag kan lära mig på plats.",intern:"Praktik eller traineeplats där jag kan lära mig."})[o.goal];
+  p.student=true; p.t=Date.now(); save(); pushProfile(); fillProfile(); buildOptions();
+  onbClose(); if(typeof tourStart==="function") tourStart(); else go("profile");
+  if(showPlans) openPaywall();
+}
+/* weekly goal progress */
+function weekProgress(){
+  const o=S.onb||{}, goal=Number(o.weekly||0); if(!goal) return null;
+  const now=new Date(), day=(now.getDay()+6)%7, start=new Date(now.getFullYear(),now.getMonth(),now.getDate()-day).getTime();
+  const done=Object.values(S.apps).filter(a=>["sent","applied","drafted"].includes(a.status)&&(a.sentAt||a.t)>=start).length;
+  return {goal,done};
+}
 
 /* ---------- walk in: places near you + what to say ---------- */
 let POIS=null, goCount=20, openPitch=null; const pitches={};
@@ -1214,7 +1335,7 @@ document.addEventListener("keydown",e=>{
   else if(e.key==="z"&&(e.metaKey||e.ctrlKey)) undo();
 });
 function endLanding(to){ S.seen=true; save(); $("land").hidden=true; go(to); }
-$("l-start").onclick=()=>endLanding("profile"); $("l-skip").onclick=()=>endLanding("swipe");
+$("l-start").onclick=()=>onbOpen(); $("l-skip").onclick=()=>endLanding("swipe");
 
 Object.values(S.apps).forEach(a=>{ if(a.status==="drafting"||a.status==="sending") a.status=a.body?"ready":"queued"; });
 if(!S.seen&&!S.profile.t&&!Object.keys(S.swipes).length) $("land").hidden=false;
