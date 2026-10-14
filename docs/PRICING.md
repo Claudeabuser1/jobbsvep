@@ -1,4 +1,4 @@
-# Pricing: how Jobbsvep can never cost more than it earns
+# Pricing: how Matchd can never cost more than it earns
 
 ## The short version
 

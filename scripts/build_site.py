@@ -5,7 +5,7 @@ Environment (all optional):
   JOBBSVEP_API   base URL of the AI server (server/), e.g. https://api.example.se
   SITE_DOMAIN    custom domain for GitHub Pages; writes site/CNAME
   CONTACT_EMAIL  shown on the help page
-  OWNER_NAME     name of the person or company running Jobbsvep (privacy policy)
+  OWNER_NAME     name of the person or company running Matchd (privacy policy)
   APP_DATA_BASE  for app builds only: where to load job data from, e.g. https://jobbsvep.se/
 
 Run:  python3 scripts/build_site.py
@@ -14,7 +14,7 @@ import html, os, shutil, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = os.path.join(ROOT, "site")
-ICON = "data:image/svg+xml," + "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%235b4fd6'/%3E%3Ctext x='50' y='70' font-family='sans-serif' font-size='62' font-weight='800' fill='%23fff' text-anchor='middle'%3Ej%3C/text%3E%3C/svg%3E"
+ICON = "data:image/svg+xml," + "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%235b4fd6'/%3E%3Ctext x='50' y='70' font-family='sans-serif' font-size='62' font-weight='800' fill='%23fff' text-anchor='middle'%3Em%3C/text%3E%3C/svg%3E"
 DESC = "Extrajobb, sommarjobb och första jobbet nära dig i Stockholm. Svep höger så skrivs ansökan åt dig."
 DESC_EN = "Extra work, summer jobs and your first job near you in Stockholm. Swipe right and your application is written for you."
 
@@ -32,13 +32,13 @@ def main():
     def wrap(body, lang, base, desc):
         head = ('<!doctype html><html lang="%s"><head><meta charset="utf-8">'
                 '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
-                '<meta name="description" content="%s"><meta property="og:title" content="Jobbsvep">'
+                '<meta name="description" content="%s"><meta property="og:title" content="Matchd">'
                 '<meta property="og:description" content="%s"><meta name="theme-color" content="#5b4fd6">'
                 '<meta name="jobbsvep-api" content="%s"><meta name="jobbsvep-contact" content="%s"><meta name="jobbsvep-owner" content="%s">'
                 '<meta name="jobbsvep-lang" content="%s"><meta name="jobbsvep-base" content="%s">'
                 '<link rel="alternate" hreflang="sv" href="%s"><link rel="alternate" hreflang="en" href="%sen/"><link rel="icon" href="%s">'
                 '<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="%sicons/apple-touch-icon.png">'
-                '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Jobbsvep">'
+                '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Matchd">'
                 '<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%%}'
                 ':root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>'
                 '</head><body>') % (lang, desc, desc, api, contact, owner, lang, data_base or base, base or "./", base or "./", ICON, base)

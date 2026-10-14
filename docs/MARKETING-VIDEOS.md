@@ -14,9 +14,9 @@
 2. **Edit in CapCut** (free) or TikTok's built-in editor:
    - New project, add the clips in order, and cut each to 1–2 seconds.
    - Add the caption with the Text tool. Place it in the top third so the app's buttons don't cover it. Keep it on screen for the whole video.
-   - Optional: a second text at the end with the punchline and "jobbsvep.se".
+   - Optional: a second text at the end with the punchline and "matchd.se".
 3. **Pick the sound inside TikTok or Instagram,** not in CapCut. Business accounts on TikTok can only use the **Commercial Music Library**. Popular songs can get your video muted or removed. Search the library for a calm, trending sound.
-4. **Post with 3–5 hashtags.** Swedish: #sommarjobb #extrajobb #förstajobbet #jobbsökning #jobbsvep. English: #firstjob #jobhunting #studentjob #jobsearch.
+4. **Post with 3–5 hashtags.** Swedish: #sommarjobb #extrajobb #förstajobbet #jobbsökning #matchd. English: #firstjob #jobhunting #studentjob #jobsearch.
 5. **Post at the right times:** about three times a week, between 15:00 and 18:00 on weekdays, when school is out.
 
 The hook must land in the first 1–2 seconds. Start with the funniest clip, not the logo.
@@ -46,6 +46,8 @@ Each has an English and a Swedish caption. Film once, post twice with different 
 - **Be honest about the app.** Show the real app, real swipes, real letters. Blur personal details such as your phone number and address.
 
 ## 5. A new name that works internationally
+
+**Chosen name (15 October 2026): Matchd.** `matchd.se` was free; `matchd.com`, `.app` and `.io` were taken. Matchd is already used by an Australian recruitment-assessment company (matchd.com) and a Dutch staffing firm, so search the EU trademark register (EUIPO) before you invest in the brand. The research below is kept for reference.
 
 What a good name needs here:
 

@@ -6,8 +6,8 @@ function render() {
   for (const k of FIELDS) $(k).value = state.profile[k] || "";
   $("cvname").textContent = state.cv ? "Sparad: " + state.cv.name : "Ingen CV-fil sparad än.";
   $("sync").textContent = state.synced
-    ? "Synkad med Jobbsvep " + new Date(state.synced).toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " · " + state.apps.length + " ansökningar"
-    : "Inte synkad med Jobbsvep än. Öppna Jobbsvep i en flik, eller fyll i dina uppgifter nedan.";
+    ? "Synkad med Matchd " + new Date(state.synced).toLocaleString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " · " + state.apps.length + " ansökningar"
+    : "Inte synkad med Matchd än. Öppna Matchd i en flik, eller fyll i dina uppgifter nedan.";
   const sel = $("app"), cur = sel.value;
   sel.length = 1;
   for (const a of state.apps) sel.add(new Option((a.e || "") + " – " + (a.h || ""), a.id));
@@ -42,7 +42,7 @@ $("load").addEventListener("click", () => {
     for (const k of ["name", "email", "phone", "linkedin"]) if (d.profile && d.profile[k]) state.profile[k] = d.profile[k];
     state.apps = Array.isArray(d.apps) ? d.apps : []; state.synced = Date.now();
     save(); render(); $("paste").value = ""; $("status").textContent = "Inläst.";
-  } catch (_) { $("status").textContent = "Det där såg inte ut som data från Jobbsvep."; }
+  } catch (_) { $("status").textContent = "Det där såg inte ut som data från Matchd."; }
 });
 
 $("fill").addEventListener("click", async () => {
@@ -68,6 +68,6 @@ $("grab").addEventListener("click", async () => {
     const [r] = await chrome.scripting.executeScript({ target: { tabId: t.id }, func: () => (globalThis.__jobbsvepGrab ? globalThis.__jobbsvepGrab() : null) });
     if (!r || !r.result || !r.result.text) throw 0;
     await navigator.clipboard.writeText(r.result.title + "\n" + r.result.url + "\n\n" + r.result.text);
-    $("status").textContent = "Kopierad. Klistra in den under Importera en annons i Jobbsvep.";
+    $("status").textContent = "Kopierad. Klistra in den under Importera en annons i Matchd.";
   } catch (e) { $("status").textContent = "Kunde inte läsa sidan. Markera annonstexten och kopiera den själv."; }
 });

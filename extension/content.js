@@ -1,12 +1,12 @@
-// Jobbsvep content script. Runs in every frame.
+// Matchd content script. Runs in every frame.
 // 1. Fills job application forms when the popup asks (never submits, never ticks boxes).
-// 2. Picks up profile + drafted applications from the Jobbsvep page when it is open.
+// 2. Picks up profile + drafted applications from the Matchd page when it is open.
 (() => {
   if (globalThis.__jobbsvepLoaded) return;
   globalThis.__jobbsvepLoaded = true;
   const store = typeof chrome !== "undefined" && chrome.storage ? chrome.storage.local : null;
 
-  /* ---------- sync from the Jobbsvep page ---------- */
+  /* ---------- sync from the Matchd page ---------- */
   let lastBridge = "";
   function syncBridge() {
     const el = document.getElementById("jobbsvep-bridge");

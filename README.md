@@ -1,4 +1,6 @@
-# Jobbsvep
+# Matchd
+
+*Formerly Jobbsvep. The repository, server and storage keys keep the old name internally; everything users see says Matchd.*
 
 Swipe-to-apply job search for students in Stockholm. You describe what you want, add your CV and an example of how you write, then swipe through matching jobs. Swiping right drafts an application in your voice that you review and send.
 
@@ -51,7 +53,7 @@ Set `ALLOWED_ORIGINS` in `server/fly.toml` to the site's address so only your si
 Buy the domain at any registrar, then:
 
 ```bash
-gh variable set SITE_DOMAIN --body "jobbsvep.se" && gh workflow run update.yml
+gh variable set SITE_DOMAIN --body "matchd.se" && gh workflow run update.yml
 ```
 
 At the registrar, point the domain at GitHub Pages: four `A` records for `@` to `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`, and a `CNAME` for `www` to `claudeabuser1.github.io`. In the repository's Settings → Pages, enter the domain and tick "Enforce HTTPS" once the certificate is ready.

@@ -1,8 +1,8 @@
-# Taking Jobbsvep outside Sweden
+# Taking Matchd outside Sweden
 
 ## Summary
 
-Most of Jobbsvep already works in any country: swiping, AI letters, walk-in pitches, the credit guard, the app shell. What is Swedish is the **job data**, the **rules for what counts as a youth job**, the **language**, and the **money and law** (kronor, Swedish VAT, Swedish consumer law). The plan is to move each of those into a per-country "market" setting, then add countries one at a time. **Norway first**, because it has a free official job feed and is closest to Sweden.
+Most of Matchd already works in any country: swiping, AI letters, walk-in pitches, the credit guard, the app shell. What is Swedish is the **job data**, the **rules for what counts as a youth job**, the **language**, and the **money and law** (kronor, Swedish VAT, Swedish consumer law). The plan is to move each of those into a per-country "market" setting, then add countries one at a time. **Norway first**, because it has a free official job feed and is closest to Sweden.
 
 ## 1. What is Sweden-specific today
 

@@ -1,4 +1,4 @@
-// Jobbsvep service worker: makes the site installable and usable offline.
+// Matchd service worker: makes the site installable and usable offline.
 // Pages and job data: network first (always fresh when online), cached copy when offline.
 // Fonts and icons: cache first. The AI server is never cached.
 const VERSION = "__BUILD__";

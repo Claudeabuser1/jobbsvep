@@ -1,4 +1,4 @@
-// Jobbsvep API server.
+// Matchd API server.
 //
 // - POST /ai forwards a prompt to Claude. The API key stays here and never reaches the browser.
 // - Every account has an AI budget in öre per period. Before each Claude call the server reserves the

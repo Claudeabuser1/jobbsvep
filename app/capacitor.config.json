@@ -1,7 +1,11 @@
 {
-  "appId": "se.jobbsvep.app",
-  "appName": "Jobbsvep",
+  "appId": "se.matchd.app",
+  "appName": "Matchd",
   "webDir": "www",
-  "server": { "androidScheme": "https" },
-  "ios": { "contentInset": "always" }
+  "server": {
+    "androidScheme": "https"
+  },
+  "ios": {
+    "contentInset": "always"
+  }
 }

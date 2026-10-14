@@ -1,4 +1,4 @@
-<title>Jobbsvep</title>
+<title>Matchd</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap">
 <style>
 /* Design 2b "Svep först": 320px sidebar + centred photo-style card on desktop, card + overlapping round buttons + tab bar on mobile. Single light theme by design. */
@@ -253,13 +253,13 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
 
 <div class="app">
   <aside class="side" aria-label="Ansökningar">
-    <div class="side-top"><button class="logo-t" data-go="swipe">jobbsvep</button><button class="me" id="me" data-go="profile" title="Din profil" aria-label="Din profil">?</button></div>
+    <div class="side-top"><button class="logo-t" data-go="swipe">matchd</button><button class="me" id="me" data-go="profile" title="Din profil" aria-label="Din profil">?</button></div>
     <div class="side-sec"><button class="btn ghost sm" data-go="go" style="align-self:flex-start">Gå dit själv: ställen nära dig</button></div>
     <div class="side-sec"><b>Redo att skicka</b><div id="s-rings"></div></div>
     <div class="side-sec"><b>Ansökningar</b><div id="s-list"></div><button class="btn ghost sm" data-imp="1" style="align-self:flex-start">Importera en annons</button></div>
     <div class="side-foot"><div class="foot-links" style="margin-bottom:8px"><button data-go="help">Hjälp och kontakt</button><button data-help="privacy">Integritet</button><button data-help="terms">Villkor</button><a class="lang-link" hidden></a></div><span id="snap"></span></div>
   </aside>
-  <header class="mhead"><button class="logo-t" data-go="swipe">jobbsvep</button><span class="right"><button class="fpill" id="m-filter" data-go="profile">Stockholm · Filter</button><button class="helpbtn" data-go="help" aria-label="Hjälp och kontakt" title="Hjälp och kontakt">?</button></span></header>
+  <header class="mhead"><button class="logo-t" data-go="swipe">matchd</button><span class="right"><button class="fpill" id="m-filter" data-go="profile">Stockholm · Filter</button><button class="helpbtn" data-go="help" aria-label="Hjälp och kontakt" title="Hjälp och kontakt">?</button></span></header>
   <main>
     <section class="view" id="v-swipe">
       <div class="deskpill" id="deskpill"></div>
@@ -324,7 +324,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
           <h2>Ditt abonnemang</h2>
           <p id="plan-status">Hämtar…</p>
           <div class="btns"><button class="btn" id="plan-up" type="button">Få fler AI-ansökningar</button><button class="btn ghost" id="plan-manage" type="button" hidden>Hantera abonnemang</button></div>
-          <details><summary style="cursor:pointer;font-weight:600">Använda Jobbsvep på en annan enhet</summary>
+          <details><summary style="cursor:pointer;font-weight:600">Använda Matchd på en annan enhet</summary>
             <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
               <p class="note">Din kontokod kopplar ihop dina enheter med ditt abonnemang. Dela den inte med någon.</p>
               <div class="code" id="acct-code"></div>
@@ -336,7 +336,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
         </div>
         <div class="panel">
           <h2>LinkedIn</h2>
-          <p>LinkedIn släpper inte in andra appar i din profil, så kopplingen går via dig: ladda upp din profil som PDF (på din profilsida: Resurser, sedan Spara som PDF) eller klistra in texten. Då kan Jobbsvep använda den som CV och föreslå en vassare profil som du klistrar in på LinkedIn.</p>
+          <p>LinkedIn släpper inte in andra appar i din profil, så kopplingen går via dig: ladda upp din profil som PDF (på din profilsida: Resurser, sedan Spara som PDF) eller klistra in texten. Då kan Matchd använda den som CV och föreslå en vassare profil som du klistrar in på LinkedIn.</p>
           <label class="f" for="p-li">Länk till din profil<input type="text" id="p-li" autocomplete="off" placeholder="https://www.linkedin.com/in/…"></label>
           <div class="drop" id="li-drop"><span id="li-status">Släpp din LinkedIn-PDF här eller välj en fil</span><div class="btns"><button class="btn ghost sm" id="li-pick" type="button">Välj fil</button></div><input type="file" id="li-file" accept=".pdf,.txt,application/pdf,text/plain" hidden></div>
           <label class="f" for="p-litext">Din nuvarande LinkedIn-profil som text<textarea id="p-litext" rows="5" placeholder="Rubrik, Om, Erfarenhet, Utbildning, Kompetenser…"></textarea></label>
@@ -347,7 +347,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
         </div>
         <div class="panel">
           <h2>Fyll i formulär automatiskt</h2>
-          <p>Jobbsveps tillägg för Chrome fyller i ansökningsformulär på arbetsgivarnas sajter med ditt namn, dina kontaktuppgifter, ditt CV och brevet du har fått skrivet här. Tillägget hämtar uppgifterna själv när den här sidan är öppen. Fungerar inte det kan du kopiera över dem.</p>
+          <p>Matchds tillägg för Chrome fyller i ansökningsformulär på arbetsgivarnas sajter med ditt namn, dina kontaktuppgifter, ditt CV och brevet du har fått skrivet här. Tillägget hämtar uppgifterna själv när den här sidan är öppen. Fungerar inte det kan du kopiera över dem.</p>
           <div class="btns"><button class="btn ghost" id="ext-copy" type="button">Kopiera mina uppgifter till tillägget</button></div>
           <p class="note" id="ext-note"></p>
         </div>
@@ -404,11 +404,11 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
         <button class="back" data-go="swipe">← Tillbaka till jobben</button>
         <h1 class="vh">Hjälp och kontakt</h1>
 <!--i18n-skip-start-->
-        <div class="panel" id="h-lang" hidden><h2>Language</h2><p>Jobbsvep finns på svenska och engelska. Jobbsvep is available in Swedish and English.</p><div class="btns"><a class="btn ghost lang-link" hidden></a></div></div>
+        <div class="panel" id="h-lang" hidden><h2>Language</h2><p>Matchd finns på svenska och engelska. Matchd is available in Swedish and English.</p><div class="btns"><a class="btn ghost lang-link" hidden></a></div></div>
 <!--i18n-skip-end-->
         <div class="panel"><h2>Kom igång</h2><p>Vill du se genomgången igen, eller svara på frågorna en gång till?</p><div class="btns"><button class="btn" id="h-tour" type="button">Visa guiden igen</button><button class="btn ghost" id="h-onb" type="button">Gör om frågorna</button></div></div>
         <div class="panel" id="h-faq"><h2>Vanliga frågor</h2><div class="faq">
-          <details><summary>Kostar Jobbsvep något?</summary><div><p>Nej, inte för att använda det. Att svepa, få jobb som passar dig, mallbrev, Gå dit och dina sparade jobb är alltid gratis. Du får också ungefär fem AI-skrivna ansökningar i månaden utan kostnad.</p><p>Vill du ha fler AI-ansökningar finns Vecka för 49 kr och 3 månader för 299 kr (förnyas inte) och Månad för 129 kr i månaden (avsluta när du vill under Profil, Hantera abonnemang).</p></div></details>
+          <details><summary>Kostar Matchd något?</summary><div><p>Nej, inte för att använda det. Att svepa, få jobb som passar dig, mallbrev, Gå dit och dina sparade jobb är alltid gratis. Du får också ungefär fem AI-skrivna ansökningar i månaden utan kostnad.</p><p>Vill du ha fler AI-ansökningar finns Vecka för 49 kr och 3 månader för 299 kr (förnyas inte) och Månad för 129 kr i månaden (avsluta när du vill under Profil, Hantera abonnemang).</p></div></details>
           <details><summary>Var kommer jobben ifrån?</summary><div><p>Från Arbetsförmedlingens Platsbanken och från andra svenska jobbsajter som Arbetsförmedlingen samlar ihop, till exempel studentjob.se och ledigajobb.se. Listan uppdateras varje måndag och torsdag, och annonser som har tagits bort försvinner då.</p></div></details>
           <details><summary>Hur väljer ni vilka jobb jag ser?</summary><div><p>Vi går igenom varje annons och sorterar bort jobb som kräver utbildning, legitimation, körkort eller flera års erfarenhet när Ungdomsläget är på. Sedan visar vi jobben närmast dig först. När AI-hjälpen är på läser den också din profil och sätter en matchning i procent.</p><p>Sorteringen bygger på annonsens text och kan ibland bli fel. Läs alltid annonsen innan du söker.</p></div></details>
           <details><summary>Varför ser jag inga jobb nära mig?</summary><div><p>Kontrollera att du har skrivit var du bor under Profil och att maxavståndet inte är för litet. Vissa områden har helt enkelt få annonser just nu. Prova då Gå dit, där ser du ställen nära dig som kan anställa utan att annonsera.</p></div></details>
@@ -431,7 +431,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
         </div></div>
         <div class="panel" id="h-terms"><h2>Villkor</h2><div class="legal">
           <p>Senast uppdaterad 14 oktober 2026.</p>
-          <h3>Tjänsten</h3><p>Jobbsvep hjälper dig att hitta lediga jobb och skriva ansökningar. Vi lovar inte att du får ett jobb, och vi ansvarar inte för innehållet i arbetsgivarnas annonser.</p>
+          <h3>Tjänsten</h3><p>Matchd hjälper dig att hitta lediga jobb och skriva ansökningar. Vi lovar inte att du får ett jobb, och vi ansvarar inte för innehållet i arbetsgivarnas annonser.</p>
           <h3>AI-texter</h3><p>Brev och pitchar skrivs av AI. Du ansvarar för det du skickar, så läs alltid igenom texten först.</p>
           <h3>Paket och betalning</h3><p>Vecka kostar 49 kr och gäller i 7 dagar. 3 månader kostar 299 kr och gäller i 90 dagar. Ingen av dem förnyas. Månad kostar 129 kr och förnyas varje månad tills du avslutar under Profil, Hantera abonnemang. Priserna är inklusive moms. AI-hjälpen i ett paket gäller under paketets period och sparas inte till nästa period.</p>
           <h3>Ångerrätt</h3><p>Du har 14 dagars ångerrätt. Om du ber oss att börja leverera direkt och använder AI-hjälpen under ångerfristen betalar du för det du har hunnit använda. Kontakta oss för att ångra ett köp.</p>
@@ -489,7 +489,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
   </div>
 
   <div class="land" id="land" hidden>
-    <header><span class="logo-t">jobbsvep</span><span style="display:flex;gap:10px;align-items:center"><a class="out lang-link" hidden style="text-decoration:none"></a><button class="out" id="l-skip">Börja svepa</button></span></header>
+    <header><span class="logo-t">matchd</span><span style="display:flex;gap:10px;align-items:center"><a class="out lang-link" hidden style="text-decoration:none"></a><button class="out" id="l-skip">Börja svepa</button></span></header>
     <div class="hero">
       <h1>Svep. Matcha.<br>Börja jobba.</h1>
       <p>Extrajobb, sommarjobb och första jobbet nära dig i Stockholm, för dig som är ung och inte har hunnit jobba så mycket. Svep höger på det du gillar så skrivs din ansökan direkt.</p>
@@ -1085,7 +1085,7 @@ $("h-del-btns").addEventListener("click",e=>{
 
 /* ---------- guided tour after the questionnaire ---------- */
 const TOUR=[
-  {tab:"profile",sel:"#p-specs",h:"Först: din profil",p:"Jobbsvep visar bara jobb som passar dig, och det är profilen som avgör vad som passar. Skriv vad du vill jobba med, när du kan jobba och vad du inte vill göra. Ju tydligare du är, desto bättre blir matchningen."},
+  {tab:"profile",sel:"#p-specs",h:"Först: din profil",p:"Matchd visar bara jobb som passar dig, och det är profilen som avgör vad som passar. Skriv vad du vill jobba med, när du kan jobba och vad du inte vill göra. Ju tydligare du är, desto bättre blir matchningen."},
   {tab:"profile",sel:"#p-home",h:"Var du bor",p:"Vi visar de närmaste jobben först och gömmer jobb som ligger längre bort än ditt maxavstånd. Ingen vill pendla en timme till ett extrajobb."},
   {tab:"profile",sel:"#cv-drop",h:"Ditt CV",p:"Ladda upp ditt CV eller klistra in texten nedanför. Har du inget CV än? Skriv några rader om skola, idrott, ideellt arbete och vad du är bra på. Breven bygger bara på det du skriver här, inget hittas på."},
   {tab:"profile",sel:"#p-example",h:"Din röst",p:"Klistra in ett mejl eller meddelande du själv har skrivit. Då låter breven som du, fast lite mer proffsigt."},
@@ -1159,7 +1159,7 @@ async function onbRender(){
   const st=ONB[onbStep], o=S.onb, b=$("onb-body");
   $("onb-bar").style.width=Math.round(onbStep/(ONB.length-1)*100)+"%"; $("onb-back").style.visibility=onbStep?"visible":"hidden"; $("onb-skip").hidden=st.t==="plan";
   let h="";
-  if(st.t==="intro") h='<h1>Hej! Vi ska hitta ett jobb som passar dig.</h1><p class="sub">Svara på några snabba frågor, så anpassar vi Jobbsvep efter dig. Det tar ungefär en minut.</p><div class="onb-foot"><button class="btn big" data-next="1">Sätt igång</button></div>';
+  if(st.t==="intro") h='<h1>Hej! Vi ska hitta ett jobb som passar dig.</h1><p class="sub">Svara på några snabba frågor, så anpassar vi Matchd efter dig. Det tar ungefär en minut.</p><div class="onb-foot"><button class="btn big" data-next="1">Sätt igång</button></div>';
   else if(st.t==="one"||st.t==="many"){
     const cur=o[st.k]; h='<h1>'+esc(st.q)+'</h1>'+(st.sub?'<p class="sub">'+esc(st.sub)+'</p>':'')+'<div class="choices">'+st.o.map(x=>choiceBtn(x[0],x[1],x[2],st.t==="many"?(cur||[]).includes(x[0]):cur===x[0])).join("")+'</div>'+(st.t==="many"?'<div class="onb-foot"><button class="btn big" data-next="1"'+((cur||[]).length?"":" disabled")+'>Fortsätt</button></div>':'');
   }
@@ -1173,7 +1173,7 @@ async function onbRender(){
   else if(st.t==="statYouth"){
     const hard=(o.hard||[]).filter(k=>HELP_TXT[k]);
     h='<div class="stat">23,8 %</div><h1>av unga i arbetskraften saknar jobb just nu.</h1><p class="sub">Det är alltså inte dig det är fel på. Det är svårt för många. De som får jobb först brukar söka fler jobb, anpassa varje ansökan och ibland gå dit själva.</p><p class="statsrc">Källa: SCB, Arbetskraftsundersökningarna augusti 2026, unga 15–24 år, säsongsrensat.</p>'
-      +(hard.length?'<div class="planbox"><b>Så hjälper Jobbsvep dig med det som är svårast</b>'+hard.map(k=>'<p style="margin:0"><b>'+esc(HELP_TXT[k][0])+'.</b> '+esc(HELP_TXT[k][1])+'</p>').join("")+'</div>':'')+'<div class="onb-foot"><button class="btn big" data-next="1">Fortsätt</button></div>';
+      +(hard.length?'<div class="planbox"><b>Så hjälper Matchd dig med det som är svårast</b>'+hard.map(k=>'<p style="margin:0"><b>'+esc(HELP_TXT[k][0])+'.</b> '+esc(HELP_TXT[k][1])+'</p>').join("")+'</div>':'')+'<div class="onb-foot"><button class="btn big" data-next="1">Fortsätt</button></div>';
   }
   else if(st.t==="plan"){
     const w=Number(o.weekly||5), apps=w*4;
@@ -1333,7 +1333,7 @@ $("li-go").onclick=async()=>{
   }catch(e){ n.className="note err"; n.textContent=sampleCopy(e&&e.code); if(e&&OFF.includes(e.code)) sample=null; }
   b.disabled=false;
 };
-$("ext-copy").onclick=async()=>{ const n=$("ext-note"); try{ await navigator.clipboard.writeText(bridgeData()); n.className="note ok"; n.textContent="Kopierat. Öppna tillägget, välj Hämta från Jobbsvep manuellt och klistra in."; }catch(_){ n.className="note err"; n.textContent="Det gick inte att kopiera härifrån. Ha den här sidan öppen i Chrome så hämtar tillägget uppgifterna själv."; } };
+$("ext-copy").onclick=async()=>{ const n=$("ext-note"); try{ await navigator.clipboard.writeText(bridgeData()); n.className="note ok"; n.textContent="Kopierat. Öppna tillägget, välj Hämta från Matchd manuellt och klistra in."; }catch(_){ n.className="note err"; n.textContent="Det gick inte att kopiera härifrån. Ha den här sidan öppen i Chrome så hämtar tillägget uppgifterna själv."; } };
 
 /* ---------- import an ad found elsewhere ---------- */
 let impFiles=[];

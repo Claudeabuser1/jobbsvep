@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Jobbsvep – fyll i ansökningar",
+  "name": "Matchd – fyll i ansökningar",
   "version": "1.0.0",
-  "description": "Fyller i jobbansökningsformulär med dina uppgifter och ditt personliga brev från Jobbsvep. Skickar aldrig något själv.",
-  "action": { "default_title": "Jobbsvep", "default_popup": "popup.html" },
+  "description": "Fyller i jobbansökningsformulär med dina uppgifter och ditt personliga brev från Matchd. Skickar aldrig något själv.",
+  "action": { "default_title": "Matchd", "default_popup": "popup.html" },
   "permissions": ["storage", "unlimitedStorage", "scripting", "activeTab", "clipboardWrite"],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [

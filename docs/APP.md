@@ -1,4 +1,4 @@
-# Jobbsvep as an app
+# Matchd as an app
 
 There are two steps. Step 1 is already built and live. Step 2 is set up and ready, and needs your developer accounts.
 
@@ -15,7 +15,7 @@ How a user installs it:
 - **iPhone (Safari):** open the site, tap Share, then "Lägg till på hemskärmen".
 - **Android (Chrome):** open the site and tap "Installera app" in the menu, or the banner Chrome shows.
 
-This costs nothing and needs no app store. Use it to test whether people actually keep Jobbsvep on their phones before paying for store accounts.
+This costs nothing and needs no app store. Use it to test whether people actually keep Matchd on their phones before paying for store accounts.
 
 ## Step 2: real iPhone and Android apps (ready, not built)
 
@@ -67,7 +67,7 @@ npm run android
    - Add in-app purchases. Raise app prices or lower AI budgets so the PRICING.md guarantee still holds after the store's cut.
 
    Check the current rules for your region when you get there: the EU rules (DMA) have been changing.
-3. **Give the app something the website can't do.** Stores can reject apps that are just a website in a frame. The best candidates for Jobbsvep:
+3. **Give the app something the website can't do.** Stores can reject apps that are just a website in a frame. The best candidates for Matchd:
    - **Push notifications:** "3 new jobs within 2 km of you". Uses `@capacitor/push-notifications` plus a small addition to the server.
    - **"Near me" with GPS** instead of typing an address: `@capacitor/geolocation`.
    - **Haptic feedback** on swipes: `@capacitor/haptics`.
@@ -76,7 +76,7 @@ npm run android
    - A privacy policy URL: the help page.
    - An age rating. Users are 16+, but the app has no adult content, so it will likely get the lowest or a teen rating.
    - The "delete my data" requirement is already covered by the help page.
-5. **App ID.** `app/capacitor.config.json` uses `se.jobbsvep.app`. If you change the name (see the name ideas), change it before the first upload. It can never be changed after.
+5. **App ID.** `app/capacitor.config.json` uses `se.matchd.app`, based on the domain matchd.se. It can never be changed after the first upload, so buy matchd.se before you publish.
 
 ## What I did not do
 
