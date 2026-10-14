@@ -27,8 +27,9 @@ const DAY = 86_400_000;
 // What each plan costs and how much AI it may use per period. Budgets are in öre of real Claude cost.
 const PLANS = {
   free: { name: "Gratis", price_ore: 0, budget_ore: Number(env.FREE_BUDGET_ORE || 150), days: 30 },
-  week: { name: "Vecka", price_ore: 1900, budget_ore: Number(env.WEEK_BUDGET_ORE || 500), days: 7, stripePrice: env.STRIPE_PRICE_WEEK, mode: "payment" },
-  month: { name: "Månad", price_ore: 4900, budget_ore: Number(env.MONTH_BUDGET_ORE || 1200), days: 30, stripePrice: env.STRIPE_PRICE_MONTH, mode: "subscription" },
+  week: { name: "Vecka", price_ore: 4900, budget_ore: Number(env.WEEK_BUDGET_ORE || 600), days: 7, stripePrice: env.STRIPE_PRICE_WEEK, mode: "payment" },
+  month: { name: "Månad", price_ore: 12900, budget_ore: Number(env.MONTH_BUDGET_ORE || 1800), days: 30, stripePrice: env.STRIPE_PRICE_MONTH, mode: "subscription" },
+  quarter: { name: "3 månader", price_ore: 29900, budget_ore: Number(env.QUARTER_BUDGET_ORE || 5400), days: 90, stripePrice: env.STRIPE_PRICE_QUARTER, mode: "payment" },
 };
 const LETTER_ORE = 30; // typical cost of one drafted application, used only to show "about N applications left"
 

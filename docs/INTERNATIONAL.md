@@ -14,7 +14,7 @@ Most of Jobbsvep already works in any country: swiping, AI letters, walk-in pitc
 | Address lookup | `web/data/places.json` built from Swedish ads, AI fallback says "in Sweden" | Swedish postcodes and street names |
 | Language | `web/jobbsvep.html` (Swedish), `web/i18n/en.json` (English) | UI copy, AI instructions about "Swedish ads" |
 | Questionnaire facts | `web/jobbsvep.html` (`statYouth`, plan screen) | SCB youth unemployment, IFAU research |
-| Money | `server/server.js` `PLANS`, paywall cards | 19 kr / 49 kr, 25% Swedish VAT, `USD_SEK` |
+| Money | `server/server.js` `PLANS`, paywall cards | 49 kr / 129 kr / 299 kr, 25% Swedish VAT, `USD_SEK` |
 | Law | Help page (privacy policy, terms) | IMY as regulator, Swedish 14-day withdrawal rules, rules for under-18s from Arbetsmiljöverket |
 | Chrome extension | `extension/content.js` | Swedish field names (*förnamn*, *postnummer*, *personnummer* skipped) |
 

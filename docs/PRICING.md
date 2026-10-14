@@ -32,15 +32,28 @@ Estimated cost per action (actual cost is measured on every call):
 | Plan | Price | AI budget | About | Your income after VAT and card fee | Your worst case |
 | --- | --- | --- | --- | --- | --- |
 | Gratis | 0 kr | 1.50 kr / 30 days | 5 letters | 0 kr | −1.50 kr per active free user, capped by the daily pool |
-| Vecka | 19 kr, once, 7 days | 5 kr | 15 letters | 13.11 kr | **+8.11 kr** |
-| Månad | 49 kr / month | 12 kr | 40 letters | 36.67 kr | **+24.67 kr** |
+| Vecka | 49 kr, once, 7 days | 6 kr | 20 letters | 36.67 kr | **+30.67 kr** |
+| Månad | 129 kr / month | 18 kr | 60 letters | 99.47 kr | **+81.47 kr** |
+| 3 månader | 299 kr, once, 90 days | 54 kr | 180 letters | 232.91 kr | **+178.91 kr** |
 
-How "income after VAT and card fee" is worked out:
+How "income after VAT and card fee" is worked out, using Månad:
 
-- Swedish VAT is 25%, included in the price: 49 kr ÷ 1.25 = 39.20 kr.
-- Stripe's fee for normal European cards is about 1.5% of the full price + 1.80 kr: 0.74 + 1.80 = 2.54 kr, so 39.20 − 2.54 = 36.67 kr. Check the current fee at stripe.com/se/pricing.
+- Swedish VAT is 25%, included in the price: 129 kr ÷ 1.25 = 103.20 kr.
+- Stripe's fee for normal European cards is about 1.5% of the full price + 1.80 kr: 1.94 + 1.80 = 3.74 kr, so 103.20 − 3.74 = 99.47 kr. Check the current fee at stripe.com/se/pricing.
 
-"Worst case" assumes the user spends the whole AI budget. Most users won't, so the real margin is higher. Fixed costs (Fly server about 30–50 kr/month, domain about 10 kr/month) are covered by a handful of paying users.
+Each AI budget is 16–23% of the plan's income, well under the one-third rule below. "Worst case" assumes the user spends the whole budget; most won't. Fixed costs (Fly server about 30–50 kr a month, domain about 10 kr a month) are covered by a single paying user.
+
+### How the prices are presented (anchoring)
+
+Every comparison uses real prices only:
+
+- **3 månader is shown first.** The biggest number sets the reference point, so 129 kr feels moderate.
+- **Månad is highlighted as "Populärast".** It's in the middle, with a per-week price ("Bara 30 kr i veckan").
+- **Vecka shows 49 kr i veckan.** Next to Månad's 30 kr a week, that makes the month look like the obvious deal. Buying four weeks would cost 196 kr.
+- **3 månader shows "spara 88 kr".** This is true: 3 × 129 kr = 387 kr, against 299 kr.
+- **The value anchor:** "Ett enda arbetspass på ditt nya jobb betalar en hel månad."
+
+Never show a crossed-out "ordinary price" that was never actually charged. Under Swedish price-marking rules, a price reduction must be measured against the lowest price of the previous 30 days, and Konsumentverket acts against fake discounts. If you run a real campaign later, for example Månad at 99 kr for two weeks, you may show "129 kr" crossed out because that was the real price before.
 
 ## How the guard works (server/server.js)
 
@@ -54,7 +67,7 @@ I tested this with a fake AI and a 1.50 kr budget. It allowed 12 calls costing 1
 
 ## Changing the numbers
 
-Set these as Fly settings, no code change needed: `FREE_BUDGET_ORE`, `WEEK_BUDGET_ORE`, `MONTH_BUDGET_ORE`, `FREE_DAILY_ORE` (all in öre), `USD_SEK`. If you change a price, change it in three places: the product price in Stripe, `price_ore` in `server/server.js`, and the plan cards in `web/jobbsvep.html`. Keep each budget below a third of the income after VAT and fees, and you stay profitable even if Claude prices rise.
+Set these as Fly settings, no code change needed: `FREE_BUDGET_ORE`, `WEEK_BUDGET_ORE`, `MONTH_BUDGET_ORE`, `QUARTER_BUDGET_ORE`, `FREE_DAILY_ORE` (all in öre), `USD_SEK`. If you change a price, change it in three places: the product price in Stripe, `price_ore` in `server/server.js`, and the plan cards in `web/jobbsvep.html`. Keep each budget below a third of the income after VAT and fees, and you stay profitable even if Claude prices rise.
 
 Example:
 
