@@ -254,7 +254,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
     <div class="side-sec"><button class="btn ghost sm" data-go="go" style="align-self:flex-start">Gå dit själv: ställen nära dig</button></div>
     <div class="side-sec"><b>Redo att skicka</b><div id="s-rings"></div></div>
     <div class="side-sec"><b>Ansökningar</b><div id="s-list"></div><button class="btn ghost sm" data-imp="1" style="align-self:flex-start">Importera en annons</button></div>
-    <div class="side-foot"><div class="foot-links" style="margin-bottom:8px"><button data-go="help">Hjälp och kontakt</button><button data-help="privacy">Integritet</button><button data-help="terms">Villkor</button></div><span id="snap"></span></div>
+    <div class="side-foot"><div class="foot-links" style="margin-bottom:8px"><button data-go="help">Hjälp och kontakt</button><button data-help="privacy">Integritet</button><button data-help="terms">Villkor</button><a class="lang-link" hidden></a></div><span id="snap"></span></div>
   </aside>
   <header class="mhead"><button class="logo-t" data-go="swipe">jobbsvep</button><span class="right"><button class="fpill" id="m-filter" data-go="profile">Stockholm · Filter</button><button class="helpbtn" data-go="help" aria-label="Hjälp och kontakt" title="Hjälp och kontakt">?</button></span></header>
   <main>
@@ -400,6 +400,9 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
       <div class="col">
         <button class="back" data-go="swipe">← Tillbaka till jobben</button>
         <h1 class="vh">Hjälp och kontakt</h1>
+<!--i18n-skip-start-->
+        <div class="panel" id="h-lang" hidden><h2>Language</h2><p>Jobbsvep finns på svenska och engelska. Jobbsvep is available in Swedish and English.</p><div class="btns"><a class="btn ghost lang-link" hidden></a></div></div>
+<!--i18n-skip-end-->
         <div class="panel"><h2>Kom igång</h2><p>Vill du se genomgången igen, eller svara på frågorna en gång till?</p><div class="btns"><button class="btn" id="h-tour" type="button">Visa guiden igen</button><button class="btn ghost" id="h-onb" type="button">Gör om frågorna</button></div></div>
         <div class="panel" id="h-faq"><h2>Vanliga frågor</h2><div class="faq">
           <details><summary>Kostar Jobbsvep något?</summary><div><p>Nej, inte för att använda det. Att svepa, få jobb som passar dig, mallbrev, Gå dit och dina sparade jobb är alltid gratis. Du får också ungefär fem AI-skrivna ansökningar i månaden utan kostnad.</p><p>Vill du ha fler AI-ansökningar finns Vecka för 19 kr (förnyas inte) och Månad för 49 kr i månaden (avsluta när du vill under Profil, Hantera abonnemang).</p></div></details>
@@ -482,7 +485,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
   </div>
 
   <div class="land" id="land" hidden>
-    <header><span class="logo-t">jobbsvep</span><button class="out" id="l-skip">Börja svepa</button></header>
+    <header><span class="logo-t">jobbsvep</span><span style="display:flex;gap:10px;align-items:center"><a class="out lang-link" hidden style="text-decoration:none"></a><button class="out" id="l-skip">Börja svepa</button></span></header>
     <div class="hero">
       <h1>Svep. Matcha.<br>Börja jobba.</h1>
       <p>Extrajobb, sommarjobb och första jobbet nära dig i Stockholm, för dig som är ung och inte har hunnit jobba så mycket. Svep höger på det du gillar så skrivs din ansökan direkt.</p>
@@ -507,6 +510,14 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const cap=n=>(window.claude&&typeof window.claude.use==="function")?window.claude.use(n).catch(()=>null):Promise.resolve(null);
 const LS="jobbsvep:v1";
 const STANDALONE=!(window.claude&&typeof window.claude.use==="function");
+const metaVal=n=>(((document.querySelector('meta[name="'+n+'"]')||{}).content)||"").trim();
+const BASE=metaVal("jobbsvep-base"), LANG=metaVal("jobbsvep-lang")||"sv";
+/*i18n-skip-start*/
+const FIELD_EN={"Administration, ekonomi, juridik":"Admin, finance, law","Bygg och anläggning":"Construction","Chefer och verksamhetsledare":"Management","Data/IT":"IT and tech","Försäljning, inköp, marknadsföring":"Sales, retail, marketing","Hantverk":"Crafts and trades","Hotell, restaurang, storhushåll":"Hotels, restaurants, catering","Hälso- och sjukvård":"Healthcare","Industriell tillverkning":"Manufacturing","Installation, drift, underhåll":"Installation, maintenance","Kropps- och skönhetsvård":"Beauty and wellness","Kultur, media, design":"Culture, media, design","Militära yrken":"Military","Naturbruk":"Farming, forestry, animals","Pedagogik":"Education and childcare","Sanering och renhållning":"Cleaning","Säkerhet och bevakning":"Security","Transport, distribution, lager":"Transport, delivery, warehouse","Yrken med social inriktning":"Care and social work","Yrken med teknisk inriktning":"Engineering and technical","Praktik, trainee och studentjobb":"Internships, trainee and student jobs"};
+const OUT_LANG=LANG==="en"?"English":"Swedish";
+const LANG_LINK=LANG==="en"?{href:"../",label:"Svenska"}:{href:"en/",label:"English"};
+/*i18n-skip-end*/
+const fieldLabel=i=>{ const n=META&&META.fields[i]?META.fields[i].name:""; return LANG==="en"?(FIELD_EN[n]||n):n; };
 const API=(((document.querySelector('meta[name="jobbsvep-api"]')||{}).content)||"").replace(/\/$/,"");
 /* On the public website Claude is reached through the site's own small API instead of the artifact host. */
 async function shrinkImage(file){
@@ -523,6 +534,8 @@ async function api(path,body){
   let r; try{ r=await fetch(API+path,{method:body?"POST":"GET",headers:h,body:body?JSON.stringify(body):undefined}); }catch(_){ return {status:0,data:{}}; }
   let d={}; try{ d=await r.json(); }catch(_){} return {status:r.status,data:d};
 }
+const PLAN_NAMES={free:"Gratis",week:"Vecka",month:"Månad"};
+const planLabel=k=>PLAN_NAMES[k]||k;
 function takeStatus(d){ if(d&&d.plan){ acctInfo=d; renderPlan(); } }
 async function ensureAccount(){
   if(!API) return null;
@@ -536,9 +549,9 @@ function renderPlan(){
   const show=STANDALONE&&!!API; $("plan-panel").hidden=!show; if(!show) return;
   const a=acctInfo, cn=$("credit-note");
   if(!a){ $("plan-status").textContent="AI-hjälpen går inte att nå just nu. Allt annat fungerar som vanligt."; cn.hidden=true; return; }
-  $("plan-status").textContent=a.plan_name+" · "+lettersLeft(a.est_letters)+(a.plan==="free"?" till ":" · gäller till ")+untilDate(a.period_end)+".";
+  $("plan-status").textContent=planLabel(a.plan)+" · "+lettersLeft(a.est_letters)+(a.plan==="free"?" till ":" · gäller till ")+untilDate(a.period_end)+".";
   $("plan-manage").hidden=!a.can_manage; $("acct-code").textContent=acctToken();
-  cn.hidden=false; cn.innerHTML=esc(a.plan_name)+": "+lettersLeft(a.est_letters)+". "+(a.plan==="free"?'<button class="linkbtn" data-paywall="1" style="border:0;background:none;padding:0;color:var(--accent-d);font-weight:600;cursor:pointer">Få fler</button>':"");
+  cn.hidden=false; cn.innerHTML=esc(planLabel(a.plan))+": "+lettersLeft(a.est_letters)+". "+(a.plan==="free"?'<button class="linkbtn" data-paywall="1" style="border:0;background:none;padding:0;color:var(--accent-d);font-weight:600;cursor:pointer">Få fler</button>':"");
 }
 function openPaywall(reason){
   const pw=$("paywall"); $("pw-note").textContent="";
@@ -570,7 +583,7 @@ async function handleCheckoutReturn(){
   history.replaceState(null,"",location.pathname+location.hash);
   if(q==="cancel"){ toast("Betalningen avbröts. Inget har dragits."); return; }
   await ensureAccount(); const r=await api("/checkout/confirm?session_id="+encodeURIComponent(q));
-  if(r.status===200){ if(r.data.token) setAcct(r.data.token); takeStatus(r.data); toast("Tack! Du har nu "+r.data.plan_name+" med ungefär "+r.data.est_letters+" AI-ansökningar."); }
+  if(r.status===200){ if(r.data.token) setAcct(r.data.token); takeStatus(r.data); toast("Tack! Du har nu "+planLabel(r.data.plan)+" med ungefär "+r.data.est_letters+" AI-ansökningar."); }
   else toast("Vi kunde inte bekräfta betalningen än. Ladda om sidan om en minut.");
 }
 function httpSample(){
@@ -625,14 +638,14 @@ function mcpCopy(e){const c=e&&e.code;return ({needs_reauth:"Gmail behöver ansl
 /* ---------- data ---------- */
 async function loadData(){
   try{
-    META=await (await fetch("data/meta.json")).json();
-    const parts=await Promise.all(META.fields.map((f,i)=>fetch("data/i-"+i+".json").then(r=>r.json())));
+    META=await (await fetch(BASE+"data/meta.json")).json();
+    const parts=await Promise.all(META.fields.map((f,i)=>fetch(BASE+"data/i-"+i+".json").then(r=>r.json())));
     parts.forEach((rows,fi)=>rows.forEach(r=>{
       const j={id:r[0],h:r[1],e:r[2]||"Arbetsgivare ej angiven",m:r[3],o:r[4],g:r[5],et:r[6],hr:r[7],pub:r[8],dl:r[9],em:r[10],ci:r[11],sn:r[12],lat:r[13],lon:r[14],street:(r[15]||"").replace(/[,\s]+$/,""),stu:r[16]||0,src:r[17]||"",age:r[18]||0,lic:r[19]||0,f:fi};
       j.h1=(j.h+" "+j.o+" "+j.g).toLowerCase(); j.h2=j.sn.toLowerCase();
       JOBS.push(j);BYID.set(j.id,j);
     }));
-    try{ PLACES=await (await fetch("data/places.json")).json(); }catch(_){ PLACES={m:{},s:{},p:{}}; }
+    try{ PLACES=await (await fetch(BASE+"data/places.json")).json(); }catch(_){ PLACES={m:{},s:{},p:{}}; }
     const txt=JOBS.length.toLocaleString("sv-SE")+" lediga jobb i Stockholms län från Platsbanken"+(META.otherSites?" och "+Object.keys(META.sources||{}).length+" andra jobbsajter":"")+", uppdaterat "+fmtDate(META.built);
     $("snap").textContent=txt; $("l-src").textContent=txt;
     mergeShared(); buildOptions(); rebuildPool(); renderDeck(); dataDone();
@@ -655,7 +668,7 @@ function mergeShared(){
 async function detail(j){
   if(j._det) return j._det;
   const fn=META.chunks[j.ci]; if(!fn) return {};
-  if(!chunkCache[fn]) chunkCache[fn]=fetch("data/"+fn).then(r=>r.json()).catch(()=>{delete chunkCache[fn];return {};});
+  if(!chunkCache[fn]) chunkCache[fn]=fetch(BASE+"data/"+fn).then(r=>r.json()).catch(()=>{delete chunkCache[fn];return {};});
   return (await chunkCache[fn])[j.id]||{};
 }
 
@@ -762,7 +775,7 @@ async function rankBatch(){
   const prompt="You are a recruiter matching one candidate to open jobs in Stockholm. Judge fit honestly: seniority, skills, what they asked for and what they said they don't want.\n\n"
    +"WHAT THE CANDIDATE WANTS:\n"+(p.specs||"(not stated)")+(p.student?"\nThe candidate is young (age "+(p.age||"16-21")+") with "+expText()+": favour extra, part-time, summer and entry-level jobs they can realistically get, score jobs close to home higher, and mark down hard any job that needs a qualification, a licence or years of experience.":"")+"\n\nCANDIDATE CV:\n"+(p.cvText.slice(0,6000)||"(no CV given)")
    +"\n\nJOBS (id | title | employer | occupation | place | terms | ad excerpt):\n"+lines
-   +"\n\nReply with only a JSON array, one object per job, every id included: [{\"id\":\"<id>\",\"s\":<fit 0-100>,\"why\":\"<one short sentence in Swedish, max 18 words, addressed to the candidate as 'du', saying why it fits or what the catch is>\"}]. Be strict: under 40 means not worth their time.";
+   +"\n\nReply with only a JSON array, one object per job, every id included: [{\"id\":\"<id>\",\"s\":<fit 0-100>,\"why\":\"<one short sentence in "+OUT_LANG+", max 18 words, addressed to the candidate directly as 'du' or 'you', saying why it fits or what the catch is>\"}]. Be strict: under 40 means not worth their time.";
   try{
     const r=await sample.json(prompt,{modelTier:"quick"});
     (Array.isArray(r)?r:[]).forEach(x=>{const id=String(x.id);if(BYID.has(id))S.ai[id]={s:Math.max(0,Math.min(100,Math.round(Number(x.s)||0))),why:String(x.why||"").slice(0,200)};});
@@ -795,7 +808,7 @@ async function findMatches(){
 /* ---------- chrome: filter pill, sidebar, tabs ---------- */
 function filterParts(){
   const p=S.profile, a=[];
-  a.push(p.fields.length===1&&META?META.fields[p.fields[0]].name:(p.fields.length>1?p.fields.length+" områden":(S.plan?"Mina matchningar":"Alla jobb")));
+  a.push(p.fields.length===1&&META?fieldLabel(p.fields[0]):(p.fields.length>1?p.fields.length+" områden":(S.plan?"Mina matchningar":"Alla jobb")));
   a.push(p.homeLL?(p.homeLabel+(p.radius?" · "+p.radius+" km":"")):"Stockholm");
   if(p.student) a.push("Ungdomsläge");
   if(p.hours.length===1) a.push(sv(p.hours[0]));
@@ -1049,7 +1062,8 @@ $("mt-apps").onclick=()=>{$("match").hidden=true;go("apps");};
 /* ---------- help, contact and legal ---------- */
 const CONTACT=(((document.querySelector('meta[name="jobbsvep-contact"]')||{}).content)||"").trim();
 const OWNER=(((document.querySelector('meta[name="jobbsvep-owner"]')||{}).content)||"").trim();
-function renderHelp(){
+function renderLangLinks(){ if(!STANDALONE) return; document.querySelectorAll(".lang-link").forEach(a=>{ a.hidden=false; a.href=LANG_LINK.href; a.textContent=LANG_LINK.label; a.lang=LANG==="en"?"sv":"en"; }); $("h-lang").hidden=false; }
+function renderHelp(){ renderLangLinks();
   $("h-contact-text").textContent=CONTACT?"Har du en fråga, hittat ett fel eller vill ta bort dina uppgifter? Skriv till oss så svarar vi så snart vi kan.":"Vi håller på att sätta upp vår kontaktadress. Den kommer upp här inom kort.";
   $("h-contact-btns").innerHTML=CONTACT?'<a class="btn" href="mailto:'+esc(CONTACT)+'">Mejla oss</a><span class="code">'+esc(CONTACT)+'</span>':'';
   $("h-owner").textContent=OWNER?"Personuppgiftsansvarig: "+OWNER+(CONTACT?", "+CONTACT:"")+".":"";
@@ -1206,21 +1220,23 @@ function weekProgress(){
 
 /* ---------- walk in: places near you + what to say ---------- */
 let POIS=null, goCount=20, openPitch=null; const pitches={};
-async function loadPois(){ if(POIS) return; try{ POIS=await (await fetch("pois.json")).json(); }catch(_){ POIS={types:[],places:[]}; } const sel=$("go-type"); POIS.types.forEach((t,i)=>sel.add(new Option(t,String(i)))); $("go-src").textContent=POIS.places.length?"Platser från OpenStreetMap, © OpenStreetMap-bidragsgivare. Uppgifterna kan vara inaktuella, kolla att stället finns kvar.":""; }
-const GO_WHO={"Mataffär":"butikschefen eller den som ansvarar för personal","Butik":"butikschefen","Kafé och bageri":"ägaren eller den som är ansvarig i dag","Snabbmat":"restaurangchefen eller skiftledaren","Restaurang":"restaurangchefen eller ägaren","Hotell":"receptionen, och be att få prata med den som anställer","Fritid och nöje":"platschefen","Bensinstation":"stationschefen"};
-const GO_WHEN={"Mataffär":"En vardag mellan 10 och 11 eller 14 och 16. Undvik rusningen efter jobbet och helgerna.","Butik":"En vardag på förmiddagen, strax efter att de har öppnat.","Kafé och bageri":"Mitt på eftermiddagen en vardag, när lunchen är över.","Snabbmat":"Mellan lunch och middag, ungefär 14.30 till 16.30.","Restaurang":"Mellan lunch och middag, ungefär 14.30 till 16.30. Aldrig under servering.","Hotell":"En vardag på eftermiddagen, efter utcheckningen.","Fritid och nöje":"En vardag på dagen, när det är lugnt.","Bensinstation":"En vardag mitt på dagen."};
+async function loadPois(){ if(POIS) return; try{ POIS=await (await fetch(BASE+"pois.json")).json(); }catch(_){ POIS={types:[],places:[]}; } const sel=$("go-type"); POIS.types.forEach((t,i)=>sel.add(new Option(POI_TYPES[i]||t,String(i)))); $("go-src").textContent=POIS.places.length?"Platser från OpenStreetMap, © OpenStreetMap-bidragsgivare. Uppgifterna kan vara inaktuella, kolla att stället finns kvar.":""; }
+// index-aligned with TYPES in scripts/build_places.py
+const POI_TYPES=["Mataffär","Butik","Kafé och bageri","Snabbmat","Restaurang","Hotell","Fritid och nöje","Bensinstation"];
+const GO_WHO=["butikschefen eller den som ansvarar för personal","butikschefen","ägaren eller den som är ansvarig i dag","restaurangchefen eller skiftledaren","restaurangchefen eller ägaren","receptionen, och be att få prata med den som anställer","platschefen","stationschefen"];
+const GO_WHEN=["En vardag mellan 10 och 11 eller 14 och 16. Undvik rusningen efter jobbet och helgerna.","En vardag på förmiddagen, strax efter att de har öppnat.","Mitt på eftermiddagen en vardag, när lunchen är över.","Mellan lunch och middag, ungefär 14.30 till 16.30.","Mellan lunch och middag, ungefär 14.30 till 16.30. Aldrig under servering.","En vardag på eftermiddagen, efter utcheckningen.","En vardag på dagen, när det är lugnt.","En vardag mitt på dagen."];
 function templatePitch(name,type,job){
   const p=S.profile, me=p.name?p.name.split(/\s+/)[0]:"";
   return {tpl:true,
     say:"Hej! "+(me?"Jag heter "+me:"Jag bor här i närheten")+(p.age&&p.age!=="21"?" och är "+p.age+" år":"")+". "+(job?"Jag såg att ni söker "+job.toLowerCase()+" och ville komma förbi själv.":"Jag undrar om ni behöver extrapersonal, till exempel på kvällar och helger.")+" Jag lär mig snabbt, passar tider och kan börja direkt. Får jag lämna mitt CV till den som anställer?",
-    ask_for:GO_WHO[type]||"den som är ansvarig för personal", when:GO_WHEN[type]||"En vardag när det är lugnt, inte mitt i lunchen.",
+    ask_for:(type!==""&&GO_WHO[Number(type)])||"den som är ansvarig för personal", when:(type!==""&&GO_WHEN[Number(type)])||"En vardag när det är lugnt, inte mitt i lunchen.",
     bring:["Ett utskrivet CV på en sida, med ditt telefonnummer överst","Hela och rena kläder som passar stället","Telefonen laddad, de kan ringa samma dag"],
     followup:"Hej! "+(me?"Jag heter "+me+" och ":"Jag ")+"var inne hos er på "+name+" häromdagen och lämnade mitt CV. Jag är fortfarande väldigt intresserad av att jobba hos er och kan börja direkt."+(p.phone?" Ni når mig på "+p.phone+".":"")+(me?" Vänliga hälsningar, "+p.name:"")};
 }
 async function aiPitch(key,name,type,job){
   const p=S.profile, cur=pitches[key]; cur.busy=true; renderGo();
-  const prompt="A young job seeker in Stockholm is going to walk into a workplace in person and ask for a job. Write what they should say and do. Everything in Swedish, natural spoken language a teenager would actually say, confident but polite, no clichés.\n\n"
-   +"PLACE: "+name+" ("+(type||"arbetsplats")+")"+(job?"\nThey currently advertise this job: "+job:"\nNo job is advertised: this is a spontaneous visit.")
+  const prompt="A young job seeker in Stockholm is going to walk into a workplace in person and ask for a job. Write what they should say and do. Everything in "+OUT_LANG+", natural spoken language a teenager would actually say, confident but polite, no clichés.\n\n"
+   +"PLACE: "+name+" ("+((type!==""&&POI_TYPES[Number(type)])||"arbetsplats")+")"+(job?"\nThey currently advertise this job: "+job:"\nNo job is advertised: this is a spontaneous visit.")
    +"\n\nJOB SEEKER\nFirst name: "+(p.name.split(/\s+/)[0]||"(unknown, leave the name out)")+"\nAge: "+(p.age||"not given")+"\nLooking for: "+(p.specs||"extra work")+"\nCV (use only facts from here, never invent experience):\n"+((p.cvText||p.liText).slice(0,3000)||"(no CV yet)")
    +"\n\nReply with only a JSON object: {\"say\":\"<what to say when walking in, 45-70 words, first person>\",\"ask_for\":\"<who to ask for at this kind of place>\",\"when\":\"<best day and time to go to this kind of place, one sentence>\",\"bring\":[\"<3 short things to bring or prepare>\"],\"followup\":\"<a short follow-up text message or email to send 3-4 days later, 35-55 words>\",\"tip\":\"<one specific tip for this kind of workplace, one sentence>\"}";
   try{
@@ -1254,7 +1270,7 @@ function renderGo(){
   $("go-hiring").innerHTML=hiring.length?hiring.map(x=>goRow("j:"+x.j.id,x.j.e,x.j.h+" · "+fmtKm(x.km),mapURL(x.j),"",x.j.o||x.j.h,x.j.id)).join(""):'<p class="note">Inga annonser med adress nära dig just nu. Ställena nedan kan anställa ändå.</p>';
   const ti=$("go-type").value, h=p.homeLL;
   const near=POIS.places.filter(r=>ti===""||r[1]===Number(ti)).map(r=>({r,km:hav(h,[r[2],r[3]])})).sort((a,b)=>a.km-b.km).slice(0,goCount);
-  $("go-places").innerHTML=near.length?near.map(x=>{const r=x.r,t=POIS.types[r[1]]||"";return goRow("p:"+r[0]+"@"+r[2]+","+r[3],r[0],[t,r[4],fmtKm(x.km)].filter(Boolean).join(" · "),"https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(r[4]?r[0]+", "+r[4]:r[2]+","+r[3]),t,"");}).join(""):'<p class="note">Listan över ställen är inte inläst än. Titta in igen lite senare.</p>';
+  $("go-places").innerHTML=near.length?near.map(x=>{const r=x.r,t=POI_TYPES[r[1]]||"";return goRow("p:"+r[0]+"@"+r[2]+","+r[3],r[0],[t,r[4],fmtKm(x.km)].filter(Boolean).join(" · "),"https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(r[4]?r[0]+", "+r[4]:r[2]+","+r[3]),String(r[1]),"");}).join(""):'<p class="note">Listan över ställen är inte inläst än. Titta in igen lite senare.</p>';
   $("go-more").hidden=near.length<goCount;
 }
 $("go-type").onchange=()=>{ goCount=20; renderGo(); };
@@ -1362,7 +1378,7 @@ $("imp-go").onclick=async()=>{
 /* ---------- profile ---------- */
 function buildOptions(){
   const p=S.profile, f=$("p-field");
-  if(META&&f.options.length<2) META.fields.forEach((x,i)=>f.add(new Option(x.name,String(i))));
+  if(META&&f.options.length<2) META.fields.forEach((x,i)=>f.add(new Option(fieldLabel(i),String(i))));
   f.value=p.fields.length?String(p.fields[0]):""; $("p-emp").value=p.emp[0]||""; $("p-hours").value=p.hours[0]||"";
 }
 function fillProfile(){

@@ -50,8 +50,11 @@ def clean(s):
     return re.sub(r"[ \t]+", " ", re.sub(r"\n{3,}", "\n\n", (s or "").replace("\r", ""))).strip()
 
 
-def short_emp(label):
+def short_emp(label, duration=""):
     l = label.lower()
+    if "vanlig" in l:  # "Vanlig anställning": permanent or fixed-term depending on the ad's duration
+        d = duration.lower()
+        return "Permanent" if (not d or "tills vidare" in d) else "Fixed-term"
     if "tillsvidare" in l: return "Permanent"
     if "sommarjobb" in l or "feriejobb" in l: return "Summer job"
     if "behov" in l: return "On-call"
@@ -198,7 +201,7 @@ def main():
             if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
                 email = ""
             must, nice = h.get("must_have") or {}, h.get("nice_to_have") or {}
-            et, hr = short_emp(lab(h.get("employment_type"))), hours(lab(h.get("working_hours_type")))
+            et, hr = short_emp(lab(h.get("employment_type")), lab(h.get("duration"))), hours(lab(h.get("working_hours_type")))
             edu = bool((must.get("education") or []) or (must.get("education_level") or []))
             stu = youth_score(head, lab(h.get("occupation")) + " " + lab(h.get("occupation_group")), desc, hr, bool(h.get("experience_required")), edu)
             age = min_age(desc)
