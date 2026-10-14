@@ -1,0 +1,284 @@
+<title>Matchd Launch Checklist</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: one narrow column. Progress and "do this next" on top, then one fold-out card per big task with tiny tickable steps. */
+:root{
+  --bg:#fbf9f7; --surface:#ffffff; --subtle:#f1ece8; --ink:#1d1715; --ink2:#4a413c; --muted:#6e6460; --line:#ebe5e1;
+  --accent:#5b4fd6; --accent-d:#4a3ec2; --accent-soft:#eeebfc; --hero:#5b4fd6; --done:#1f7a55; --done-soft:#e3f3ea;
+  --font:"Onest","Segoe UI",system-ui,-apple-system,sans-serif; --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#16131a; --surface:#211d26; --subtle:#2b2631; --ink:#f3eff4; --ink2:#d3ccd6; --muted:#a59eab; --line:#363040;
+  --accent:#9b90ff; --accent-d:#b3aaff; --accent-soft:#2c2848; --done:#5fd39f; --done-soft:#17352a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#16131a; --surface:#211d26; --subtle:#2b2631; --ink:#f3eff4; --ink2:#d3ccd6; --muted:#a59eab; --line:#363040;
+  --accent:#9b90ff; --accent-d:#b3aaff; --accent-soft:#2c2848; --done:#5fd39f; --done-soft:#17352a; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:28px 64px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{margin:0;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:clamp(30px,6vw,42px);font-weight:800;line-height:1.05}
+.lead{margin:0;color:var(--ink2);max-width:60ch}
+a{color:var(--accent-d)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.overall{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.overall .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.overall b{font-size:15px}
+.big{font-size:32px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.bar{height:10px;border-radius:5px;background:var(--subtle);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:5px;transition:width .35s ease}
+.sync{font-size:13px;color:var(--muted)}
+
+.next{background:var(--hero);color:#fff;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.next .eyebrow{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+.next h2{font-size:22px}
+.next .step{background:rgba(255,255,255,.12);border-radius:16px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start}
+.next .step p{margin:0}
+.next .from{font-size:14px;opacity:.85}
+.next .cmd{background:rgba(0,0,0,.25);color:#fff}
+.next .copy{background:#fff;color:#4338b5}
+.next a{color:#fff}
+.next .tick{border-color:#fff}
+.next .tick:checked{background:#fff}
+
+.group{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.group.complete{border-color:var(--done)}
+.group summary{list-style:none;cursor:pointer;padding:16px 18px;display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:center}
+.group summary::-webkit-details-marker{display:none}
+.badge{grid-row:span 2;width:40px;height:40px;border-radius:12px;background:var(--accent-soft);color:var(--accent-d);display:grid;place-items:center;font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+.group.complete .badge{background:var(--done-soft);color:var(--done)}
+.group h2{font-size:19px;font-weight:700}
+.meta{font-size:14px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.mini{width:70px;height:6px;border-radius:3px;background:var(--subtle);overflow:hidden;display:inline-block}
+.mini i{display:block;height:100%;background:var(--accent)}
+.group.complete .mini i{background:var(--done)}
+.chev{grid-row:span 2;color:var(--muted);transition:transform .2s ease;font-size:18px}
+.group[open] .chev{transform:rotate(90deg)}
+.why{margin:0 18px 6px;padding:10px 12px;border-radius:12px;background:var(--subtle);color:var(--ink2);font-size:14px}
+.steps{list-style:none;margin:0;padding:6px 18px 16px;display:flex;flex-direction:column}
+.steps li{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}
+.steps li:last-child{border-bottom:0}
+.steps li.done .txt{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.txt p{margin:0}
+.tick{appearance:none;-webkit-appearance:none;flex:none;width:26px;height:26px;margin:0;border-radius:8px;border:2px solid var(--accent);background:transparent;cursor:pointer;display:grid;place-items:center;transition:background .15s}
+.tick:checked{background:var(--accent)}
+.tick:checked::after{content:"";width:7px;height:13px;border:solid var(--surface);border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.steps li.done .tick{border-color:var(--done)} .steps li.done .tick:checked{background:var(--done)}
+.cmdrow{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
+.cmd{flex:1;min-width:0;font-family:var(--mono);font-size:13px;background:var(--subtle);color:var(--ink);border-radius:10px;padding:8px 10px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;user-select:all;-webkit-user-select:all}
+.copy{border:0;border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;font-weight:600;background:var(--accent);color:#fff;cursor:pointer;align-self:center}
+.hint{font-size:13px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;max-width:calc(100% - 32px);text-align:center;z-index:5}
+.foot{font-size:13px;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion:reduce){ .bar i,.chev{transition:none} }
+</style>
+
+<div class="wrap">
+  <h1>Matchd launch checklist</h1>
+  <p class="lead">Everything you need to do to take Matchd live properly, broken into tiny steps. Open a task, tick the steps as you go. The box at the top always shows the very next thing to do.</p>
+
+  <div class="overall">
+    <div class="row"><b>Overall progress</b><span class="big" id="pct">0%</span></div>
+    <div class="bar"><i id="bar" style="width:0%"></i></div>
+    <div class="row"><span class="hint" id="count"></span><span class="sync" id="sync">Saved in this browser</span></div>
+  </div>
+
+  <div class="next" id="next"></div>
+
+  <div id="groups" style="display:flex;flex-direction:column;gap:12px"></div>
+
+  <p class="foot">Stuck on a step? Copy it and ask Claude in the chat. Steps marked "Tell Claude" are things Claude finishes for you once you send the message.</p>
+  <div class="toast" id="toast" hidden></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const REPO="https://github.com/Claudeabuser1/jobbsvep";
+const SITE="https://claudeabuser1.github.io/jobbsvep/";
+// Each big task has small steps. A step can have a link, a command or text to copy, and a hint.
+const GROUPS=[
+ {id:"name",title:"Choose the name",time:"10 min",why:"Decide this first. The domain, social media handles and the app ID all depend on it, and the app ID can never change after the first upload.",steps:[
+  {id:"read",t:"Read the name ideas (section 5).",link:REPO+"/blob/main/docs/MARKETING-VIDEOS.md"},
+  {id:"pick",t:"Pick the name. You chose Matchd."},
+  {id:"prv",t:"Search the Swedish trademark register for Matchd. Important: an Australian recruiting company (matchd.com) and a Dutch staffing firm already use the name, so check that neither has registered it in Sweden or the EU.",link:"https://www.prv.se/sv/varumarken/"},
+  {id:"euipo",t:"Search the EU trademark register for Matchd too. If it is registered for recruiting or job services, pick another name before buying anything.",link:"https://euipo.europa.eu/eSearch/"},
+  {id:"tell",t:"Tell Claude which name you chose.",copy:"I have chosen the name ___ for the app. Please update the website, texts and app ID.",claude:true},
+ ]},
+ {id:"email",title:"Create a contact email",time:"10 min",why:"A real contact address on the help page makes the site look trustworthy, and Stripe, the stores and the privacy policy all need one.",steps:[
+  {id:"signup",t:"Create a new Google account just for the app.",link:"https://accounts.google.com/signup"},
+  {id:"addr",t:"Use an address like hej.matchd@gmail.com. Later you can move to hej@matchd.se on your own domain."},
+  {id:"2fa",t:"Turn on 2-step verification for the account.",link:"https://myaccount.google.com/security"},
+  {id:"tell",t:"Tell Claude the address, so it shows on the help page.",copy:"My contact email is ___. Please put it on the website.",claude:true},
+  {id:"check",t:"Open the website, tap ? (Help) and check that the address is there.",link:SITE},
+ ]},
+ {id:"ai",title:"Turn on the AI",time:"15 min",why:"Right now the website writes template letters. With your Claude API key, it writes real personal letters, pitches and matches. The server already keeps every user inside a budget so you can't lose money.",steps:[
+  {id:"console",t:"Sign in to the Claude Console (or create an account).",link:"https://console.anthropic.com"},
+  {id:"billing",t:"Under Billing, add a card and buy a small amount of credit to start, for example 10 USD."},
+  {id:"limit",t:"Set a monthly spend limit, for example 20 USD, under Limits. This is your safety net."},
+  {id:"key",t:"Under API Keys, create a key called jobbsvep-server and copy it. It is only shown once. Never paste it in a chat, a document or on the website."},
+  {id:"secret",t:"Open Terminal on your Mac, paste this, replace PASTE-KEY-HERE with your key and press Enter.",cmd:"fly secrets set ANTHROPIC_API_KEY=PASTE-KEY-HERE -a jobbsvep-api"},
+  {id:"health",t:"Open this address. It should say \"ai\":true.",link:"https://jobbsvep-api.fly.dev/health"},
+  {id:"test",t:"On the website, swipe right on a job. Within a minute, a real letter should appear under Applications.",link:SITE},
+ ]},
+ {id:"domain",title:"Buy the domain",time:"20 min, then wait up to a day",why:"So the site lives at your own address (like hejshift.se) instead of claudeabuser1.github.io.",steps:[
+  {id:"buy",t:"Buy matchd.se at a Swedish registrar such as Loopia or One.com (about 100 to 200 kr a year). It was free on 15 October 2026; matchd.com is already taken.",link:"https://www.loopia.se"},
+  {id:"a1",t:"In the domain's DNS settings, add an A record for @ pointing to this address.",cmd:"185.199.108.153"},
+  {id:"a2",t:"Add a second A record for @.",cmd:"185.199.109.153"},
+  {id:"a3",t:"Add a third A record for @.",cmd:"185.199.110.153"},
+  {id:"a4",t:"Add a fourth A record for @.",cmd:"185.199.111.153"},
+  {id:"cname",t:"Add a CNAME record for www pointing here.",cmd:"claudeabuser1.github.io"},
+  {id:"tell",t:"Tell Claude the domain. Claude connects the website, the AI server and the payment return page to it.",copy:"I bought the domain ___ and added the DNS records. Please connect the website, the AI server and Stripe to it.",claude:true},
+  {id:"https",t:"After Claude is done, in the repository Settings, Pages, tick Enforce HTTPS. It can take a few hours before the box can be ticked.",link:REPO+"/settings/pages"},
+ ]},
+ {id:"test",title:"Test it like a real user",time:"20 min",why:"You are the target user. Ten minutes of using it on your own phone finds the problems nobody else will tell you about.",steps:[
+  {id:"home",t:"On your phone, open the website and add it to your home screen (iPhone: Share, then Add to Home Screen).",link:SITE},
+  {id:"quiz",t:"Do the questionnaire and the guided tour from start to finish."},
+  {id:"cv",t:"Add your real CV and swipe through at least 10 jobs."},
+  {id:"letters",t:"Read two of the letters. Would you send them? Note what feels wrong."},
+  {id:"walk",t:"Open Gå dit and read a pitch for a place near you."},
+  {id:"en",t:"Switch to English (Help, Language) and check that it reads well."},
+  {id:"tell",t:"Send Claude everything that felt weird, slow or confusing.",copy:"I tested the app on my phone. These things felt wrong: ___",claude:true},
+ ]},
+ {id:"social",title:"Set up social media",time:"30 min",why:"Short videos are the cheapest way to reach 16 to 21 year olds. Use the same handle everywhere so people can find you.",steps:[
+  {id:"handle",t:"Pick one handle, like @matchd.se or @matchdapp, and check it is free on TikTok, Instagram and YouTube before you create anything."},
+  {id:"tiktok",t:"Create a TikTok account with your contact email, then switch it to a Business account in the settings.",link:"https://www.tiktok.com/signup"},
+  {id:"insta",t:"Create an Instagram account and switch it to a Professional (Business) account.",link:"https://www.instagram.com/accounts/emailsignup/"},
+  {id:"yt",t:"Create a YouTube channel for Shorts.",link:"https://www.youtube.com/create_channel"},
+  {id:"li",t:"Create a LinkedIn company page.",link:"https://www.linkedin.com/company/setup/new/"},
+  {id:"pic",t:"Use the app icon as profile picture. Open this link and save the image.",link:SITE+"icons/icon-512.png"},
+  {id:"bio",t:"Paste this bio on every account.",copy:"Extrajobb, sommarjobb och första jobbet nära dig i Stockholm. Svep höger så skrivs ansökan åt dig. Gratis."},
+  {id:"link",t:"Add the website as the link in every bio.",cmd:SITE},
+ ]},
+ {id:"videos",title:"Post your first three videos",time:"1 to 2 hours",why:"Three videos is enough to see what people react to. Do more of what works.",steps:[
+  {id:"read",t:"Read the video guide, especially the table with ten ready-to-film videos.",link:REPO+"/blob/main/docs/MARKETING-VIDEOS.md"},
+  {id:"pick",t:"Pick three. Good first picks: number 1, 3 and 6."},
+  {id:"film",t:"Film the clips vertically, in daylight, 1 to 3 seconds each. Only film yourself, or ask people first."},
+  {id:"edit",t:"Edit in CapCut. Put the caption in the top third of the screen.",link:"https://www.capcut.com"},
+  {id:"post",t:"Post on TikTok with a sound from the Commercial Music Library, 3 to 5 hashtags, on a weekday between 15 and 18."},
+  {id:"repost",t:"Post the same videos as Instagram Reels and YouTube Shorts."},
+  {id:"measure",t:"After 48 hours, tell Claude the views of each video.",copy:"My first videos got these views after 48 hours: ___. Which kind should I make more of?",claude:true},
+ ]},
+ {id:"company",title:"Start a company",time:"1 hour, then a few weeks of waiting",why:"You need a registered business to take payments, and Stripe asks for one. An enskild firma is free to register.",steps:[
+  {id:"age",t:"If you are under 18: a parent or guardian must agree, and the överförmyndare in your municipality must approve the business. Talk to your parents first."},
+  {id:"verksamt",t:"Go to verksamt.se and choose to start an enskild firma.",link:"https://www.verksamt.se"},
+  {id:"fskatt",t:"In the same application, apply for F-skatt and VAT registration (momsregistrering)."},
+  {id:"wait",t:"Wait for the decision from Skatteverket. It usually comes by post or in your digital mailbox."},
+  {id:"bank",t:"Open a separate bank account for the business. It makes bookkeeping much easier."},
+  {id:"tell",t:"Tell Claude the business name, so it goes into the privacy policy.",copy:"My business is registered as ___. Please put it in the privacy policy.",claude:true},
+ ]},
+ {id:"stripe",title:"Turn on payments with Stripe",time:"45 min",why:"This lets people buy Vecka, Månad and 3 månader. The server is already built; it only needs your Stripe keys. Always test in test mode first.",steps:[
+  {id:"signup",t:"Create a Stripe account for your business, with Sweden as the country.",link:"https://dashboard.stripe.com/register"},
+  {id:"testmode",t:"Make sure Test mode is switched on (top right in the dashboard)."},
+  {id:"week",t:"Products, Add product: name \"Vecka\", one-time price 49 SEK."},
+  {id:"month",t:"Add product: name \"Månad\", recurring price 129 SEK every month."},
+  {id:"quarter",t:"Add product: name \"3 månader\", one-time price 299 SEK."},
+  {id:"prices",t:"Open each product and copy its price ID. All three start with price_."},
+  {id:"webhook",t:"Developers, Webhooks, Add endpoint, with this address.",cmd:"https://jobbsvep-api.fly.dev/stripe/webhook"},
+  {id:"events",t:"Select these three events for the webhook, then copy its signing secret (starts with whsec_).",cmd:"checkout.session.completed\ninvoice.paid\ncustomer.subscription.deleted"},
+  {id:"portal",t:"Search for Customer portal in the Stripe settings, turn it on and allow customers to cancel subscriptions."},
+  {id:"keys",t:"Developers, API keys: copy the Secret key (starts with sk_test_)."},
+  {id:"secret",t:"In Terminal, paste this, replace the five parts in CAPITALS, and press Enter.",cmd:"fly secrets set STRIPE_SECRET_KEY=SK_TEST_HERE STRIPE_WEBHOOK_SECRET=WHSEC_HERE STRIPE_PRICE_WEEK=PRICE_WEEK_HERE STRIPE_PRICE_MONTH=PRICE_MONTH_HERE STRIPE_PRICE_QUARTER=PRICE_QUARTER_HERE -a jobbsvep-api"},
+  {id:"testbuy",t:"On the website, buy Månad with Stripe's test card. Any future date and any CVC work.",cmd:"4242 4242 4242 4242"},
+  {id:"consent",t:"In the Checkout settings, turn on that customers must accept your terms, and link to the terms on the help page."},
+  {id:"live",t:"When everything works: switch to Live mode, create the same three products, a live webhook and live keys, and run the Terminal command again with the live values."},
+ ]},
+ {id:"legal",title:"Check the legal pages",time:"30 min",why:"The privacy policy and terms describe what the app really does today. Read them once with fresh eyes, especially before taking money.",steps:[
+  {id:"read",t:"On the website, open Help and read the privacy policy and the terms.",link:SITE},
+  {id:"match",t:"Check that everything still matches reality after you set up the domain and Stripe."},
+  {id:"adult",t:"Ask an adult you trust, or someone who knows law, to read them too."},
+  {id:"record",t:"Keep a short list of what personal data you handle and where it is stored. The privacy policy is a good starting point."},
+  {id:"tell",t:"Tell Claude anything that should change.",copy:"Please change this in the privacy policy or terms: ___",claude:true},
+ ]},
+ {id:"stores",title:"Later: the app stores",time:"when you have regular users",why:"The website already installs like an app. Real store apps cost money every year, so wait until people use Matchd every week.",steps:[
+  {id:"read",t:"Read the app plan.",link:REPO+"/blob/main/docs/APP.md"},
+  {id:"apple",t:"Join the Apple Developer Program (99 USD a year). You need a Mac with Xcode.",link:"https://developer.apple.com/programs/"},
+  {id:"google",t:"Create a Google Play Console account (25 USD once).",link:"https://play.google.com/console/"},
+  {id:"tell",t:"Tell Claude you are ready, so it can add push notifications and build the apps.",copy:"I have my developer accounts. Please add push notifications and prepare the app for the stores.",claude:true},
+ ]},
+];
+
+/* ---------- state: ticks are saved on your Claude account when possible ---------- */
+const LS="jobbsvep-launch:v1";
+let done={}; try{ done=JSON.parse(localStorage.getItem(LS)||"{}")||{}; }catch(_){ done={}; }
+let ref=null, writeT=0;
+const open=new Set([GROUPS[0].id]);
+const key=(g,s)=>g+"."+s;
+
+function persist(){
+  try{ localStorage.setItem(LS,JSON.stringify(done)); }catch(_){}
+  if(!ref) return;
+  clearTimeout(writeT); writeT=setTimeout(()=>{ ref.set({done:done}).then(()=>{ $("sync").textContent="Saved to your Claude account"; }).catch(()=>{ $("sync").textContent="Saved in this browser only"; }); },500);
+}
+async function connect(){
+  if(!(window.claude&&window.claude.use)) return;
+  try{
+    const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+    if(!db||!user) return;
+    const id=await user.id(); if(!id) return;
+    ref=db.doc("data/users/"+id+"/checklist");
+    const snap=await ref.get();
+    const remote=snap.exists?(snap.data().done||{}):{};
+    done=Object.assign({},remote,done);
+    $("sync").textContent="Saved to your Claude account";
+    render();
+    if(Object.keys(done).length!==Object.keys(remote).length) persist();
+  }catch(_){}
+}
+
+/* ---------- rendering ---------- */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function stepBody(g,s){
+  let h='<p>'+(s.claude?'<b>Tell Claude.</b> ':'')+esc(s.t)+'</p>';
+  if(s.link) h+='<p><a href="'+esc(s.link)+'" target="_blank" rel="noopener">'+esc(s.link.replace(/^https?:\/\//,"").replace(/\/$/,""))+'</a></p>';
+  const c=s.cmd||s.copy;
+  if(c) h+='<div class="cmdrow"><div class="cmd" id="c-'+g.id+'-'+s.id+'">'+esc(c)+'</div><button class="copy" type="button" data-copy="c-'+g.id+'-'+s.id+'">Copy</button></div>';
+  return h;
+}
+function render(){
+  let total=0, doneCount=0, next=null;
+  const html=GROUPS.map((g,gi)=>{
+    const n=g.steps.filter(s=>done[key(g.id,s.id)]).length; total+=g.steps.length; doneCount+=n;
+    if(!next){ const s=g.steps.find(s=>!done[key(g.id,s.id)]); if(s) next={g,s}; }
+    const complete=n===g.steps.length;
+    return '<details class="group'+(complete?" complete":"")+'" data-g="'+g.id+'"'+(open.has(g.id)?" open":"")+'>'
+      +'<summary><span class="badge">'+(complete?"✓":(gi+1))+'</span><h2>'+esc(g.title)+'</h2><span class="chev" aria-hidden="true">›</span>'
+      +'<span class="meta"><span>'+n+' of '+g.steps.length+' done</span><span class="mini"><i style="width:'+Math.round(n/g.steps.length*100)+'%"></i></span><span>'+esc(g.time)+'</span></span></summary>'
+      +'<p class="why">'+esc(g.why)+'</p><ul class="steps">'
+      +g.steps.map(s=>{ const k=key(g.id,s.id), d=!!done[k]; return '<li class="'+(d?"done":"")+'"><input class="tick" type="checkbox" id="t-'+k.replace(".","-")+'" data-k="'+k+'"'+(d?" checked":"")+' aria-label="'+esc(s.t)+'"><div class="txt">'+stepBody(g,s)+'</div></li>'; }).join("")
+      +'</ul></details>';
+  }).join("");
+  $("groups").innerHTML=html;
+  const pct=total?Math.round(doneCount/total*100):0;
+  $("pct").textContent=pct+"%"; $("bar").style.width=pct+"%";
+  $("count").textContent=doneCount+" of "+total+" steps done, "+GROUPS.filter(g=>g.steps.every(s=>done[key(g.id,s.id)])).length+" of "+GROUPS.length+" tasks complete";
+  const nx=$("next");
+  if(!next){ nx.innerHTML='<span class="eyebrow">All done</span><h2>Everything is ticked off. Matchd is launched.</h2>'; return; }
+  const k=key(next.g.id,next.s.id);
+  nx.innerHTML='<span class="eyebrow">Do this next</span><h2>'+esc(next.g.title)+'</h2><div class="step"><input class="tick" type="checkbox" id="next-tick" data-k="'+k+'" aria-label="Mark as done"><div class="txt">'+stepBody(next.g,next.s).replace(/id="c-/g,'id="n-').replace(/data-copy="c-/g,'data-copy="n-')+'<span class="from">Step '+(next.g.steps.indexOf(next.s)+1)+' of '+next.g.steps.length+'</span></div></div>';
+}
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,2200); }
+
+document.addEventListener("change",e=>{
+  const k=e.target.dataset&&e.target.dataset.k; if(!k) return;
+  const [gid]=k.split("."); const g=GROUPS.find(x=>x.id===gid);
+  if(e.target.checked) done[k]=Date.now(); else delete done[k];
+  const complete=g.steps.every(s=>done[key(g.id,s.id)]);
+  if(e.target.checked&&complete){ toast(g.title+": done!"); open.delete(g.id); const nextG=GROUPS.find(x=>x.steps.some(s=>!done[key(x.id,s.id)])); if(nextG) open.add(nextG.id); }
+  else open.add(gid);
+  persist(); render();
+});
+document.addEventListener("toggle",e=>{ const g=e.target.dataset&&e.target.dataset.g; if(!g) return; if(e.target.open) open.add(g); else open.delete(g); },true);
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-copy]"); if(!b) return;
+  const el=$(b.dataset.copy);
+  try{ await navigator.clipboard.writeText(el.textContent); toast("Copied"); }
+  catch(_){ const r=document.createRange(); r.selectNodeContents(el); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast("Selected. Press Cmd+C to copy."); }
+});
+render();
+connect();
+})();
+</script>
