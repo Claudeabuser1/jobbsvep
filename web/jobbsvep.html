@@ -151,6 +151,16 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
 .planbox div{display:flex;justify-content:space-between;gap:12px;font-size:15px} .planbox div b{text-align:right}
 .onb-foot{position:sticky;bottom:0;background:linear-gradient(to top,var(--bg) 70%,transparent);padding:16px 0 4px;margin-top:auto}
 .onb-foot .btn{width:100%}
+.tour{position:absolute;inset:0;z-index:45}
+.tour-hole{position:absolute;border-radius:16px;box-shadow:0 0 0 9999px rgba(29,23,21,.62);transition:all .25s ease;pointer-events:none}
+.tour-tip{position:absolute;left:16px;right:16px;max-width:380px;margin:0 auto;background:var(--surface);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--sh-card)}
+.tour-tip .n{font-size:12px;font-weight:700;color:var(--accent-d);letter-spacing:.04em;text-transform:uppercase}
+.tour-tip h3{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.tour-tip p{margin:0;color:var(--ink2);font-size:15px;line-height:1.45}
+.tour-tip .row2{display:flex;gap:8px;align-items:center;margin-top:6px}
+.tour-tip .row2 .sp{flex:1}
+.tour-tip .skip{border:0;background:none;color:var(--muted);font-weight:600;padding:6px 0}
+@media (prefers-reduced-motion:reduce){ .tour-hole{transition:none} }
 .confirm{background:var(--subtle);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
 .confirm p{margin:0;overflow-wrap:anywhere}
 .sel{user-select:all;-webkit-user-select:all;font-weight:700}
@@ -401,6 +411,16 @@ textarea{resize:vertical;min-height:100px;line-height:1.5}
       <p class="note">Svepa, matchning, mallbrev, Gå dit och dina sparade jobb är alltid gratis. Du betalar säkert via Stripe.</p>
       <p class="note" id="pw-note"></p>
       <div class="btns"><button class="btn ghost" id="pw-free" type="button">Fortsätt gratis</button></div>
+    </div>
+  </div>
+
+  <div class="tour" id="tour" hidden role="dialog" aria-modal="true" aria-labelledby="tour-h">
+    <div class="tour-hole" id="tour-hole"></div>
+    <div class="tour-tip" id="tour-tip">
+      <span class="n" id="tour-n"></span>
+      <h3 id="tour-h"></h3>
+      <p id="tour-p"></p>
+      <div class="row2"><button class="skip" id="tour-skip" type="button">Hoppa över guiden</button><span class="sp"></span><button class="btn ghost sm" id="tour-back" type="button">Tillbaka</button><button class="btn sm" id="tour-next" type="button">Nästa</button></div>
     </div>
   </div>
 
@@ -972,6 +992,49 @@ function showSent(a){
 }
 $("mt-go").onclick=()=>{$("match").hidden=true;go("swipe");};
 $("mt-apps").onclick=()=>{$("match").hidden=true;go("apps");};
+
+/* ---------- guided tour after the questionnaire ---------- */
+const TOUR=[
+  {tab:"profile",sel:"#p-specs",h:"Först: din profil",p:"Jobbsvep visar bara jobb som passar dig, och det är profilen som avgör vad som passar. Skriv vad du vill jobba med, när du kan jobba och vad du inte vill göra. Ju tydligare du är, desto bättre blir matchningen."},
+  {tab:"profile",sel:"#p-home",h:"Var du bor",p:"Vi visar de närmaste jobben först och gömmer jobb som ligger längre bort än ditt maxavstånd. Ingen vill pendla en timme till ett extrajobb."},
+  {tab:"profile",sel:"#cv-drop",h:"Ditt CV",p:"Ladda upp ditt CV eller klistra in texten nedanför. Har du inget CV än? Skriv några rader om skola, idrott, ideellt arbete och vad du är bra på. Breven bygger bara på det du skriver här, inget hittas på."},
+  {tab:"profile",sel:"#p-example",h:"Din röst",p:"Klistra in ett mejl eller meddelande du själv har skrivit. Då låter breven som du, fast lite mer proffsigt."},
+  {tab:"profile",sel:"#b-match",h:"Hitta dina jobb",p:"När profilen är klar trycker du här, så letar vi fram jobben som passar dig bäst. Du kan ändra profilen när du vill."},
+  {tab:"swipe",sel:".card:not(.under)",alt:".deckwrap",h:"Svep",p:"Svep höger för att söka jobbet och vänster för att hoppa över. Du kan också trycka på knapparna under kortet, eller använda piltangenterna på datorn."},
+  {tab:"swipe",sel:"#b-save",h:"Spara till senare",p:"Osäker? Tryck på Spara så hamnar jobbet bland dina sparade jobb under Ansökningar."},
+  {tab:"swipe",sel:".readbtn",alt:".deckwrap",h:"Läs hela annonsen",p:"Här ser du hela annonsen, sista ansökningsdag, avstånd och en länk till kartan."},
+  {tab:"apps",sel:"#v-apps h1",h:"Dina ansökningar",p:"Varje jobb du sveper höger på hamnar här med ett färdigt brev. Läs det, ändra det du vill och skicka. Här ser du också hur det går med ditt veckomål."},
+  {tab:"go",sel:"#v-go h1",h:"Gå dit själv",p:"Många butiker, kaféer och restauranger anställer utan att annonsera. Här ser du ställen nära dig och får en färdig pitch för vad du ska säga när du går in."},
+  {tab:"swipe",sel:".deckwrap",h:"Nu kör vi!",p:"Det var allt. Börja svepa, och kom ihåg: det är fler ansökningar som ger jobb. Lycka till!",last:true},
+];
+let tourI=0;
+function tourStart(){ tourI=0; $("tour").hidden=false; tourShow(); }
+function tourEnd(){ $("tour").hidden=true; S.tourDone=Date.now(); save(); go("swipe"); }
+function tourShow(){
+  const st=TOUR[tourI]; if(tab!==st.tab) go(st.tab);
+  setTimeout(()=>{
+    let el=document.querySelector(st.sel); if((!el||!el.getClientRects().length)&&st.alt) el=document.querySelector(st.alt);
+    $("tour-n").textContent=(tourI+1)+" av "+TOUR.length; $("tour-h").textContent=st.h; $("tour-p").textContent=st.p;
+    $("tour-back").hidden=tourI===0; $("tour-next").textContent=st.last?"Börja svepa":"Nästa"; $("tour-skip").hidden=!!st.last;
+    if(el&&el.scrollIntoView) el.scrollIntoView({block:"center",behavior:"instant"});
+    tourPlace(el); $("tour-next").focus();
+  },120);
+}
+function tourPlace(el){
+  const app=document.querySelector(".app").getBoundingClientRect(), hole=$("tour-hole"), tip=$("tour-tip");
+  if(!el){ hole.style.cssText="left:50%;top:40%;width:0;height:0"; tip.style.top="30%"; tip.style.bottom=""; return; }
+  const r=el.getBoundingClientRect(), pad=8;
+  const top=Math.max(4,r.top-app.top-pad), left=Math.max(4,r.left-app.left-pad), w=Math.min(app.width-8,r.width+pad*2), h=Math.min(app.height-8,r.height+pad*2);
+  hole.style.cssText="left:"+left+"px;top:"+top+"px;width:"+w+"px;height:"+h+"px";
+  const below=app.height-(top+h), above=top;
+  if(below>=220||below>=above){ tip.style.top=Math.min(app.height-200,top+h+12)+"px"; tip.style.bottom=""; }
+  else { tip.style.top=""; tip.style.bottom=Math.max(12,app.height-top+12)+"px"; }
+}
+$("tour-next").onclick=()=>{ if(TOUR[tourI].last) return tourEnd(); tourI++; tourShow(); };
+$("tour-back").onclick=()=>{ tourI=Math.max(0,tourI-1); tourShow(); };
+$("tour-skip").onclick=tourEnd;
+addEventListener("resize",()=>{ if(!$("tour").hidden) tourShow(); });
+document.addEventListener("keydown",e=>{ if($("tour").hidden) return; e.stopPropagation(); if(e.key==="Escape") tourEnd(); else if(e.key==="ArrowRight"||e.key==="Enter"){ e.preventDefault(); $("tour-next").click(); } else if(e.key==="ArrowLeft"){ e.preventDefault(); $("tour-back").click(); } },true);
 
 /* ---------- first-run questionnaire ---------- */
 function expText(){ const e=S.onb&&S.onb.exp; return e==="none"?"no work experience yet":e==="some"?"a little work experience (summer job, internship or extra work)":e==="lots"?"some work experience":"little or no work experience"; }
