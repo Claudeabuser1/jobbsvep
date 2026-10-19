@@ -31,7 +31,7 @@ python3 scripts/build_data.py && python3 scripts/build_site.py && python3 -m htt
 - **Website:** pushing to `main` deploys it. The workflow also rebuilds job data Mondays and Thursdays. If a deploy hangs, check for a stuck Pages deployment and cancel it with `gh api -X POST repos/Claudeabuser1/jobbsvep/pages/deployments/<id>/cancel`.
 - **Server:** `cd server && fly deploy --remote-only --ha=false`.
 - **Places:** `scripts/build_places.py` (OpenStreetMap; slow, run rarely, commits `web/pois.json`).
-- **Repository variables:** `JOBBSVEP_API` is set. `CONTACT_EMAIL`, `OWNER_NAME` and `SITE_DOMAIN` are not set yet.
+- **Repository variables:** `JOBBSVEP_API` and `CONTACT_EMAIL` (matchd.info@gmail.com) are set. `OWNER_NAME` and `SITE_DOMAIN` are not set yet.
 - **Not in the repo on purpose:** the one-off JobTeaser listing (`jobteaser.json`). Their site rules don't allow automated collection.
 
 ## Status (15 October 2026)
@@ -51,7 +51,7 @@ Done and tested:
 - Docs: `docs/PRICING.md`, `docs/APP.md`, `docs/INTERNATIONAL.md`, `docs/MARKETING-VIDEOS.md`.
 
 Waiting on the owner (all in the checklist):
-- Contact email.
+
 - Anthropic API key on Fly.
 - Buy matchd.se. Then set `SITE_DOMAIN`, add the domain to `ALLOWED_ORIGINS` and `SITE_URL` in `server/fly.toml`, and redeploy.
 - Register an enskild firma.
